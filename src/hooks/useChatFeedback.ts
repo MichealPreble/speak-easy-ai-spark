@@ -1,12 +1,13 @@
 
+import { useCallback } from "react";
 import { SpeechFeedback } from "@/hooks/useVoiceRecognition";
 
 /**
  * Hook for generating feedback based on speech analysis
  */
 export function useChatFeedback() {
-  // Generate feedback based on speech analysis
-  const generateSpeechFeedback = (feedback: SpeechFeedback): string => {
+  // Generate feedback based on speech analysis - memoized to prevent unnecessary re-creation
+  const generateSpeechFeedback = useCallback((feedback: SpeechFeedback): string => {
     const { speed, duration, fillerWords, wordCount } = feedback;
     
     let feedbackText = "## Speech Analysis\n\n";
@@ -58,7 +59,7 @@ export function useChatFeedback() {
     feedbackText += "• Practice with a timer to develop a sense for timing\n";
     
     return feedbackText;
-  };
+  }, []);
 
   return {
     generateSpeechFeedback

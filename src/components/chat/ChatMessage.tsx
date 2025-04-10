@@ -1,4 +1,5 @@
 
+import { memo } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Message } from "@/types/chat";
 import { Bot, User, Mic, BarChart2 } from "lucide-react";
@@ -13,7 +14,7 @@ const formatTime = (date: Date): string => {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
-const ChatMessage = ({ message, isDarkMode }: ChatMessageProps) => {
+const ChatMessage = memo(({ message, isDarkMode }: ChatMessageProps) => {
   const isUser = message.sender === "user";
 
   return (
@@ -72,6 +73,8 @@ const ChatMessage = ({ message, isDarkMode }: ChatMessageProps) => {
       </div>
     </div>
   );
-};
+});
+
+ChatMessage.displayName = "ChatMessage";
 
 export default ChatMessage;
