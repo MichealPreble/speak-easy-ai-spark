@@ -1,4 +1,3 @@
-
 import { Bot, Mic, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -35,7 +34,6 @@ const Hero = () => {
             <MessageSquare 
               className="w-16 h-16 md:w-24 md:h-24 text-primary/40" 
               aria-hidden="true"
-              loading="lazy"
             />
           </div>
           <span className="relative z-10 text-lg md:text-xl font-medium">AI Speech Coach Preview Coming Soon</span>
