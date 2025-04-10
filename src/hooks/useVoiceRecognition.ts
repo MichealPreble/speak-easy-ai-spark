@@ -1,6 +1,8 @@
 
 import { useRef, useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { setupAudioAnalysis, cleanupAudio } from "@/utils/audioAnalysisUtils";
+import { useAudioAnalysis } from "@/hooks/useAudioAnalysis";
 
 export type SpeechFeedback = {
   speed: number;
@@ -23,50 +25,14 @@ export function useVoiceRecognition(
   // Audio analysis refs for pitch and volume tracking
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const pitchDataRef = useRef<number[]>([]);
-  const volumeDataRef = useRef<number[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  // Function to estimate pitch from audio data
-  const getPitch = (analyser: AnalyserNode, audioContext: AudioContext) => {
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Float32Array(bufferLength);
-    analyser.getFloatTimeDomainData(dataArray);
-
-    // Simple autocorrelation to estimate pitch
-    let maxCorrelation = 0;
-    let bestOffset = -1;
-    for (let offset = 20; offset < bufferLength / 2; offset++) {
-      let correlation = 0;
-      for (let i = 0; i < bufferLength - offset; i++) {
-        correlation += Math.abs(dataArray[i] - dataArray[i + offset]);
-      }
-      if (correlation > maxCorrelation) {
-        maxCorrelation = correlation;
-        bestOffset = offset;
-      }
-    }
-
-    if (bestOffset > 0) {
-      const sampleRate = audioContext.sampleRate;
-      const pitch = sampleRate / bestOffset; // Hz
-      return pitch;
-    }
-    return 0;
-  };
-
-  // Function to get volume level from audio data
-  const getVolume = (analyser: AnalyserNode) => {
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    analyser.getByteFrequencyData(dataArray);
-
-    let sum = 0;
-    for (let i = 0; i < bufferLength; i++) {
-      sum += dataArray[i];
-    }
-    const average = sum / bufferLength;
-    return average; // Approximate dB level
-  };
+  // Use our new audio analysis hook
+  const { getAnalysisResults } = useAudioAnalysis(
+    isVoiceActive, 
+    analyserRef.current, 
+    audioContextRef.current
+  );
 
   // Initialize speech recognition if available
   useEffect(() => {
@@ -99,13 +65,8 @@ export function useVoiceRecognition(
               matches.map(word => word.toLowerCase()) : 
               [];
             
-            // Calculate pitch and volume variation from collected data
-            const pitchVariation = pitchDataRef.current.length > 0
-              ? Math.max(...pitchDataRef.current) - Math.min(...pitchDataRef.current)
-              : 0;
-            const volumeVariation = volumeDataRef.current.length > 0
-              ? Math.max(...volumeDataRef.current) - Math.min(...volumeDataRef.current)
-              : 0;
+            // Get pitch and volume variation from our audio analysis hook
+            const { pitchVariation, volumeVariation } = getAnalysisResults();
             
             // Create feedback object
             const feedback: SpeechFeedback = {
@@ -113,21 +74,14 @@ export function useVoiceRecognition(
               duration: Math.round(duration),
               fillerWords: [...new Set(fillerWords)], // Remove duplicates
               wordCount,
-              pitchVariation: Math.round(pitchVariation),
-              volumeVariation: Math.round(volumeVariation)
+              pitchVariation,
+              volumeVariation
             };
             
             // Clean up audio context
-            if (audioContextRef.current) {
-              audioContextRef.current.close().catch(() => {
-                // Silently handle any audio context closing errors
-              });
-              audioContextRef.current = null;
-            }
-            
-            // Reset data arrays
-            pitchDataRef.current = [];
-            volumeDataRef.current = [];
+            cleanupAudio(streamRef.current, audioContextRef.current);
+            audioContextRef.current = null;
+            streamRef.current = null;
             
             onVoiceMessage(transcript, feedback);
           } catch (error) {
@@ -185,15 +139,11 @@ export function useVoiceRecognition(
       }
       
       // Clean up audio context if it exists
-      if (audioContextRef.current) {
-        audioContextRef.current.close().catch(() => {
-          // Silently handle any audio context closing errors
-        });
-      }
+      cleanupAudio(streamRef.current, audioContextRef.current);
     };
   }, [onVoiceMessage, toast]);
 
-  const toggleVoice = () => {
+  const toggleVoice = async () => {
     if (!isBrowserSupported) {
       toast({
         title: "Voice recognition not supported",
@@ -207,6 +157,11 @@ export function useVoiceRecognition(
       try {
         recognitionRef.current.stop();
         setIsVoiceActive(false);
+        
+        // Clean up audio resources
+        cleanupAudio(streamRef.current, audioContextRef.current);
+        audioContextRef.current = null;
+        streamRef.current = null;
       } catch (error) {
         toast({
           title: "Error stopping voice recognition",
@@ -222,46 +177,11 @@ export function useVoiceRecognition(
         setIsVoiceActive(true);
         
         // Set up Web Audio API for pitch and volume analysis
-        try {
-          // @ts-ignore - AudioContext might not be available in all browsers
-          audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-          analyserRef.current = audioContextRef.current.createAnalyser();
-          analyserRef.current.fftSize = 2048;
-          
-          // Request microphone access for audio analysis
-          navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(stream => {
-              if (audioContextRef.current && analyserRef.current) {
-                const source = audioContextRef.current.createMediaStreamSource(stream);
-                source.connect(analyserRef.current);
-                
-                // Start analyzing audio data
-                const analyze = () => {
-                  if (!isVoiceActive || !audioContextRef.current || !analyserRef.current) {
-                    stream.getTracks().forEach(track => track.stop());
-                    return;
-                  }
-                  
-                  const pitch = getPitch(analyserRef.current, audioContextRef.current);
-                  const volume = getVolume(analyserRef.current);
-                  
-                  // Only store valid measurements
-                  if (pitch > 50 && pitch < 400) pitchDataRef.current.push(pitch);
-                  if (volume > 0) volumeDataRef.current.push(volume);
-                  
-                  // Continue analysis loop
-                  requestAnimationFrame(analyze);
-                };
-                
-                analyze();
-              }
-            })
-            .catch(err => {
-              console.error("Error accessing microphone for audio analysis:", err);
-            });
-        } catch (error) {
-          console.error("Error setting up audio analysis:", error);
-          // Continue with voice recognition even if audio analysis fails
+        const audioSetup = await setupAudioAnalysis();
+        if (audioSetup.success) {
+          audioContextRef.current = audioSetup.audioContext;
+          analyserRef.current = audioSetup.analyser;
+          streamRef.current = audioSetup.stream;
         }
         
         toast({
