@@ -8,7 +8,7 @@ import { SpeechFeedback } from "@/hooks/useVoiceRecognition";
 export function useChatFeedback() {
   // Generate feedback based on speech analysis - memoized to prevent unnecessary re-creation
   const generateSpeechFeedback = useCallback((feedback: SpeechFeedback): string => {
-    const { speed, duration, fillerWords, wordCount } = feedback;
+    const { speed, duration, fillerWords, wordCount, pitchVariation, volumeVariation } = feedback;
     
     let feedbackText = "## Speech Analysis\n\n";
     
@@ -47,6 +47,30 @@ export function useChatFeedback() {
       feedbackText += "  Good length for a practice segment. You provided enough content to demonstrate your speaking style.\n\n";
     }
     
+    // Pitch variation feedback
+    if (pitchVariation !== undefined) {
+      feedbackText += `• **Pitch variation**: ${pitchVariation} Hz\n`;
+      if (pitchVariation < 50) {
+        feedbackText += "  Your pitch variation is quite low, which can make your speech sound monotone. Try varying your pitch to emphasize key points and keep your audience engaged.\n\n";
+      } else if (pitchVariation > 200) {
+        feedbackText += "  Your pitch variation is quite high, which can be engaging but may sound exaggerated. Aim for a more balanced variation to maintain a natural tone.\n\n";
+      } else {
+        feedbackText += "  Your pitch variation is in a good range, adding expressiveness to your speech. Well done!\n\n";
+      }
+    }
+    
+    // Volume variation feedback
+    if (volumeVariation !== undefined) {
+      feedbackText += `• **Volume variation**: ${volumeVariation} dB\n`;
+      if (volumeVariation < 10) {
+        feedbackText += "  Your volume variation is low, which can make your speech sound flat. Try varying your volume to highlight important points and maintain audience interest.\n\n";
+      } else if (volumeVariation > 50) {
+        feedbackText += "  Your volume variation is quite high, which can be dynamic but may feel inconsistent. Aim for a more controlled variation to maintain clarity.\n\n";
+      } else {
+        feedbackText += "  Your volume variation is in a good range, adding dynamism to your speech. Well done!\n\n";
+      }
+    }
+    
     // Overall feedback and tips
     feedbackText += "### Next Steps\n";
     if (fillerWords.length > 0) {
@@ -54,6 +78,12 @@ export function useChatFeedback() {
     }
     if (speed < 120 || speed > 180) {
       feedbackText += "• Work on varying your speaking pace for different parts of your speech\n";
+    }
+    if (pitchVariation !== undefined && pitchVariation < 50) {
+      feedbackText += "• Practice varying your pitch for emphasis and engagement\n";
+    }
+    if (volumeVariation !== undefined && volumeVariation < 10) {
+      feedbackText += "• Work on varying your volume to highlight important points\n";
     }
     feedbackText += "• Record yourself and listen for vocal variety\n";
     feedbackText += "• Practice with a timer to develop a sense for timing\n";
