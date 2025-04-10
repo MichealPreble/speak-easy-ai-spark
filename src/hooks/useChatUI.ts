@@ -18,6 +18,11 @@ export function useChatUI(messages: Message[]) {
     }
   };
 
+  // Effect to scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   // Focus input field
   const focusInput = () => {
     if (inputRef.current) {

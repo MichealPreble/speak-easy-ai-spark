@@ -3,6 +3,7 @@ import { Bot, ArrowLeft } from "lucide-react";
 import Chat from "@/components/chat/Chat";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const ChatPage = () => {
   return (
@@ -32,7 +33,9 @@ const ChatPage = () => {
             Try the dark mode toggle and search feature.
           </p>
           
-          <Chat />
+          <ErrorBoundary>
+            <Chat />
+          </ErrorBoundary>
           
           <div className="mt-8 p-4 bg-muted rounded-lg">
             <h3 className="font-medium mb-2">About This Demo</h3>
