@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -111,3 +110,16 @@
   }
 }
 
+@layer components {
+  .glass-panel {
+    @apply bg-white/20 dark:bg-black/20 backdrop-blur-md border border-white/20 dark:border-gray-800/30 shadow-lg;
+  }
+  
+  .glass-card {
+    @apply bg-white/30 dark:bg-black/30 backdrop-blur-sm border border-white/30 dark:border-gray-800/40 shadow-md;
+  }
+  
+  .glass-button {
+    @apply bg-primary/10 hover:bg-primary/20 backdrop-blur-sm border border-primary/30 dark:border-primary-dark/30 shadow-sm transition-all;
+  }
+}
