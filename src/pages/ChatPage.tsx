@@ -1,15 +1,25 @@
 
-import { Bot } from "lucide-react";
+import { Bot, ArrowLeft } from "lucide-react";
 import Chat from "@/components/chat/Chat";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const ChatPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/90">
       <header className="py-6 border-b">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-2">
-            <Bot className="h-6 w-6 text-primary mr-2" />
-            <span className="text-lg font-bold">SpeakEasyAI</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bot className="h-6 w-6 text-primary mr-2" />
+              <span className="text-lg font-bold">SpeakEasyAI</span>
+            </div>
+            <Link to="/">
+              <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Home
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
@@ -18,7 +28,7 @@ const ChatPage = () => {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-2">Chat with SpeakEasyAI</h1>
           <p className="text-muted-foreground mb-8">
-            Experience the power of AI conversation. This is a demo version - in the full version, we'll connect to advanced language models.
+            Experience the power of AI conversation. Your chat history is saved in your browser. This is a demo version - in the full version, we'll connect to advanced language models.
           </p>
           
           <Chat />
@@ -28,7 +38,8 @@ const ChatPage = () => {
             <p className="text-sm text-muted-foreground">
               This is a preview of SpeakEasyAI's conversation capabilities. In the full version, 
               you'll get more accurate and personalized responses, context-awareness, and the ability 
-              to train the AI on your specific needs.
+              to train the AI on your specific needs. Your chat history is saved locally in your browser - 
+              use the "Clear Chat" button to remove it.
             </p>
           </div>
         </div>

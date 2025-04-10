@@ -1,6 +1,7 @@
 
 import { Bot } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const Footer = () => {
   return (
@@ -16,19 +17,24 @@ const Footer = () => {
               © {new Date().getFullYear()} SpeakEasyAI. All rights reserved.
             </p>
           </div>
-          <div className="flex gap-6">
-            <Link to="/chat" className="text-muted-foreground hover:text-foreground transition-colors">
-              Try Chat
+          <div className="flex flex-col sm:flex-row gap-6 items-center">
+            <Link to="/chat">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Bot className="h-4 w-4" />
+                Try Chat
+              </Button>
             </Link>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-              Terms
-            </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-              Privacy
-            </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-              Contact
-            </a>
+            <div className="flex gap-6">
+              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                Terms
+              </a>
+              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                Privacy
+              </a>
+              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                Contact
+              </a>
+            </div>
           </div>
         </div>
       </div>
