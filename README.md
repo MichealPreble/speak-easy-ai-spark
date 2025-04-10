@@ -1,73 +1,83 @@
-# Welcome to your Lovable project
 
-## Project info
+# SpeakEasyAI
 
-**URL**: https://lovable.dev/projects/119cc9de-b688-4c69-a9c7-1326b34f4439
+SpeakEasyAI is an AI-powered conversation assistant with voice recognition, message summarization, and markdown formatting capabilities.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- 💬 Chat interface with AI assistant
+- 🎤 Voice messaging support
+- 📝 Markdown formatting for messages
+- 🔍 Message search functionality
+- 🌓 Dark/light mode toggle
+- 📊 Conversation summarization
+- ⌨️ Keyboard shortcuts
 
-**Use Lovable**
+## Getting Started
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/119cc9de-b688-4c69-a9c7-1326b34f4439) and start prompting.
+### Prerequisites
 
-Changes made via Lovable will be committed automatically to this repo.
+- Node.js 14.x or higher
+- npm or yarn
 
-**Use your preferred IDE**
+### Installation
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/speakeasyai.git
+   cd speakeasyai
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-Follow these steps:
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+4. Open [http://localhost:5173](http://localhost:5173) to view the app in your browser.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## Deployment
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Deploying to Vercel
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+1. Push your code to GitHub
 
-**Edit a file directly in GitHub**
+2. Visit [Vercel](https://vercel.com) and create a new project from your GitHub repository
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3. Follow the Vercel setup wizard, keeping the default settings
 
-**Use GitHub Codespaces**
+4. Click "Deploy" and wait for the build to complete
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+5. Your app is now live at the URL provided by Vercel!
 
-## What technologies are used for this project?
+## User Guide
 
-This project is built with:
+- **Chat**: Type a message in the text box and press Enter or click the send button
+- **Voice Input**: Click the microphone icon or press Ctrl+V to start recording a voice message
+- **Search**: Type in the search box to filter messages
+- **Theme**: Toggle between light and dark mode using the sun/moon icon
+- **Summarize**: Click the book icon or press Ctrl+S to get a summary of your conversation
+- **Clear Chat**: Click the trash icon to clear all messages
 
-- Vite
-- TypeScript
+## Tech Stack
+
 - React
-- shadcn-ui
-- Tailwind CSS
+- TypeScript
+- TailwindCSS
+- shadcn/ui
+- Vite
 
-## How can I deploy this project?
+## Browser Support
 
-Simply open [Lovable](https://lovable.dev/projects/119cc9de-b688-4c69-a9c7-1326b34f4439) and click on Share -> Publish.
+- Chrome (recommended for full feature support including voice)
+- Firefox
+- Safari
+- Edge
 
-## Can I connect a custom domain to my Lovable project?
+## License
 
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is licensed under the MIT License - see the LICENSE file for details.
