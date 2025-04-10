@@ -1,10 +1,14 @@
 
 import { useMemo, useState } from "react";
 
+interface UseChatResponsesProps {
+  selectedScenario?: string | null;
+}
+
 /**
  * Hook for generating AI speech coach responses with scenario support
  */
-export function useChatResponses({ selectedScenario }: { selectedScenario?: string | null } = {}) {
+export function useChatResponses({ selectedScenario }: UseChatResponsesProps = {}) {
   // Track speech writing progress
   const [speechWritingState, setSpeechWritingState] = useState({
     step: 'initial',

@@ -1,15 +1,23 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Chat from "@/components/chat/Chat";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { LogOut } from "lucide-react";
 
+const scenarios = [
+  { value: "small-team", label: "Present to a Small Team" },
+  { value: "conference-keynote", label: "Deliver a Conference Keynote" },
+  { value: "wedding-toast", label: "Give a Wedding Toast" }
+];
+
 const ChatPage = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
 
   const handleSignOut = async () => {
     try {
@@ -60,7 +68,33 @@ const ChatPage = () => {
               </div>
             )}
           </div>
-          <Chat />
+          
+          <div className="mb-6">
+            <div className="flex items-center mb-4">
+              <h2 className="text-lg font-medium mr-4">Practice Scenario:</h2>
+              <Select value={selectedScenario || ""} onValueChange={setSelectedScenario}>
+                <SelectTrigger className="w-[250px] bg-white/50 dark:bg-black/20 border-secondary-light/20 dark:border-secondary-dark/20">
+                  <SelectValue placeholder="Select a scenario" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No scenario</SelectItem>
+                  {scenarios.map((scenario) => (
+                    <SelectItem key={scenario.value} value={scenario.value}>
+                      {scenario.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedScenario && (
+              <div className="text-sm text-muted-foreground bg-white/50 dark:bg-black/20 p-3 rounded-md border border-secondary-light/20 dark:border-secondary-dark/20">
+                <p className="font-medium mb-1">Selected scenario: {scenarios.find(s => s.value === selectedScenario)?.label}</p>
+                <p>Type "start practice" to begin your guided practice session!</p>
+              </div>
+            )}
+          </div>
+          
+          <Chat selectedScenario={selectedScenario} />
           <div className="mt-6 text-center text-sm text-muted-foreground p-2 rounded-lg bg-white/50 dark:bg-black/20 backdrop-blur-sm inline-block mx-auto border border-secondary-light/20 dark:border-secondary-dark/20">
             <p>Try voice recording (mic button) or keyboard shortcuts: Ctrl+V for voice, Ctrl+S to summarize</p>
           </div>

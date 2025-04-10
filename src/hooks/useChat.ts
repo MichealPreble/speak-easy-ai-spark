@@ -13,7 +13,11 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import { useChatFeedback } from "@/hooks/useChatFeedback";
 import { useChatResponses } from "@/hooks/useChatResponses";
 
-export const useChat = ({ selectedScenario }: { selectedScenario?: string | null } = {}) => {
+interface UseChatProps {
+  selectedScenario?: string | null;
+}
+
+export const useChat = ({ selectedScenario }: UseChatProps = {}) => {
   const { toast } = useToast();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);

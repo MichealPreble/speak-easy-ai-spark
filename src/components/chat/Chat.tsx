@@ -9,7 +9,11 @@ import ChatSearch from "./ChatSearch";
 import LoadingIndicator from "./LoadingIndicator";
 import NoMessages from "./NoMessages";
 
-const Chat = () => {
+interface ChatProps {
+  selectedScenario?: string | null;
+}
+
+const Chat = ({ selectedScenario }: ChatProps) => {
   const {
     filteredMessages,
     input,
@@ -27,7 +31,7 @@ const Chat = () => {
     toggleVoice,
     summarize,
     showTypingIndicator
-  } = useChat();
+  } = useChat({ selectedScenario });
 
   return (
     <div className="flex flex-col h-[500px] sm:h-[600px] w-full border border-secondary-light/30 dark:border-secondary-dark/30 rounded-lg shadow-glass backdrop-blur-md bg-white/85 dark:bg-black/85">
