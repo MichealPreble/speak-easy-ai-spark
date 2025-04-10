@@ -19,7 +19,7 @@ export const useChat = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   // Use our specialized hooks
-  const { messages, setMessages, clearMessages } = useMessageStore();
+  const { messages, setMessages, clearMessages, addMessage } = useMessageStore();
   const { searchQuery, setSearchQuery, filteredMessages } = useMessageSearch(messages);
   const { isDarkMode, toggleDarkMode } = useThemeMode();
   const { speak } = useSpeechSynthesis();
@@ -46,10 +46,17 @@ export const useChat = () => {
       text: transcript,
       sender: "user",
       timestamp: new Date(),
-      isVoiceMessage: true
+      isVoiceMessage: true,
+      read: false
     };
     
-    setMessages((prev) => [...prev, userMessage]);
+    addMessage({
+      text: transcript,
+      sender: "user",
+      isVoiceMessage: true,
+      read: false
+    });
+
     setInput("");
     setIsLoading(true);
     
@@ -59,29 +66,25 @@ export const useChat = () => {
     // Simulate bot response (will be replaced with actual API call later)
     setTimeout(() => {
       const botResponse = getSimulatedResponse(transcript);
-      const botMessage: Message = {
-        id: Date.now() + 1,
+      
+      addMessage({
         text: botResponse,
         sender: "bot",
-        timestamp: new Date(),
-      };
+        read: false
+      });
 
       // Only add feedback for longer messages that are actually speech practice
-      let messages = [botMessage];
-      
       if (transcript.length > 30 || speechFeedback.duration > 5) {
-        const feedbackText = generateSpeechFeedback(speechFeedback);
-        const feedbackMessage: Message = {
-          id: Date.now() + 2,
+        const feedbackText = generateSpeechFeedback(speechFeedback, transcript);
+        
+        addMessage({
           text: feedbackText,
           sender: "bot",
-          timestamp: new Date(),
-          isFeedback: true
-        };
-        messages.push(feedbackMessage);
+          isFeedback: true,
+          read: false
+        });
       }
       
-      setMessages((prev) => [...prev, ...messages]);
       setIsLoading(false);
       
       // Speak the response
@@ -97,14 +100,12 @@ export const useChat = () => {
     analytics.trackMessageSent();
 
     // Add user message
-    const userMessage: Message = {
-      id: Date.now(),
+    addMessage({
       text: text,
       sender: "user",
-      timestamp: new Date(),
-    };
+      read: false
+    });
     
-    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
     
@@ -114,14 +115,13 @@ export const useChat = () => {
     // Simulate bot response (will be replaced with actual API call later)
     setTimeout(() => {
       const botResponse = getSimulatedResponse(text);
-      const botMessage: Message = {
-        id: Date.now() + 1,
+      
+      addMessage({
         text: botResponse,
         sender: "bot",
-        timestamp: new Date(),
-      };
+        read: false
+      });
       
-      setMessages((prev) => [...prev, botMessage]);
       setIsLoading(false);
     }, 1500);
   };
