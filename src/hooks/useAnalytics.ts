@@ -20,11 +20,6 @@ export function trackEvent(
       value: value
     });
   }
-  
-  // Log events during development
-  if (process.env.NODE_ENV === 'development') {
-    console.info(`[Analytics] ${category} - ${action}${label ? ` - ${label}` : ''}${value ? ` - ${value}` : ''}`);
-  }
 }
 
 // Hook for analytics
@@ -38,10 +33,6 @@ export function useAnalytics() {
         page_title: title
       });
     }
-    
-    if (process.env.NODE_ENV === 'development') {
-      console.info(`[Analytics] Page View - ${path}${title ? ` - ${title}` : ''}`);
-    }
   };
 
   // Predefined tracking functions for common events
@@ -51,6 +42,9 @@ export function useAnalytics() {
   const trackSummarize = () => trackEvent('summarize', 'Chat', 'Conversation Summarized');
   const trackClearChat = () => trackEvent('clear_chat', 'Chat', 'Chat Cleared');
   const trackSearchUsed = () => trackEvent('search', 'Chat', 'Search Messages');
+  
+  // New tracking function for the "Try it yourself" button in Hero
+  const trackTryItYourself = () => trackEvent('try_it_yourself', 'Hero', 'Clicked Try It Yourself Button');
 
   return {
     trackPageView,
@@ -59,6 +53,7 @@ export function useAnalytics() {
     trackMessageSent,
     trackSummarize,
     trackClearChat,
-    trackSearchUsed
+    trackSearchUsed,
+    trackTryItYourself
   };
 }

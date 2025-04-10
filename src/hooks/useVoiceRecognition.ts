@@ -23,7 +23,7 @@ export function useVoiceRecognition(
     // Fix the type error by using a proper type check
     if (typeof window !== 'undefined') {
       // @ts-ignore - Ignoring type check since webkitSpeechRecognition isn't in standard lib.d.ts
-      const SpeechRecognition = window.webkitSpeechRecognition;
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognition) {
         setIsBrowserSupported(true);
         recognitionRef.current = new SpeechRecognition();

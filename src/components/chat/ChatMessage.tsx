@@ -17,7 +17,10 @@ const ChatMessage = ({ message, isDarkMode }: ChatMessageProps) => {
   const isUser = message.sender === "user";
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div 
+      className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+      aria-label={`${isUser ? "Your" : "AI"} message at ${formatTime(message.timestamp)}`}
+    >
       <div
         className={`flex items-start gap-2 max-w-[80%] ${
           isUser ? "flex-row-reverse" : "flex-row"
@@ -49,7 +52,7 @@ const ChatMessage = ({ message, isDarkMode }: ChatMessageProps) => {
             <div className="prose dark:prose-invert prose-sm max-w-none">
               {message.isFeedback && (
                 <div className="flex items-center gap-2 mb-1 font-medium text-amber-700 dark:text-amber-400">
-                  <BarChart2 className="h-4 w-4" />
+                  <BarChart2 className="h-4 w-4" aria-hidden="true" />
                   <span>Speech Analysis</span>
                 </div>
               )}
@@ -57,7 +60,7 @@ const ChatMessage = ({ message, isDarkMode }: ChatMessageProps) => {
             </div>
             {message.isVoiceMessage && (
               <div className="mt-1 flex items-center text-xs opacity-70">
-                <Mic className="h-3 w-3 mr-1" />
+                <Mic className="h-3 w-3 mr-1" aria-hidden="true" />
                 <span>Voice message</span>
               </div>
             )}
