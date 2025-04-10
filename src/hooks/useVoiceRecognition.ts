@@ -7,8 +7,8 @@ export type SpeechFeedback = {
   duration: number;
   fillerWords: string[];
   wordCount: number;
-  pitchVariation?: number; // New: Measure of pitch variation (Hz)
-  volumeVariation?: number; // New: Measure of volume variation (dB)
+  pitchVariation?: number; // Measure of pitch variation (Hz)
+  volumeVariation?: number; // Measure of volume variation (dB)
 };
 
 export function useVoiceRecognition(
@@ -20,7 +20,7 @@ export function useVoiceRecognition(
   const recognitionRef = useRef<any>(null);
   const startTimeRef = useRef<number | null>(null);
   
-  // New refs for audio analysis
+  // Audio analysis refs for pitch and volume tracking
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const pitchDataRef = useRef<number[]>([]);
