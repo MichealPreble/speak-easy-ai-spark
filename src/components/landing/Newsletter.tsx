@@ -3,13 +3,16 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { Mail } from "lucide-react";
 
 const Newsletter = () => {
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!email.trim()) {
       toast({
         title: "Email required",
@@ -28,16 +31,26 @@ const Newsletter = () => {
       return;
     }
 
-    toast({
-      title: "Thanks for subscribing!",
-      description: "We'll keep you updated on our launch",
-    });
-    setEmail("");
+    // Show loading state
+    setIsSubmitting(true);
+    
+    // Simulate subscription with a timeout
+    setTimeout(() => {
+      toast({
+        title: "Thanks for subscribing!",
+        description: "We'll keep you updated on our launch",
+      });
+      setEmail("");
+      setIsSubmitting(false);
+    }, 800);
   };
 
   return (
-    <section className="container mx-auto px-4 py-12 md:py-24">
+    <section className="container mx-auto px-4 py-12 md:py-24" id="newsletter">
       <div className="max-w-2xl mx-auto text-center">
+        <div className="mb-6 flex justify-center">
+          <Mail className="h-12 w-12 text-primary/50" aria-hidden="true" />
+        </div>
         <h2 className="text-2xl md:text-3xl font-bold mb-4">
           Stay Updated
         </h2>
@@ -51,8 +64,15 @@ const Newsletter = () => {
             className="flex-1"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            aria-label="Email address"
+            required
           />
-          <Button type="submit">Subscribe</Button>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Subscribing...' : 'Subscribe'}
+          </Button>
         </form>
       </div>
     </section>

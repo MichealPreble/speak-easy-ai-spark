@@ -3,8 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { lazy, Suspense } from "react";
+import { BrowserRouter, Routes, Route, useLocation, useNavigationType } from "react-router-dom";
+import { lazy, Suspense, useEffect } from "react";
 import { ScrollToAnchor } from "@/components/ui/scroll-to-anchor";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -13,6 +13,23 @@ import Terms from "./pages/Terms";
 
 // Lazy load the chat page to improve initial load performance
 const ChatPage = lazy(() => import("./pages/ChatPage"));
+
+// Google Analytics tracking component
+const Analytics = () => {
+  const location = useLocation();
+  const navigationType = useNavigationType();
+  
+  useEffect(() => {
+    // Only track page views on push navigation (not on replace or pop)
+    if (navigationType === 'PUSH' && typeof window.gtag === 'function') {
+      window.gtag('config', 'GA_MEASUREMENT_ID', {
+        page_path: location.pathname + location.search
+      });
+    }
+  }, [location, navigationType]);
+  
+  return null;
+};
 
 const queryClient = new QueryClient();
 
@@ -23,6 +40,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToAnchor />
+        <Analytics />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route 
@@ -51,5 +69,18 @@ const App = () => (
     </TooltipProvider>
   </QueryClientProvider>
 );
+
+// Add GoogleAnalytics type definition for TypeScript
+declare global {
+  interface Window {
+    gtag?: (
+      command: string,
+      action: string,
+      params?: {
+        [key: string]: any;
+      }
+    ) => void;
+  }
+}
 
 export default App;

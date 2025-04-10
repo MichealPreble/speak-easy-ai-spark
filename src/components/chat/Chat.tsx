@@ -1,4 +1,5 @@
 
+import { memo } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChat } from "@/hooks/useChat";
 import ChatHeader from "./ChatHeader";
@@ -17,7 +18,7 @@ const Chat = () => {
     searchQuery,
     setSearchQuery,
     isDarkMode,
-    setIsDarkMode,
+    toggleDarkMode,
     isVoiceActive,
     inputRef,
     scrollAreaRef,
@@ -33,7 +34,7 @@ const Chat = () => {
       {/* Chat Header */}
       <ChatHeader 
         isDarkMode={isDarkMode} 
-        onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} 
+        onToggleDarkMode={toggleDarkMode} 
         onClearChat={handleClearChat}
         onToggleVoice={toggleVoice}
         isVoiceActive={isVoiceActive}
@@ -78,4 +79,5 @@ const Chat = () => {
   );
 };
 
-export default Chat;
+// Memoize the Chat component to prevent unnecessary re-renders
+export default memo(Chat);

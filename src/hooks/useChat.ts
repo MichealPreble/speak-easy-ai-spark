@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Message } from "@/types/chat";
 import { useToast } from "@/hooks/use-toast";
@@ -9,6 +8,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMessageStore } from "@/hooks/useMessageStore";
 import { useMessageSearch } from "@/hooks/useMessageSearch";
 import { useChatUI } from "@/hooks/useChatUI";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export const useChat = () => {
   const { toast } = useToast();
@@ -18,7 +18,7 @@ export const useChat = () => {
   // Use our specialized hooks
   const { messages, setMessages, clearMessages } = useMessageStore();
   const { searchQuery, setSearchQuery, filteredMessages } = useMessageSearch(messages);
-  const { isDarkMode, setIsDarkMode } = useThemeMode();
+  const { isDarkMode, toggleDarkMode } = useThemeMode();
   const { speak } = useSpeechSynthesis();
   const { 
     inputRef, 
@@ -27,6 +27,7 @@ export const useChat = () => {
     showTyping,
     showTypingIndicator 
   } = useChatUI(messages);
+  const analytics = useAnalytics();
 
   // Public speaking focused response generator
   const getSimulatedResponse = (userInput: string): string => {
@@ -134,6 +135,9 @@ export const useChat = () => {
   const handleSendVoice = (transcript: string, speechFeedback: SpeechFeedback) => {
     if (!transcript.trim()) return;
     
+    // Track voice message event
+    analytics.trackVoiceMessage();
+    
     const userMessage: Message = {
       id: Date.now(),
       text: transcript,
@@ -186,6 +190,9 @@ export const useChat = () => {
   const handleSendMessage = (text = input) => {
     if (!text.trim() || isLoading) return;
 
+    // Track text message event
+    analytics.trackMessageSent();
+
     // Add user message
     const userMessage: Message = {
       id: Date.now(),
@@ -220,7 +227,17 @@ export const useChat = () => {
   const { isVoiceActive, toggleVoice } = useVoiceRecognition(handleSendVoice);
 
   // Summarize the conversation
-  const summarize = () => handleSendMessage("summarize");
+  const summarize = () => {
+    analytics.trackSummarize();
+    handleSendMessage("summarize");
+  };
+
+  // Handle theme toggling with analytics
+  const handleToggleDarkMode = () => {
+    const newTheme = !isDarkMode ? 'dark' : 'light';
+    analytics.trackThemeToggle(newTheme);
+    toggleDarkMode();
+  };
 
   // Set up keyboard shortcuts
   useKeyboardShortcuts({
@@ -234,12 +251,20 @@ export const useChat = () => {
   }, [messages, isLoading]);
 
   const handleClearChat = () => {
+    analytics.trackClearChat();
     clearMessages();
     toast({
       title: "Chat cleared",
       description: "All previous messages have been removed.",
     });
   };
+
+  // Track search usage
+  useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      analytics.trackSearchUsed();
+    }
+  }, [searchQuery]);
 
   return {
     messages,
@@ -250,7 +275,7 @@ export const useChat = () => {
     searchQuery,
     setSearchQuery,
     isDarkMode,
-    setIsDarkMode,
+    toggleDarkMode: handleToggleDarkMode,
     isVoiceActive,
     inputRef,
     scrollAreaRef,
