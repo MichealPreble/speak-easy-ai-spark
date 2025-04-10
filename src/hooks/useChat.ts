@@ -13,7 +13,7 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import { useChatFeedback } from "@/hooks/useChatFeedback";
 import { useChatResponses } from "@/hooks/useChatResponses";
 
-export const useChat = () => {
+export const useChat = ({ selectedScenario }: { selectedScenario?: string | null } = {}) => {
   const { toast } = useToast();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +32,7 @@ export const useChat = () => {
   } = useChatUI(messages);
   const analytics = useAnalytics();
   const { generateSpeechFeedback } = useChatFeedback();
-  const { getSimulatedResponse } = useChatResponses();
+  const { getSimulatedResponse } = useChatResponses({ selectedScenario });
 
   // Handle voice message send
   const handleSendVoice = (transcript: string, speechFeedback: SpeechFeedback) => {
