@@ -14,7 +14,7 @@ export function useMessageStore() {
         : [
             {
               id: 1,
-              text: "Hi there! I'm SpeakEasyAI. How can I assist you today?\n\nTry typing **bold** or *italic* text for formatting!",
+              text: "Welcome to SpeakEasyAI! I'm your public speaking assistant, ready to help you become a more confident and effective speaker.\n\nI can help you:\n- Structure your speeches\n- Integrate personal stories\n- Improve your delivery\n- Practice with voice recognition\n\nHow would you like to enhance your speaking skills today?",
               sender: "bot",
               timestamp: new Date(),
             },
@@ -24,7 +24,7 @@ export function useMessageStore() {
       return [
         {
           id: 1,
-          text: "Hi there! I'm SpeakEasyAI. How can I assist you today?",
+          text: "Welcome to SpeakEasyAI! I'm your public speaking assistant. How can I help you improve your speaking skills today?",
           sender: "bot",
           timestamp: new Date(),
         },
@@ -45,7 +45,7 @@ export function useMessageStore() {
   const clearMessages = () => {
     const initialMessage: Message = {
       id: Date.now(),
-      text: "Hi there! I'm SpeakEasyAI. How can I assist you today?\n\nTry typing **bold** or *italic* text for formatting!",
+      text: "Welcome to SpeakEasyAI! I'm your public speaking assistant, ready to help you become a more confident and effective speaker.\n\nI can help you:\n- Structure your speeches\n- Integrate personal stories\n- Improve your delivery\n- Practice with voice recognition\n\nHow would you like to enhance your speaking skills today?",
       sender: "bot",
       timestamp: new Date(),
     };
