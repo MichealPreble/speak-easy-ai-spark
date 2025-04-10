@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Message } from "@/types/chat";
 import { useToast } from "@/hooks/use-toast";
-import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
+import { useVoiceRecognition, SpeechFeedback } from "@/hooks/useVoiceRecognition";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 import { useThemeMode } from "@/hooks/useThemeMode";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -75,8 +75,63 @@ export const useChat = () => {
     }
   };
 
+  // Generate feedback based on speech analysis
+  const generateSpeechFeedback = (feedback: SpeechFeedback): string => {
+    const { speed, duration, fillerWords, wordCount } = feedback;
+    
+    let feedbackText = "## Speech Analysis\n\n";
+    
+    // Speaking rate feedback
+    if (speed > 0) {
+      feedbackText += `• **Speaking rate**: ${speed} words per minute\n`;
+      if (speed < 120) {
+        feedbackText += "  You're speaking a bit slowly, which can be good for emphasis but might lose audience attention if maintained throughout. Consider varying your pace.\n\n";
+      } else if (speed > 180) {
+        feedbackText += "  You're speaking quite rapidly, which shows enthusiasm but might make it difficult for your audience to follow. Try slowing down for key points.\n\n";
+      } else {
+        feedbackText += "  Your speaking rate is in an ideal range for clear comprehension. Well done!\n\n";
+      }
+    }
+    
+    // Filler words feedback
+    if (fillerWords.length > 0) {
+      const fillerFrequency = fillerWords.length / (duration / 60); // Fillers per minute
+      feedbackText += `• **Filler words**: ${fillerWords.join(", ")}\n`;
+      if (fillerFrequency > 5) {
+        feedbackText += "  You're using quite a few filler words, which can distract from your message. Practice replacing them with strategic pauses.\n\n";
+      } else if (fillerFrequency > 0) {
+        feedbackText += "  You have a few filler words, but they're not overly distracting. Being aware of them is the first step to reducing them.\n\n";
+      }
+    } else {
+      feedbackText += "• **Filler words**: None detected! Excellent job avoiding filler words.\n\n";
+    }
+    
+    // Duration feedback
+    feedbackText += `• **Duration**: ${duration} seconds (${wordCount} words)\n`;
+    if (duration < 10) {
+      feedbackText += "  Your message was quite brief. For practicing a speech, try a longer segment to demonstrate your pacing and structure.\n\n";
+    } else if (duration > 60) {
+      feedbackText += "  You delivered a substantial message. Great job maintaining your flow for an extended period.\n\n";
+    } else {
+      feedbackText += "  Good length for a practice segment. You provided enough content to demonstrate your speaking style.\n\n";
+    }
+    
+    // Overall feedback and tips
+    feedbackText += "### Next Steps\n";
+    if (fillerWords.length > 0) {
+      feedbackText += "• Practice replacing filler words with pauses\n";
+    }
+    if (speed < 120 || speed > 180) {
+      feedbackText += "• Work on varying your speaking pace for different parts of your speech\n";
+    }
+    feedbackText += "• Record yourself and listen for vocal variety\n";
+    feedbackText += "• Practice with a timer to develop a sense for timing\n";
+    
+    return feedbackText;
+  };
+
   // Handle voice message send
-  const handleSendVoice = (transcript: string) => {
+  const handleSendVoice = (transcript: string, speechFeedback: SpeechFeedback) => {
     if (!transcript.trim()) return;
     
     const userMessage: Message = {
@@ -103,8 +158,23 @@ export const useChat = () => {
         sender: "bot",
         timestamp: new Date(),
       };
+
+      // Only add feedback for longer messages that are actually speech practice
+      let messages = [botMessage];
       
-      setMessages((prev) => [...prev, botMessage]);
+      if (transcript.length > 30 || speechFeedback.duration > 5) {
+        const feedbackText = generateSpeechFeedback(speechFeedback);
+        const feedbackMessage: Message = {
+          id: Date.now() + 2,
+          text: feedbackText,
+          sender: "bot",
+          timestamp: new Date(),
+          isFeedback: true
+        };
+        messages.push(feedbackMessage);
+      }
+      
+      setMessages((prev) => [...prev, ...messages]);
       setIsLoading(false);
       
       // Speak the response

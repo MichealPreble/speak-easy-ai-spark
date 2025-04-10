@@ -14,7 +14,7 @@ export function useMessageStore() {
         : [
             {
               id: 1,
-              text: "Welcome to SpeakEasyAI! I'm your public speaking assistant, ready to help you become a more confident and effective speaker.\n\nI can help you:\n- Structure your speeches\n- Integrate personal stories\n- Improve your delivery\n- Practice with voice recognition\n\nHow would you like to enhance your speaking skills today?",
+              text: "Welcome to SpeakEasyAI! I'm your public speaking assistant, ready to help you become a more confident and effective speaker.\n\nI can help you:\n- Structure your speeches\n- Integrate personal stories\n- Improve your delivery\n- Practice with voice recognition and get detailed feedback\n- Build confidence techniques\n\nTry the voice button to record a practice segment and receive analysis on your pace, filler words, and delivery. How would you like to enhance your speaking skills today?",
               sender: "bot",
               timestamp: new Date(),
             },
@@ -45,7 +45,7 @@ export function useMessageStore() {
   const clearMessages = () => {
     const initialMessage: Message = {
       id: Date.now(),
-      text: "Welcome to SpeakEasyAI! I'm your public speaking assistant, ready to help you become a more confident and effective speaker.\n\nI can help you:\n- Structure your speeches\n- Integrate personal stories\n- Improve your delivery\n- Practice with voice recognition\n\nHow would you like to enhance your speaking skills today?",
+      text: "Welcome to SpeakEasyAI! I'm your public speaking assistant, ready to help you become a more confident and effective speaker.\n\nI can help you:\n- Structure your speeches\n- Integrate personal stories\n- Improve your delivery\n- Practice with voice recognition and get detailed feedback\n- Build confidence techniques\n\nTry the voice button to record a practice segment and receive analysis on your pace, filler words, and delivery. How would you like to enhance your speaking skills today?",
       sender: "bot",
       timestamp: new Date(),
     };

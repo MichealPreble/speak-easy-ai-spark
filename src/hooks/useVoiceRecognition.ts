@@ -2,10 +2,20 @@
 import { useRef, useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 
-export function useVoiceRecognition(onVoiceMessage: (transcript: string) => void) {
+export type SpeechFeedback = {
+  speed: number;
+  duration: number;
+  fillerWords: string[];
+  wordCount: number;
+};
+
+export function useVoiceRecognition(
+  onVoiceMessage: (transcript: string, feedback: SpeechFeedback) => void
+) {
   const { toast } = useToast();
   const [isVoiceActive, setIsVoiceActive] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const startTimeRef = useRef<number | null>(null);
 
   // Initialize speech recognition if available
   useEffect(() => {
@@ -21,7 +31,27 @@ export function useVoiceRecognition(onVoiceMessage: (transcript: string) => void
 
         recognitionRef.current.onresult = (event: any) => {
           const transcript = event.results[0][0].transcript;
-          onVoiceMessage(transcript);
+          const endTime = Date.now();
+          
+          // Calculate speech metrics
+          const duration = startTimeRef.current ? (endTime - startTimeRef.current) / 1000 : 0; // seconds
+          const wordCount = transcript.split(/\s+/).filter(Boolean).length;
+          const speed = duration > 0 ? Math.round((wordCount / duration) * 60) : 0; // Words per minute
+          
+          // Detect filler words
+          const fillerWordRegex = /\b(um|uh|like|you know|actually|basically|literally|so|right|well)\b/gi;
+          const fillerWords = (transcript.match(fillerWordRegex) || [])
+            .map(word => word.toLowerCase());
+          
+          // Create feedback object
+          const feedback: SpeechFeedback = {
+            speed,
+            duration: Math.round(duration),
+            fillerWords: [...new Set(fillerWords)], // Remove duplicates
+            wordCount
+          };
+          
+          onVoiceMessage(transcript, feedback);
         };
 
         recognitionRef.current.onerror = (event: any) => {
@@ -61,6 +91,7 @@ export function useVoiceRecognition(onVoiceMessage: (transcript: string) => void
       setIsVoiceActive(false);
     } else {
       try {
+        startTimeRef.current = Date.now();
         recognitionRef.current.start();
         setIsVoiceActive(true);
         toast({
