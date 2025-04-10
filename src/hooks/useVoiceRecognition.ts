@@ -38,10 +38,13 @@ export function useVoiceRecognition(
           const wordCount = transcript.split(/\s+/).filter(Boolean).length;
           const speed = duration > 0 ? Math.round((wordCount / duration) * 60) : 0; // Words per minute
           
-          // Detect filler words
+          // Detect filler words - fix the TypeScript error with proper typing
           const fillerWordRegex = /\b(um|uh|like|you know|actually|basically|literally|so|right|well)\b/gi;
-          const fillerWords = (transcript.match(fillerWordRegex) || [])
-            .map(word => word.toLowerCase());
+          const matches = transcript.match(fillerWordRegex);
+          // Ensure we have a string array even if match returns null
+          const fillerWords: string[] = matches ? 
+            matches.map(word => word.toLowerCase()) : 
+            [];
           
           // Create feedback object
           const feedback: SpeechFeedback = {
