@@ -16,7 +16,7 @@ const Index = () => {
         title="SpeakEasyAI - Public Speaking Practice & AI Feedback"
         description="Master public speaking with personalized AI coaching. Practice speeches, receive balanced feedback, and craft compelling narratives with the power of AI."
       />
-      <div className={`min-h-screen bg-gradient-to-b from-background to-background/90 ${ACCESSIBILITY_COLORS.HIGH_CONTRAST_TEXT}`}>
+      <div className={`min-h-screen bg-gradient-to-b from-primary-light/10 to-white dark:from-primary-dark/10 dark:to-background ${ACCESSIBILITY_COLORS.HIGH_CONTRAST_TEXT}`}>
         <main>
           <Hero />
           <Features />

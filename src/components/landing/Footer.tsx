@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 const Footer = () => {
   return (
-    <footer className="border-t py-8 mt-8">
+    <footer className="border-t py-8 mt-8 border-secondary-light/30 dark:border-secondary-dark/30 backdrop-blur-sm">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0">
@@ -19,7 +19,11 @@ const Footer = () => {
           </div>
           <div className="flex flex-col sm:flex-row gap-6 items-center">
             <Link to="/chat">
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2 bg-primary/15 hover:bg-primary/30 text-primary border border-primary/20 backdrop-blur-sm"
+              >
                 <MessageSquare className="h-4 w-4" />
                 Try Chat
               </Button>

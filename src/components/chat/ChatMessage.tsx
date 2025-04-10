@@ -27,12 +27,12 @@ const ChatMessage = memo(({ message, isDarkMode }: ChatMessageProps) => {
           isUser ? "flex-row-reverse" : "flex-row"
         }`}
       >
-        <Avatar className="h-8 w-8">
+        <Avatar className="h-8 w-8 border border-secondary-light/30 dark:border-secondary-dark/30 backdrop-blur-sm">
           <AvatarFallback
             className={
               isUser
-                ? "bg-secondary/10 text-secondary"
-                : "bg-primary/10 text-primary"
+                ? "bg-secondary/10 text-secondary backdrop-blur-sm"
+                : "bg-primary/10 text-primary backdrop-blur-sm"
             }
           >
             {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
@@ -40,14 +40,14 @@ const ChatMessage = memo(({ message, isDarkMode }: ChatMessageProps) => {
         </Avatar>
         <div>
           <div
-            className={`p-3 rounded-lg ${
+            className={`p-3 rounded-lg shadow-glass backdrop-blur-sm border ${
               isUser
-                ? "bg-primary text-primary-foreground"
+                ? "bg-primary/15 text-primary-foreground border-primary/20"
                 : message.isFeedback
-                ? "bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800"
+                ? "bg-amber-50/30 dark:bg-amber-950/30 border-amber-200/30 dark:border-amber-800/30"
                 : isDarkMode
-                ? "bg-muted"
-                : "bg-muted"
+                ? "bg-muted/20 border-muted/20"
+                : "bg-muted/20 border-muted/20"
             }`}
           >
             <div className="prose dark:prose-invert prose-sm max-w-none">

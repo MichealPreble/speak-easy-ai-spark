@@ -20,7 +20,7 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
     };
 
     return (
-      <div className="p-4 border-t mt-auto">
+      <div className="p-4 border-t border-secondary-light/30 dark:border-secondary-dark/30 mt-auto backdrop-blur-sm">
         <form
           onSubmit={handleSubmit}
           className="flex gap-2"
@@ -31,7 +31,7 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             placeholder={isVoiceActive ? "Listening..." : "Type your message... (supports markdown)"}
-            className={`flex-1 ${isVoiceActive ? "animate-pulse border-primary" : ""}`}
+            className={`flex-1 bg-white/20 dark:bg-black/20 backdrop-blur-sm border-secondary-light/30 dark:border-secondary-dark/30 ${isVoiceActive ? "animate-pulse border-primary" : ""}`}
             disabled={isLoading}
             aria-label="Message input"
           />
@@ -40,6 +40,7 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
             size="icon"
             disabled={isLoading || !input.trim()}
             aria-label="Send message"
+            className="bg-primary/15 hover:bg-primary/30 text-primary border border-primary/20 backdrop-blur-sm"
           >
             <Send className="h-4 w-4" />
           </Button>

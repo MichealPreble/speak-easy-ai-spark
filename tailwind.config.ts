@@ -27,11 +27,15 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					light: '#E0F2FE',
+					dark: '#0C4A6E',
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))'
+					foreground: 'hsl(var(--secondary-foreground))',
+					light: '#F3F4F6',
+					dark: '#1F2937',
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
@@ -108,6 +112,18 @@ export default {
 						},
 					},
 				},
+			},
+			backdropBlur: {
+				xs: '2px',
+				sm: '4px',
+				md: '8px',
+			},
+			backgroundOpacity: {
+				'15': '0.15',
+				'85': '0.85',
+			},
+			boxShadow: {
+				'glass': '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)',
 			},
 		}
 	},

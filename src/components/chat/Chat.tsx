@@ -30,7 +30,7 @@ const Chat = () => {
   } = useChat();
 
   return (
-    <div className="flex flex-col h-[500px] sm:h-[600px] w-full border rounded-lg shadow-md bg-card">
+    <div className="flex flex-col h-[500px] sm:h-[600px] w-full border border-secondary-light/30 dark:border-secondary-dark/30 rounded-lg shadow-glass backdrop-blur-md bg-white/85 dark:bg-black/85">
       {/* Chat Header */}
       <ChatHeader 
         isDarkMode={isDarkMode} 
