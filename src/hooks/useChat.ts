@@ -1,25 +1,26 @@
+
+import { useState, useEffect } from "react";
 import { Message } from "@/types/chat";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useRef, useEffect } from "react";
 import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 import { useThemeMode } from "@/hooks/useThemeMode";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMessageStore } from "@/hooks/useMessageStore";
 import { useMessageSearch } from "@/hooks/useMessageSearch";
+import { useChatUI } from "@/hooks/useChatUI";
 
 export const useChat = () => {
   const { toast } = useToast();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
   
-  // Use our new hooks
+  // Use our specialized hooks
   const { messages, setMessages, clearMessages } = useMessageStore();
   const { searchQuery, setSearchQuery, filteredMessages } = useMessageSearch(messages);
   const { isDarkMode, setIsDarkMode } = useThemeMode();
   const { speak } = useSpeechSynthesis();
+  const { inputRef, scrollAreaRef, scrollToBottom } = useChatUI(messages);
 
   // Simple response generator (placeholder for actual AI)
   const getSimulatedResponse = (userInput: string): string => {
@@ -134,12 +135,7 @@ export const useChat = () => {
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      const scrollableArea = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollableArea) {
-        scrollableArea.scrollTop = scrollableArea.scrollHeight;
-      }
-    }
+    scrollToBottom();
   }, [messages, isLoading]);
 
   const handleClearChat = () => {
