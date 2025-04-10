@@ -41,15 +41,6 @@ export const useChat = () => {
     // Track voice message event
     analytics.trackVoiceMessage();
     
-    const userMessage: Message = {
-      id: Date.now(),
-      text: transcript,
-      sender: "user",
-      timestamp: new Date(),
-      isVoiceMessage: true,
-      read: false
-    };
-    
     addMessage({
       text: transcript,
       sender: "user",

@@ -23,6 +23,7 @@ export function useMessageStore() {
                 text: "Welcome to SpeakEasyAI! I'm your public speaking assistant, ready to help you become a more confident and effective speaker.\n\nI can help you:\n- Structure your speeches\n- Integrate personal stories\n- Improve your delivery\n- Practice with voice recognition and get detailed feedback\n- Build confidence techniques\n\nTry the voice button to record a practice segment and receive analysis on your pace, filler words, and delivery. How would you like to enhance your speaking skills today?",
                 sender: "bot",
                 timestamp: new Date(),
+                read: true
               },
             ];
       }
@@ -35,6 +36,7 @@ export function useMessageStore() {
           text: "Welcome to SpeakEasyAI! I'm your public speaking assistant. How can I help you improve your speaking skills today?",
           sender: "bot",
           timestamp: new Date(),
+          read: true
         },
       ];
     }
@@ -75,6 +77,7 @@ export function useMessageStore() {
             text: "Welcome to SpeakEasyAI! I'm your public speaking assistant, ready to help you become a more confident and effective speaker.\n\nI can help you:\n- Structure your speeches\n- Integrate personal stories\n- Improve your delivery\n- Practice with voice recognition and get detailed feedback\n- Build confidence techniques\n\nTry the voice button to record a practice segment and receive analysis on your pace, filler words, and delivery. How would you like to enhance your speaking skills today?",
             sender: "bot",
             timestamp: new Date(),
+            read: true
           };
           setMessages([welcomeMessage]);
           
@@ -84,6 +87,7 @@ export function useMessageStore() {
             text: welcomeMessage.text,
             sender: welcomeMessage.sender,
             timestamp: welcomeMessage.timestamp,
+            read: welcomeMessage.read
           });
         }
       } catch (error) {
@@ -170,6 +174,7 @@ export function useMessageStore() {
       text: "Welcome to SpeakEasyAI! I'm your public speaking assistant, ready to help you become a more confident and effective speaker.\n\nI can help you:\n- Structure your speeches\n- Integrate personal stories\n- Improve your delivery\n- Practice with voice recognition and get detailed feedback\n- Build confidence techniques\n\nTry the voice button to record a practice segment and receive analysis on your pace, filler words, and delivery. How would you like to enhance your speaking skills today?",
       sender: "bot",
       timestamp: new Date(),
+      read: true
     };
     
     // Clear and set initial message in state
@@ -190,6 +195,7 @@ export function useMessageStore() {
           text: initialMessage.text,
           sender: initialMessage.sender,
           timestamp: initialMessage.timestamp,
+          read: initialMessage.read
         });
       } catch (error) {
         console.error("Error clearing messages in Supabase:", error);
