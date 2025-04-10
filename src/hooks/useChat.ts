@@ -66,7 +66,7 @@ export const useChat = () => {
 
       // Only add feedback for longer messages that are actually speech practice
       if (transcript.length > 30 || speechFeedback.duration > 5) {
-        const feedbackText = generateSpeechFeedback(speechFeedback, transcript);
+        const feedbackText = generateSpeechFeedback(speechFeedback);
         
         addMessage({
           text: feedbackText,
