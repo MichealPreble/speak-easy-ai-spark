@@ -55,6 +55,7 @@ const ChatMessage = memo(({ message, isDarkMode }: ChatMessageProps) => {
                 <div className="flex items-center gap-2 mb-1 font-medium text-amber-700 dark:text-amber-400">
                   <BarChart2 className="h-4 w-4" aria-hidden="true" />
                   <span>Speech Analysis</span>
+                  <span className="sr-only">Speech analysis feedback follows</span>
                 </div>
               )}
               <ReactMarkdown>{message.text}</ReactMarkdown>
