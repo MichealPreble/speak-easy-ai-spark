@@ -44,9 +44,9 @@ const ChatMessage = ({ message, isDarkMode }: ChatMessageProps) => {
                 : "bg-muted"
             }`}
           >
-            <ReactMarkdown className="prose dark:prose-invert prose-sm max-w-none">
-              {message.text}
-            </ReactMarkdown>
+            <div className="prose dark:prose-invert prose-sm max-w-none">
+              <ReactMarkdown>{message.text}</ReactMarkdown>
+            </div>
           </div>
           <div className="text-xs text-muted-foreground mt-1 mx-1">
             {formatTime(message.timestamp)}
