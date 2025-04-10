@@ -28,7 +28,8 @@ const ChatPage = () => {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-2">Chat with SpeakEasyAI</h1>
           <p className="text-muted-foreground mb-8">
-            Experience the power of AI conversation. Your chat history is saved in your browser. This is a demo version - in the full version, we'll connect to advanced language models.
+            Experience the power of AI conversation with markdown support! Your chat history is saved in your browser. 
+            Try the dark mode toggle and search feature.
           </p>
           
           <Chat />
@@ -36,10 +37,10 @@ const ChatPage = () => {
           <div className="mt-8 p-4 bg-muted rounded-lg">
             <h3 className="font-medium mb-2">About This Demo</h3>
             <p className="text-sm text-muted-foreground">
-              This is a preview of SpeakEasyAI's conversation capabilities. In the full version, 
-              you'll get more accurate and personalized responses, context-awareness, and the ability 
-              to train the AI on your specific needs. Your chat history is saved locally in your browser - 
-              use the "Clear Chat" button to remove it.
+              This is a preview of SpeakEasyAI's conversation capabilities. Your messages now support markdown 
+              formatting for **bold** and *italic* text. Use the search bar to find specific content in your 
+              conversation history, and toggle between light and dark modes. Your chat history is saved locally 
+              in your browser - use the "Clear Chat" button to remove it.
             </p>
           </div>
         </div>

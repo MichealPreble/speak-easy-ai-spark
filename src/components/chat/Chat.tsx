@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Bot, User, Trash2 } from "lucide-react";
+import { Send, Bot, User, Trash2, Search, Moon, Sun } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ReactMarkdown from "react-markdown";
 
 type Message = {
   id: number;
@@ -26,7 +27,7 @@ const Chat = () => {
         : [
             {
               id: 1,
-              text: "Hi there! I'm SpeakEasyAI. How can I assist you today?",
+              text: "Hi there! I'm SpeakEasyAI. How can I assist you today?\n\nTry typing **bold** or *italic* text for formatting!",
               sender: "bot",
               timestamp: new Date(),
             },
@@ -45,6 +46,18 @@ const Chat = () => {
   });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Check for system preference or localStorage
+    if (typeof window !== 'undefined') {
+      const storedPreference = localStorage.getItem('darkMode');
+      if (storedPreference !== null) {
+        return storedPreference === 'true';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -56,6 +69,12 @@ const Chat = () => {
       console.error("Error saving chat messages:", error);
     }
   }, [messages]);
+  
+  // Apply dark mode
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDarkMode);
+    localStorage.setItem('darkMode', String(isDarkMode));
+  }, [isDarkMode]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -100,7 +119,7 @@ const Chat = () => {
   const handleClearChat = () => {
     const initialMessage: Message = {
       id: Date.now(),
-      text: "Hi there! I'm SpeakEasyAI. How can I assist you today?",
+      text: "Hi there! I'm SpeakEasyAI. How can I assist you today?\n\nTry typing **bold** or *italic* text for formatting!",
       sender: "bot",
       timestamp: new Date(),
     };
@@ -117,22 +136,22 @@ const Chat = () => {
     const input = userInput.toLowerCase();
     
     if (input.includes("hello") || input.includes("hi")) {
-      return "Hello! How can I help you today?";
+      return "Hello! How can I help you today? Feel free to use **markdown** for formatting your messages.";
     } 
     else if (input.includes("help") || input.includes("support")) {
-      return "I'm here to help! What would you like to know about SpeakEasyAI?";
+      return "I'm here to help! What would you like to know about SpeakEasyAI?\n\n* Chat features\n* Pricing plans\n* Technical support";
+    }
+    else if (input.includes("markdown") || input.includes("format")) {
+      return "You can use markdown in your messages:\n\n**Bold text** with double asterisks\n*Italic text* with single asterisks\n- Bullet points with dash\n\nGive it a try!";
     }
     else if (input.includes("price") || input.includes("cost") || input.includes("plan")) {
-      return "SpeakEasyAI offers several pricing plans to suit your needs. Check out our pricing page for more details.";
-    }
-    else if (input.includes("feature")) {
-      return "SpeakEasyAI comes with advanced conversation capabilities, multilingual support, and custom training options.";
+      return "SpeakEasyAI offers several pricing plans to suit your needs:\n\n* **Free tier**: Basic conversations\n* **Pro tier**: $9.99/month with advanced features\n* **Enterprise**: Custom pricing for teams\n\nCheck out our pricing page for more details.";
     }
     else if (input.includes("thank")) {
-      return "You're welcome! Is there anything else I can help with?";
+      return "You're welcome! Is there anything else I can help with? 😊";
     }
     else {
-      return "I understand you're asking about that. Once I'm connected to my AI brain, I'll be able to give you a more helpful response!";
+      return "I understand you're asking about that. Once I'm connected to my AI brain, I'll be able to give you a more helpful response! In the meantime, try exploring our *markdown* **formatting** options.";
     }
   };
 
@@ -140,66 +159,104 @@ const Chat = () => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  // Filter messages based on search query
+  const filteredMessages = searchQuery.trim() 
+    ? messages.filter(msg => 
+        msg.text.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : messages;
+
   return (
-    <div className="flex flex-col h-[600px] w-full border rounded-lg shadow-md bg-card" ref={scrollAreaRef}>
+    <div className="flex flex-col h-[600px] w-full border rounded-lg shadow-md bg-card">
       {/* Chat Header */}
       <div className="p-4 border-b flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Bot className="h-6 w-6 text-primary" />
           <h3 className="text-lg font-semibold">SpeakEasyAI Assistant</h3>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleClearChat}
-          aria-label="Clear chat history"
-        >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Clear Chat
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleClearChat}
+            aria-label="Clear chat history"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Clear Chat
+          </Button>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="p-3 border-b">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search messages..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9"
+            aria-label="Search messages"
+          />
+        </div>
       </div>
 
       {/* Message List */}
-      <ScrollArea className="flex-1 p-4" aria-live="polite">
+      <ScrollArea className="flex-1 p-4" aria-live="polite" ref={scrollAreaRef}>
         <div className="space-y-4">
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${
-                msg.sender === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div className={`flex items-start gap-2 max-w-[80%] ${
-                msg.sender === "user" ? "flex-row-reverse" : "flex-row"
-              }`}>
-                <Avatar className="h-8 w-8">
-                  {msg.sender === "bot" ? (
-                    <AvatarFallback className="bg-primary/10 text-primary">
-                      <Bot className="h-4 w-4" />
+          {filteredMessages.length > 0 ? (
+            filteredMessages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`flex ${
+                  msg.sender === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div className={`flex items-start gap-2 max-w-[80%] ${
+                  msg.sender === "user" ? "flex-row-reverse" : "flex-row"
+                }`}>
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className={
+                      msg.sender === "bot" 
+                        ? "bg-primary/10 text-primary" 
+                        : "bg-secondary/10 text-secondary"
+                    }>
+                      {msg.sender === "bot" ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
                     </AvatarFallback>
-                  ) : (
-                    <AvatarFallback className="bg-secondary/10 text-secondary">
-                      <User className="h-4 w-4" />
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                <div>
-                  <div
-                    className={`p-3 rounded-lg ${
-                      msg.sender === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    }`}
-                  >
-                    {msg.text}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1 mx-1">
-                    {formatTime(msg.timestamp)}
+                  </Avatar>
+                  <div>
+                    <div
+                      className={`p-3 rounded-lg ${
+                        msg.sender === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted"
+                      }`}
+                    >
+                      <ReactMarkdown className="prose dark:prose-invert prose-sm max-w-none">
+                        {msg.text}
+                      </ReactMarkdown>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1 mx-1">
+                      {formatTime(msg.timestamp)}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-center text-muted-foreground py-4">
+              {searchQuery ? "No messages found matching your search." : "No messages yet."}
+            </p>
+          )}
           
           {isLoading && (
             <div className="flex justify-start">
@@ -233,7 +290,7 @@ const Chat = () => {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
+            placeholder="Type your message... (supports markdown)"
             className="flex-1"
             disabled={isLoading}
             aria-label="Message input"

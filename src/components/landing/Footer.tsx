@@ -1,5 +1,5 @@
 
-import { Bot } from "lucide-react";
+import { Bot, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -20,7 +20,7 @@ const Footer = () => {
           <div className="flex flex-col sm:flex-row gap-6 items-center">
             <Link to="/chat">
               <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <Bot className="h-4 w-4" />
+                <MessageSquare className="h-4 w-4" />
                 Try Chat
               </Button>
             </Link>
