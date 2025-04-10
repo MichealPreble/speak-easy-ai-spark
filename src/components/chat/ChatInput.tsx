@@ -1,18 +1,19 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send } from "lucide-react";
+import { Mic, Send } from "lucide-react";
 import { FormEvent, forwardRef } from "react";
 
 interface ChatInputProps {
   input: string;
   isLoading: boolean;
+  isVoiceActive?: boolean;
   onInputChange: (value: string) => void;
   onSend: () => void;
 }
 
 const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
-  ({ input, isLoading, onInputChange, onSend }, ref) => {
+  ({ input, isLoading, isVoiceActive, onInputChange, onSend }, ref) => {
     const handleSubmit = (e: FormEvent) => {
       e.preventDefault();
       onSend();
@@ -29,8 +30,8 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
             ref={ref}
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
-            placeholder="Type your message... (supports markdown)"
-            className="flex-1"
+            placeholder={isVoiceActive ? "Listening..." : "Type your message... (supports markdown)"}
+            className={`flex-1 ${isVoiceActive ? "animate-pulse border-primary" : ""}`}
             disabled={isLoading}
             aria-label="Message input"
           />
@@ -43,6 +44,11 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
             <Send className="h-4 w-4" />
           </Button>
         </form>
+        {isVoiceActive && (
+          <div className="text-xs text-muted-foreground mt-2 text-center">
+            <Mic className="h-3 w-3 inline-block mr-1" /> Listening... Speak now
+          </div>
+        )}
       </div>
     );
   }

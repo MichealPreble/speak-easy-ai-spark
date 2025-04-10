@@ -1,14 +1,24 @@
 
 import { Button } from "@/components/ui/button";
-import { Bot, Moon, Sun, Trash2 } from "lucide-react";
+import { Bot, Moon, Sun, Trash2, Mic, MicOff, BookOpen } from "lucide-react";
 
 interface ChatHeaderProps {
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
   onClearChat: () => void;
+  onToggleVoice: () => void;
+  isVoiceActive: boolean;
+  onSummarize: () => void;
 }
 
-const ChatHeader = ({ isDarkMode, onToggleDarkMode, onClearChat }: ChatHeaderProps) => {
+const ChatHeader = ({ 
+  isDarkMode, 
+  onToggleDarkMode, 
+  onClearChat, 
+  onToggleVoice, 
+  isVoiceActive,
+  onSummarize
+}: ChatHeaderProps) => {
   return (
     <div className="p-4 border-b flex items-center justify-between">
       <div className="flex items-center gap-2">
@@ -16,6 +26,24 @@ const ChatHeader = ({ isDarkMode, onToggleDarkMode, onClearChat }: ChatHeaderPro
         <span className="text-lg font-bold">SpeakEasyAI</span>
       </div>
       <div className="flex items-center gap-2">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={onToggleVoice}
+          aria-label={isVoiceActive ? "Disable voice input" : "Enable voice input"}
+          title="Toggle voice input (Ctrl+V)"
+        >
+          {isVoiceActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={onSummarize}
+          aria-label="Summarize conversation"
+          title="Summarize conversation (Ctrl+S)"
+        >
+          <BookOpen className="h-4 w-4" />
+        </Button>
         <Button 
           variant="ghost" 
           size="icon" 

@@ -1,7 +1,7 @@
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Message } from "@/types/chat";
-import { Bot, User } from "lucide-react";
+import { Bot, User, Mic } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface ChatMessageProps {
@@ -47,6 +47,12 @@ const ChatMessage = ({ message, isDarkMode }: ChatMessageProps) => {
             <div className="prose dark:prose-invert prose-sm max-w-none">
               <ReactMarkdown>{message.text}</ReactMarkdown>
             </div>
+            {message.isVoiceMessage && (
+              <div className="mt-1 flex items-center text-xs opacity-70">
+                <Mic className="h-3 w-3 mr-1" />
+                <span>Voice message</span>
+              </div>
+            )}
           </div>
           <div className="text-xs text-muted-foreground mt-1 mx-1">
             {formatTime(message.timestamp)}

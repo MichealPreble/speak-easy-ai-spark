@@ -4,4 +4,5 @@ export type Message = {
   text: string;
   sender: "user" | "bot";
   timestamp: Date;
+  isVoiceMessage?: boolean;
 };

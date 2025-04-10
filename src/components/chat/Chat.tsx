@@ -18,10 +18,13 @@ const Chat = () => {
     setSearchQuery,
     isDarkMode,
     setIsDarkMode,
+    isVoiceActive,
     inputRef,
     scrollAreaRef,
     handleSend,
-    handleClearChat
+    handleClearChat,
+    toggleVoice,
+    summarize
   } = useChat();
 
   return (
@@ -30,7 +33,10 @@ const Chat = () => {
       <ChatHeader 
         isDarkMode={isDarkMode} 
         onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} 
-        onClearChat={handleClearChat} 
+        onClearChat={handleClearChat}
+        onToggleVoice={toggleVoice}
+        isVoiceActive={isVoiceActive}
+        onSummarize={summarize}
       />
 
       {/* Search Bar */}
@@ -65,6 +71,7 @@ const Chat = () => {
         isLoading={isLoading}
         onInputChange={setInput}
         onSend={handleSend}
+        isVoiceActive={isVoiceActive}
       />
     </div>
   );
