@@ -57,31 +57,35 @@ export const useChat = () => {
 
   // Initialize speech recognition if available
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
+    // Fix the type error by using a proper type check
+    if (typeof window !== 'undefined') {
+      // @ts-ignore - Ignoring type check since webkitSpeechRecognition isn't in standard lib.d.ts
       const SpeechRecognition = window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'en-US';
+      if (SpeechRecognition) {
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = false;
+        recognitionRef.current.lang = 'en-US';
 
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setInput(transcript);
-        handleSendVoice(transcript);
-      };
+        recognitionRef.current.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setInput(transcript);
+          handleSendVoice(transcript);
+        };
 
-      recognitionRef.current.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
-        setIsVoiceActive(false);
-        toast({
-          title: "Voice recognition error",
-          description: "Could not recognize speech. Please try again.",
-        });
-      };
+        recognitionRef.current.onerror = (event: any) => {
+          console.error('Speech recognition error:', event.error);
+          setIsVoiceActive(false);
+          toast({
+            title: "Voice recognition error",
+            description: "Could not recognize speech. Please try again.",
+          });
+        };
 
-      recognitionRef.current.onend = () => {
-        setIsVoiceActive(false);
-      };
+        recognitionRef.current.onend = () => {
+          setIsVoiceActive(false);
+        };
+      }
     }
 
     // Setup keyboard shortcuts
@@ -94,7 +98,7 @@ export const useChat = () => {
       // Ctrl+S for summarize
       if (e.ctrlKey && e.key === 's') {
         e.preventDefault();
-        handleSendMessage('summarize');
+        summarize();
       }
     };
 
@@ -106,7 +110,7 @@ export const useChat = () => {
         recognitionRef.current.stop();
       }
     };
-  }, []);
+  }, [isVoiceActive]);
 
   // Save messages to localStorage when they change
   useEffect(() => {
@@ -300,8 +304,12 @@ export const useChat = () => {
       )
     : messages;
 
+  // Summarize the conversation
+  const summarize = () => handleSendMessage("summarize");
+
   return {
-    messages: filteredMessages,
+    messages,
+    filteredMessages,
     input,
     setInput,
     isLoading,
@@ -315,6 +323,6 @@ export const useChat = () => {
     handleSend: handleSendMessage,
     handleClearChat,
     toggleVoice,
-    summarize: () => handleSendMessage("summarize")
+    summarize
   };
 };
