@@ -34,6 +34,13 @@ const Footer = () => {
               <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">
                 Contact
               </a>
+              <a 
+                href="mailto:support@speakeasyai.com" 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Email support"
+              >
+                Support
+              </a>
             </div>
           </div>
         </div>
