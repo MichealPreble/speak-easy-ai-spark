@@ -27,7 +27,7 @@ export function useVoiceRecognition(
   const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // Use our new audio analysis hook
+  // Use our audio analysis hook
   const { getAnalysisResults } = useAudioAnalysis(
     isVoiceActive, 
     analyserRef.current, 

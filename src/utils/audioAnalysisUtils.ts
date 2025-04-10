@@ -60,7 +60,7 @@ export const getVolume = (analyser: AnalyserNode): number => {
  */
 export const setupAudioAnalysis = async () => {
   try {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const audioContext = new AudioContext();
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
     
