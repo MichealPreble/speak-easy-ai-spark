@@ -15,7 +15,7 @@ const LoadingIndicator = ({ isDarkMode }: LoadingIndicatorProps) => {
             <Bot className="h-4 w-4" />
           </AvatarFallback>
         </Avatar>
-        <div className="p-3 rounded-lg bg-muted flex items-center space-x-2">
+        <div className="p-3 rounded-lg bg-muted/20 backdrop-blur-sm border border-secondary-light/30 dark:border-secondary-dark/30 flex items-center space-x-2 shadow-glass">
           <div className="w-2 h-2 rounded-full bg-muted-foreground/30 animate-pulse delay-75"></div>
           <div className="w-2 h-2 rounded-full bg-muted-foreground/30 animate-pulse delay-150"></div>
           <div className="w-2 h-2 rounded-full bg-muted-foreground/30 animate-pulse delay-300"></div>

@@ -11,7 +11,7 @@ const ChatPage = () => {
         description="Practice your speeches with our AI assistant. Get real-time feedback on pacing, filler words, and structure to improve your public speaking skills."
         ogType="website"
       />
-      <div className="container mx-auto py-8 px-4 min-h-screen flex flex-col bg-gradient-to-b from-primary-light/10 to-white dark:from-primary-dark/10 dark:to-background">
+      <div className="container mx-auto py-8 px-4 min-h-screen flex flex-col bg-gradient-to-b from-primary-light/10 to-white dark:from-primary-dark/10 dark:to-background backdrop-blur-md">
         <div className="max-w-5xl mx-auto w-full">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2 text-primary">SpeakEasyAI Chat</h1>
