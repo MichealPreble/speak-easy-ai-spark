@@ -1,5 +1,6 @@
 
 import { Bot } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -16,6 +17,9 @@ const Footer = () => {
             </p>
           </div>
           <div className="flex gap-6">
+            <Link to="/chat" className="text-muted-foreground hover:text-foreground transition-colors">
+              Try Chat
+            </Link>
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
               Terms
             </a>
