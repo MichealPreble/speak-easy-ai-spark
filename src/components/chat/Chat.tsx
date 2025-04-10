@@ -24,7 +24,8 @@ const Chat = () => {
     handleSend,
     handleClearChat,
     toggleVoice,
-    summarize
+    summarize,
+    showTypingIndicator
   } = useChat();
 
   return (
@@ -60,7 +61,7 @@ const Chat = () => {
             <NoMessages isSearching={searchQuery.trim().length > 0} />
           )}
           
-          {isLoading && <LoadingIndicator isDarkMode={isDarkMode} />}
+          {(isLoading || showTypingIndicator) && <LoadingIndicator isDarkMode={isDarkMode} />}
         </div>
       </ScrollArea>
 

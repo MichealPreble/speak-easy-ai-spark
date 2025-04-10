@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Message } from "@/types/chat";
 import { useToast } from "@/hooks/use-toast";
@@ -20,7 +19,13 @@ export const useChat = () => {
   const { searchQuery, setSearchQuery, filteredMessages } = useMessageSearch(messages);
   const { isDarkMode, setIsDarkMode } = useThemeMode();
   const { speak } = useSpeechSynthesis();
-  const { inputRef, scrollAreaRef, scrollToBottom } = useChatUI(messages);
+  const { 
+    inputRef, 
+    scrollAreaRef, 
+    scrollToBottom, 
+    showTyping,
+    showTypingIndicator 
+  } = useChatUI(messages);
 
   // Simple response generator (placeholder for actual AI)
   const getSimulatedResponse = (userInput: string): string => {
@@ -71,6 +76,9 @@ export const useChat = () => {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    
+    // Show typing indicator before AI responds
+    showTyping(1500);
 
     // Simulate bot response (will be replaced with actual API call later)
     setTimeout(() => {
@@ -105,6 +113,9 @@ export const useChat = () => {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    
+    // Show typing indicator before AI responds
+    showTyping(1500);
 
     // Simulate bot response (will be replaced with actual API call later)
     setTimeout(() => {
@@ -162,6 +173,7 @@ export const useChat = () => {
     handleSend: handleSendMessage,
     handleClearChat,
     toggleVoice,
-    summarize
+    summarize,
+    showTypingIndicator
   };
 };
