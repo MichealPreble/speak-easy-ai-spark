@@ -1,8 +1,11 @@
-import { useRef, useState, useEffect, useCallback } from "react";
+
+import { useState, useCallback, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { setupAudioAnalysis, cleanupAudio } from "@/utils/audioAnalysisUtils";
+import { isSpeechRecognitionSupported } from "@/utils/speechRecognitionTypes";
+import { useAudioSetup } from "@/hooks/useAudioSetup";
+import { useRecognitionSetup } from "@/hooks/useRecognitionSetup";
 import { useAudioAnalysis } from "@/hooks/useAudioAnalysis";
-import { isSpeechRecognitionSupported, getSpeechErrorMessage } from "@/utils/speechRecognitionTypes";
+import { processTranscript } from "@/utils/transcriptProcessing";
 
 export type SpeechFeedback = {
   speed: number;
@@ -18,85 +21,51 @@ export function useVoiceRecognition(
 ) {
   const { toast } = useToast();
   const [isVoiceActive, setIsVoiceActive] = useState(false);
-  const [isBrowserSupported, setIsBrowserSupported] = useState<boolean | null>(null);
-  const recognitionRef = useRef<any>(null);
-  const startTimeRef = useRef<number | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-
+  
+  const {
+    audioContextRef,
+    analyserRef,
+    streamRef,
+    setupAudio,
+    teardownAudio
+  } = useAudioSetup();
+  
+  const {
+    recognitionRef,
+    startTimeRef,
+    isBrowserSupported,
+    setupRecognitionHandlers
+  } = useRecognitionSetup();
+  
   const { getAnalysisResults } = useAudioAnalysis(
     isVoiceActive, 
     analyserRef.current, 
     audioContextRef.current
   );
 
+  // Set up handlers when onVoiceMessage changes
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const isSupported = isSpeechRecognitionSupported();
-      setIsBrowserSupported(isSupported);
+    setupRecognitionHandlers((transcript, duration) => {
+      const analysis = getAnalysisResults();
+      const result = processTranscript(transcript, duration, analysis);
       
-      if (isSupported) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = false;
-        recognitionRef.current.interimResults = false;
-        recognitionRef.current.lang = 'en-US';
-
-        recognitionRef.current.onresult = (event: any) => {
-          try {
-            const transcript = event.results[0][0].transcript;
-            const endTime = Date.now();
-            const duration = startTimeRef.current ? (endTime - startTimeRef.current) / 1000 : 0;
-            const wordCount = transcript.split(/\s+/).filter(Boolean).length;
-            const speed = duration > 0 ? Math.round((wordCount / duration) * 60) : 0;
-            const fillerWordRegex = /\b(um|uh|like|you know|actually|basically|literally|so|right|well)\b/gi;
-            const matches = transcript.match(fillerWordRegex);
-            const fillerWords: string[] = matches ? matches.map(word => word.toLowerCase()) : [];
-
-            const analysis = getAnalysisResults();
-
-            const feedback: SpeechFeedback = {
-              speed,
-              duration: Math.round(duration),
-              fillerWords: [...new Set(fillerWords)],
-              wordCount,
-              pitchVariation: Math.round(analysis.pitchVariation),
-              volumeVariation: Math.round(analysis.volumeVariation),
-            };
-
-            onVoiceMessage(transcript, feedback);
-
-            cleanupAudio(streamRef.current, audioContextRef.current);
-            streamRef.current = null;
-            audioContextRef.current = null;
-            analyserRef.current = null;
-          } catch (error) {
-            toast({
-              title: "Speech processing error",
-              description: "There was an error processing your speech. Please try again.",
-              variant: "destructive"
-            });
-            setIsVoiceActive(false);
-          }
-        };
-
-        recognitionRef.current.onerror = (event: any) => {
-          const errorMessage = getSpeechErrorMessage(event.error);
-          setIsVoiceActive(false);
-          toast({
-            title: "Voice recognition error",
-            description: errorMessage,
-            variant: "destructive"
-          });
-        };
-
-        recognitionRef.current.onend = () => {
-          setIsVoiceActive(false);
-        };
-      }
+      // Pass processed transcript and feedback to callback
+      onVoiceMessage(result.transcript, result.feedback);
+      
+      // Clean up audio resources
+      teardownAudio();
+      setIsVoiceActive(false);
+    });
+    
+    if (recognitionRef.current) {
+      recognitionRef.current.onend = () => {
+        setIsVoiceActive(false);
+      };
     }
+  }, [onVoiceMessage, setupRecognitionHandlers, getAnalysisResults, teardownAudio]);
 
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
       if (recognitionRef.current && isVoiceActive) {
         try {
@@ -106,9 +75,9 @@ export function useVoiceRecognition(
         }
       }
       
-      cleanupAudio(streamRef.current, audioContextRef.current);
+      teardownAudio();
     };
-  }, [onVoiceMessage, toast, getAnalysisResults]);
+  }, [isVoiceActive, teardownAudio]);
 
   const toggleVoice = useCallback(async () => {
     if (!isBrowserSupported) {
@@ -123,10 +92,7 @@ export function useVoiceRecognition(
     if (isVoiceActive) {
       try {
         recognitionRef.current.stop();
-        cleanupAudio(streamRef.current, audioContextRef.current);
-        streamRef.current = null;
-        audioContextRef.current = null;
-        analyserRef.current = null;
+        teardownAudio();
         setIsVoiceActive(false);
       } catch (error) {
         toast({
@@ -140,14 +106,10 @@ export function useVoiceRecognition(
       try {
         startTimeRef.current = Date.now();
         
-        const audioSetup = await setupAudioAnalysis();
-        if (!audioSetup.success) {
-          throw new Error("Failed to set up audio analysis");
+        const audioSetupSuccess = await setupAudio();
+        if (!audioSetupSuccess) {
+          return;
         }
-        
-        audioContextRef.current = audioSetup.audioContext;
-        analyserRef.current = audioSetup.analyser;
-        streamRef.current = audioSetup.stream;
         
         recognitionRef.current.start();
         setIsVoiceActive(true);
@@ -157,10 +119,7 @@ export function useVoiceRecognition(
           description: "Speak now...",
         });
       } catch (error) {
-        cleanupAudio(streamRef.current, audioContextRef.current);
-        streamRef.current = null;
-        audioContextRef.current = null;
-        analyserRef.current = null;
+        teardownAudio();
         
         toast({
           title: "Voice recognition error",
@@ -169,7 +128,7 @@ export function useVoiceRecognition(
         });
       }
     }
-  }, [isVoiceActive, isBrowserSupported, toast]);
+  }, [isVoiceActive, isBrowserSupported, recognitionRef, toast, teardownAudio, setupAudio]);
 
   return {
     isVoiceActive,
