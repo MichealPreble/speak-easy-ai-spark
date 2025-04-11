@@ -38,6 +38,7 @@ const Chat = ({ selectedScenario }: ChatProps) => {
   const [currentTranscript, setCurrentTranscript] = useState("");
   const [currentDuration, setCurrentDuration] = useState(0);
   const [speechFeedback, setSpeechFeedback] = useState<any>(null);
+  const [feedbackMinimized, setFeedbackMinimized] = useState(false);
   
   // Update from voice recognition data
   useEffect(() => {
@@ -53,15 +54,29 @@ const Chat = ({ selectedScenario }: ChatProps) => {
       setCurrentDuration(0);
       setCurrentTranscript("");
       setSpeechFeedback(null);
+      setFeedbackMinimized(false);
     }
   }, [isVoiceActive]);
   
-  // Listen for input changes to update transcript (simplified approach)
+  // Listen for input changes to update transcript
   useEffect(() => {
     if (isVoiceActive && input) {
       setCurrentTranscript(input);
+      
+      // If the input is getting longer, assume we have ongoing speech
+      // and generate preliminary feedback
+      if (input.length > 20 && !speechFeedback) {
+        setSpeechFeedback({
+          speed: Math.round((input.split(/\s+/).filter(Boolean).length / currentDuration) * 60) || 0,
+          duration: Math.round(currentDuration),
+          fillerWords: [],
+          wordCount: input.split(/\s+/).filter(Boolean).length,
+          pitchVariation: 0,
+          volumeVariation: 0
+        });
+      }
     }
-  }, [input, isVoiceActive]);
+  }, [input, isVoiceActive, currentDuration, speechFeedback]);
 
   return (
     <div className="flex flex-col h-[500px] sm:h-[600px] w-full border border-secondary-light/30 dark:border-secondary-dark/30 rounded-lg shadow-glass backdrop-blur-md bg-white/85 dark:bg-black/85">
@@ -111,12 +126,14 @@ const Chat = ({ selectedScenario }: ChatProps) => {
       />
       
       {/* Real-time Feedback */}
-      <RealTimeFeedback 
-        isActive={isVoiceActive}
-        transcript={currentTranscript}
-        duration={currentDuration}
-        feedback={speechFeedback}
-      />
+      {!feedbackMinimized && (
+        <RealTimeFeedback 
+          isActive={isVoiceActive}
+          transcript={currentTranscript}
+          duration={currentDuration}
+          feedback={speechFeedback}
+        />
+      )}
     </div>
   );
 };
