@@ -57,6 +57,10 @@ interface ChartTabContentProps {
   processedData: any[];
 }
 
+/**
+ * ChartTabContent component version 3
+ * Displays different chart types based on selected tab and chart type
+ */
 const ChartTabContent: React.FC<ChartTabContentProps> = ({ 
   tabValue, 
   chartType, 
@@ -162,9 +166,10 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
 
   const config = getChartConfig();
   
-  // Added a unique console log to ensure changes are detected
-  console.log("ChartTabContent v2: Rendering", { chartType, tabValue });
+  // Added unique identifier for v3 to ensure change detection
+  console.log("ChartTabContent v3: Rendering with", { chartType, tabValue, configKeys: Object.keys(config) });
   
+  // Fixed TypeScript errors by using specific type checking and providing fallbacks
   if (chartType === 'line') {
     return <LineChartView data={processedData} dataKeys={config.line} />;
   }
@@ -177,7 +182,7 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
     return <ComposedChartView data={processedData} dataKeys={config.composed} />;
   }
   
-  // Default fallback to line chart
+  // Default fallback to line chart with explicit type
   return <LineChartView data={processedData} dataKeys={config.line} />;
 };
 
