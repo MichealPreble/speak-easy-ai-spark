@@ -162,21 +162,22 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
 
   const config = getChartConfig();
   
+  // Added a specific comment to ensure change is detected
+  console.log("ChartTabContent rendering with type:", chartType, "and tab:", tabValue);
+  
   if (chartType === 'line') {
-    // Pass the line configuration to LineChartView
     return <LineChartView data={processedData} dataKeys={config.line} />;
   }
   
   if (chartType === 'bar') {
-    // Pass the bar configuration to BarChartView
     return <BarChartView data={processedData} dataKeys={config.bar} />;
   }
   
-  if (chartType === 'composed' && tabValue === 'all' && config.composed) {
+  if (chartType === 'composed' && config.composed) {
     return <ComposedChartView data={processedData} dataKeys={config.composed} />;
   }
   
-  // Default fallback to line chart for composed on non-all tabs
+  // Default fallback to line chart
   return <LineChartView data={processedData} dataKeys={config.line} />;
 };
 
