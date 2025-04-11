@@ -24,7 +24,7 @@ const ProgressPage: React.FC = () => {
     exportData 
   } = useProgressData();
 
-  // Convert ProgressData to a format compatible with SpeechAnalysisResult
+  // Convert ProgressData to SpeechAnalysisResult for the chart
   const chartData: SpeechAnalysisResult[] = filteredData.map(item => {
     // Create a ClarityScore object from the number
     const clarity: ClarityScore = {
@@ -39,8 +39,8 @@ const ProgressPage: React.FC = () => {
       clarity,
       pace: item.pace,
       fillerWordCount: item.fillerWords,
-      hesitationCount: 0,
-      rhythmScore: 0,
+      hesitationCount: 0, // Default value since ProgressData doesn't have this
+      rhythmScore: 0,     // Default value since ProgressData doesn't have this
       timestamp: new Date(item.date).getTime()
     };
   });
@@ -84,11 +84,11 @@ const ProgressPage: React.FC = () => {
               </div>
               
               <TabsContent value="details" className="rounded-md border">
-                <SessionsTable data={filteredData} />
+                <SessionsTable data={chartData} />
               </TabsContent>
               
               <TabsContent value="stats" className="rounded-md border p-4">
-                <StatsPanel data={filteredData} />
+                <StatsPanel data={chartData} />
               </TabsContent>
             </Tabs>
           </div>
