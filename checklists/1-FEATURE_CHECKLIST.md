@@ -21,12 +21,14 @@ This checklist covers all feature-related items that need to be completed before
 ### Speech Analysis Module Validation
 - [ ] Verify `analyzeFullSpeech` function with both synchronous and async versions
   - [ ] Test with speeches of varying lengths (10s, 30s, 60s)
-  - [ ] Validate performance logging output for both versions
+  - [ ] Validate performance logging output for all detail levels
   - [ ] Confirm proper error handling with invalid inputs
+  - [ ] Test caching mechanism with repeated analysis
 - [ ] Test performance optimization
   - [ ] Verify async parallel processing is faster than sequential for complex analyses
   - [ ] Benchmark CPU usage on low-end devices (<15% CPU)
   - [ ] Confirm memory usage remains stable during long recording sessions
+  - [ ] Compare execution time with and without caching enabled
 - [ ] Validate speech analysis accuracy
   - [ ] Clarity scores match expert ratings within ±1 point
   - [ ] Rhythm analysis correctly identifies speech patterns

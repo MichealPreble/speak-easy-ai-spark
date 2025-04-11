@@ -49,16 +49,17 @@ This is the main deployment checklist for SpeakEasyAI. The detailed checklists h
 
 The speech analysis module has been enhanced with new functionality including:
 
-1. **Performance Logging**: Added ability to track execution time
+1. **Performance Logging**: Added ability to track execution time with configurable detail levels
 2. **Async Support**: Parallel processing for improved performance
 3. **Enhanced Error Handling**: Better error detection and reporting
+4. **Analysis Caching**: Caching mechanism for frequently analyzed speech patterns
 
 ### Validation Tasks:
 
 1. Test both sync and async versions of `analyzeFullSpeech` with:
    - Speeches of varying lengths (10s, 30s, 60s)
    - Different configuration options
-   - Performance logging enabled
+   - Performance logging enabled at all detail levels
    
 2. Verify error handling with:
    - Invalid inputs (empty strings, negative durations)
@@ -69,6 +70,7 @@ The speech analysis module has been enhanced with new functionality including:
    - Benchmark sync vs. async versions
    - Measure CPU and memory usage
    - Test on low-end devices
+   - Verify caching improves repeat analysis performance
 
 See the [Feature Checklist](./checklists/1-FEATURE_CHECKLIST.md) and [Performance Checklist](./checklists/4-PERFORMANCE_CHECKLIST.md) for detailed speech analysis validation tasks.
 

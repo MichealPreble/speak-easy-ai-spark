@@ -34,9 +34,14 @@ This checklist covers all documentation-related items that need to be completed 
   - [ ] Create API reference for all exported functions
   - [ ] Explain configuration options and their effects
   - [ ] Provide usage examples for sync and async versions
+  - [ ] Document caching mechanism and configuration
+  - [ ] Explain performance logging options and output formats
 - [ ] Document performance considerations
   - [ ] Explain when to use sync vs. async analysis
   - [ ] Provide guidelines for optimal performance
+  - [ ] Document cache size limitations and management
+  - [ ] Include benchmarks for different speech lengths
 - [ ] Create developer guide for extending speech analysis
   - [ ] Explain architecture and data flow
   - [ ] Provide examples of adding new analysis metrics
+  - [ ] Document integration with real-time feedback components

@@ -34,9 +34,12 @@ This checklist covers all performance-related items that need to be completed be
   - [ ] Compare synchronous vs. async versions (target: async 20% faster)
   - [ ] Measure memory usage during analysis of 5-minute speeches
   - [ ] Test performance with and without logging enabled
+  - [ ] Measure cache hit performance (target: 90% reduction in processing time)
 - [ ] Validate parallel processing benefits
   - [ ] Compare parallel vs. sequential analysis with 10+ speech samples
   - [ ] Record CPU usage patterns during analysis
+  - [ ] Test different detail levels of performance logging
 - [ ] Profile speech analysis in production build
   - [ ] Use Chrome DevTools to identify bottlenecks
   - [ ] Optimize any functions taking >100ms
+  - [ ] Verify cache size is appropriate for typical usage patterns
