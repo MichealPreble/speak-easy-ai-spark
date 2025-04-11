@@ -7,18 +7,14 @@ import SpeechTrends from "./SpeechTrends";
 import SpeechTips from "./SpeechTips";
 import SpeechClarityFeedback from "./SpeechClarityFeedback";
 import SpeechMetricsChart from "./SpeechMetricsChart";
+import { TrendMetrics } from "@/hooks/useSpeechTrends";
 
 interface FeedbackContentProps {
   isActive: boolean;
   duration: number;
   feedback?: SpeechFeedback;
   tips: string[];
-  metrics: {
-    speed: number | null;
-    wordCount: number;
-    pitchVariation: number | null;
-    fillerWordsCount: number;
-  };
+  metrics: TrendMetrics;
   clarityAnalysis: {
     score: number;
     rating: 'excellent' | 'good' | 'fair' | 'needs improvement';

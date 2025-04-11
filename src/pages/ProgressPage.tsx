@@ -23,6 +23,15 @@ const ProgressPage: React.FC = () => {
     exportData 
   } = useProgressData();
 
+  // Convert ProgressData to a format compatible with SpeechAnalysisChart
+  const chartData = filteredData.map(item => ({
+    ...item,
+    // Add missing properties required by SpeechAnalysisResult type
+    fillerWordCount: item.fillerWords,
+    hesitationCount: 0,
+    rhythmScore: 0
+  }));
+
   return (
     <>
       <SEO 
@@ -45,7 +54,7 @@ const ProgressPage: React.FC = () => {
           
           <div className="space-y-6">
             <SpeechAnalysisChart 
-              data={filteredData} 
+              data={chartData} 
               title="Speech Analysis Trends"
               description={`Showing data for ${timeframe === 'week' ? 'the last 7 days' : timeframe === 'month' ? 'the last 30 days' : 'all time'}`}
             />
