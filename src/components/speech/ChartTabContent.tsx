@@ -4,6 +4,46 @@ import LineChartView from "./LineChartView";
 import BarChartView from "./BarChartView";
 import ComposedChartView from "./ComposedChartView";
 
+// Define more specific types for the line and bar chart configurations
+interface LineChartConfig {
+  x: string;
+  lines: Array<{
+    key: string;
+    name: string;
+    color: string;
+    activeDot?: object;
+    strokeWidth?: number;
+  }>;
+}
+
+interface BarChartConfig {
+  x: string;
+  bars: Array<{
+    key: string;
+    name: string;
+    color: string;
+  }>;
+}
+
+interface ComposedChartConfig {
+  x: string;
+  areas: Array<{
+    key: string;
+    name: string;
+    color: string;
+  }>;
+  lines: Array<{
+    key: string;
+    name: string;
+    color: string;
+  }>;
+  bars: Array<{
+    key: string;
+    name: string;
+    color: string;
+  }>;
+}
+
 interface ChartTabContentProps {
   tabValue: string;
   chartType: 'line' | 'bar' | 'composed';
@@ -27,7 +67,13 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
             lines: [
               { key: "clarityScore", name: "Clarity", color: "#9b87f5", activeDot: { r: 8 }, strokeWidth: 2 }
             ]
-          }
+          } as LineChartConfig,
+          bar: {
+            x: baseX,
+            bars: [
+              { key: "clarityScore", name: "Clarity", color: "#9b87f5" }
+            ]
+          } as BarChartConfig
         };
         
       case 'pace':
@@ -38,18 +84,32 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
               { key: "pace", name: "Pace (WPM)", color: "#F97316", activeDot: { r: 8 }, strokeWidth: 2 },
               { key: "rhythmScore", name: "Rhythm", color: "#7E69AB", activeDot: { r: 6 } }
             ]
-          }
+          } as LineChartConfig,
+          bar: {
+            x: baseX,
+            bars: [
+              { key: "pace", name: "Pace (WPM)", color: "#F97316" },
+              { key: "rhythmScore", name: "Rhythm", color: "#7E69AB" }
+            ]
+          } as BarChartConfig
         };
         
       case 'hesitations':
         return {
+          line: {
+            x: baseX,
+            lines: [
+              { key: "hesitationCount", name: "Hesitations", color: "#8E9196" },
+              { key: "fillerWordCount", name: "Filler Words", color: "#1A1F2C" }
+            ]
+          } as LineChartConfig,
           bar: {
             x: baseX,
             bars: [
               { key: "hesitationCount", name: "Hesitations", color: "#8E9196" },
               { key: "fillerWordCount", name: "Filler Words", color: "#1A1F2C" }
             ]
-          }
+          } as BarChartConfig
         };
         
       case 'all':
@@ -64,7 +124,7 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
               { key: "hesitationCount", name: "Hesitations", color: "#8E9196" },
               { key: "fillerWordCount", name: "Filler Words", color: "#1A1F2C" }
             ]
-          },
+          } as LineChartConfig,
           bar: {
             x: baseX,
             bars: [
@@ -74,7 +134,7 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
               { key: "hesitationCount", name: "Hesitations", color: "#8E9196" },
               { key: "fillerWordCount", name: "Filler Words", color: "#1A1F2C" }
             ]
-          },
+          } as BarChartConfig,
           composed: {
             x: baseX,
             areas: [
@@ -88,7 +148,7 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
               { key: "hesitationCount", name: "Hesitations", color: "#8E9196" },
               { key: "fillerWordCount", name: "Filler Words", color: "#1A1F2C" }
             ]
-          }
+          } as ComposedChartConfig
         };
     }
   };
@@ -96,12 +156,14 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
   const config = getChartConfig();
   
   if (chartType === 'line') {
-    const lineConfig = tabValue === 'hesitations' ? config.bar : config.line;
+    // Make sure we're using line configuration
+    const lineConfig = config.line;
     return <LineChartView data={processedData} dataKeys={lineConfig} />;
   }
   
   if (chartType === 'bar') {
-    const barConfig = tabValue === 'clarity' || tabValue === 'pace' ? config.line : config.bar;
+    // Make sure we're using bar configuration
+    const barConfig = config.bar;
     return <BarChartView data={processedData} dataKeys={barConfig} />;
   }
   
@@ -110,8 +172,7 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
   }
   
   // Default fallback to line chart for composed on non-all tabs
-  const fallbackConfig = tabValue === 'hesitations' ? config.bar : config.line;
-  return <LineChartView data={processedData} dataKeys={fallbackConfig} />;
+  return <LineChartView data={processedData} dataKeys={config.line} />;
 };
 
 export default ChartTabContent;
