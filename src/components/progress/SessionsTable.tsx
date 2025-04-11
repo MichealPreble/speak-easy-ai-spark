@@ -3,6 +3,7 @@ import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CalendarIcon, Clock } from "lucide-react";
 import { SpeechAnalysisResult } from "@/utils/speech/types";
+import { ProgressData } from "@/hooks/useProgressData";
 
 interface SessionsTableProps {
   data: SpeechAnalysisResult[];

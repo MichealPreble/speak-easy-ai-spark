@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import SEO from "@/components/SEO";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
@@ -12,6 +12,9 @@ import StatsPanel from "@/components/progress/StatsPanel";
 import { useProgressData } from "@/hooks/useProgressData";
 import { SpeechAnalysisResult, ClarityScore } from "@/utils/speech/types";
 
+// Adding a unique console log to verify this version is loaded
+console.log("Loading updated ProgressPage component - April 11, 2025");
+
 const ProgressPage: React.FC = () => {
   const { user } = useAuth();
   const analytics = useAnalytics();
@@ -23,6 +26,11 @@ const ProgressPage: React.FC = () => {
     loadData, 
     exportData 
   } = useProgressData();
+
+  // Log on component mount to verify this version is running
+  useEffect(() => {
+    console.log("ProgressPage mounted - April 11, 2025");
+  }, []);
 
   // Convert ProgressData to SpeechAnalysisResult for the chart
   const chartData: SpeechAnalysisResult[] = filteredData.map(item => {
