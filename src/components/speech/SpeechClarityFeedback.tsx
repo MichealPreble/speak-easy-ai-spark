@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
-import { InfoCircle, CheckCircle, AlertCircle, XCircle } from "lucide-react";
+import { Info, CheckCircle, AlertCircle, XCircle } from "lucide-react";
 import { 
   Tooltip,
   TooltipContent,
@@ -29,7 +29,7 @@ const SpeechClarityFeedback = ({ score, rating, suggestions }: SpeechClarityProp
       case 'needs improvement':
         return <XCircle className="h-4 w-4 text-red-500" />;
       default:
-        return <InfoCircle className="h-4 w-4" />;
+        return <Info className="h-4 w-4" />;
     }
   };
   
@@ -51,7 +51,7 @@ const SpeechClarityFeedback = ({ score, rating, suggestions }: SpeechClarityProp
           <TooltipProvider>
             <Tooltip delayDuration={300}>
               <TooltipTrigger asChild>
-                <InfoCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
               </TooltipTrigger>
               <TooltipContent side="right" className="max-w-[220px]">
                 <p className="text-xs">
@@ -79,7 +79,7 @@ const SpeechClarityFeedback = ({ score, rating, suggestions }: SpeechClarityProp
               >
                 <span className="flex items-center justify-between">
                   <span className="font-medium">{rating}</span>
-                  <InfoCircle className="h-4 w-4 text-muted-foreground" />
+                  <Info className="h-4 w-4 text-muted-foreground" />
                 </span>
               </div>
             </TooltipTrigger>
