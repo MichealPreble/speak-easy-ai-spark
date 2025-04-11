@@ -8,11 +8,30 @@ import { analyzeRhythm } from "./rhythmAnalysis";
 import { analyzeSpeechClarity } from "./speechClarity";
 import { analyzeFullSpeech } from "./syncAnalysis";
 import { analyzeFullSpeechAsync } from "./asyncAnalysis";
-import { SpeechAnalysisResult, SpeechAnalysisConfig, ClarityScore } from "./types";
-import { getCachedAnalysis, cacheAnalysisResult, clearAnalysisCache, getCacheSize } from "./analysisCache";
+import { 
+  SpeechAnalysisResult, 
+  SpeechAnalysisConfig, 
+  ClarityScore, 
+  ProcessingMetrics,
+  BatchStatistics,
+  CacheStatistics
+} from "./types";
+import { 
+  getCachedAnalysis, 
+  cacheAnalysisResult, 
+  clearAnalysisCache, 
+  getCacheSize 
+} from "./analysisCache";
 import { processTranscriptBatch } from "./batchProcessing";
 import { benchmarkSpeechAnalysis } from "./benchmarking";
-import { getCacheStatistics, isAnalysisCached } from "./cacheStatistics";
+import { 
+  getCacheStatistics, 
+  isAnalysisCached,
+  trackCacheHit,
+  trackCacheMiss,
+  trackCacheEviction,
+  resetCacheStatistics
+} from "./cacheStatistics";
 import { validateSpeechInput } from "./validation";
 
 // Re-export all the types and functions
@@ -20,7 +39,10 @@ export type {
   SpeechAnalysisResult, 
   SpeechAnalysisConfig, 
   ClarityScore,
-  SpeechFeedback
+  SpeechFeedback,
+  ProcessingMetrics,
+  BatchStatistics,
+  CacheStatistics
 };
 
 export { 
@@ -50,6 +72,10 @@ export {
   // Cache statistics
   getCacheStatistics,
   isAnalysisCached,
+  trackCacheHit,
+  trackCacheMiss,
+  trackCacheEviction,
+  resetCacheStatistics,
   
   // Validation
   validateSpeechInput

@@ -1,45 +1,73 @@
-
 import { analysisCache } from './analysisCache';
+import { CacheStatistics } from './types';
+
+// Track cache statistics beyond just the current state
+let totalCacheHits = 0;
+let totalCacheMisses = 0;
+let totalEvictions = 0;
+
+/**
+ * Track a cache hit
+ */
+export function trackCacheHit() {
+  totalCacheHits++;
+}
+
+/**
+ * Track a cache miss
+ */
+export function trackCacheMiss() {
+  totalCacheMisses++;
+}
+
+/**
+ * Track a cache eviction
+ */
+export function trackCacheEviction() {
+  totalEvictions++;
+}
+
+/**
+ * Reset cache statistics counters
+ */
+export function resetCacheStatistics() {
+  totalCacheHits = 0;
+  totalCacheMisses = 0;
+  totalEvictions = 0;
+}
 
 /**
  * Provides statistics about the speech analysis cache
  * @returns Object with cache stats including size, hit ratio, and age information
  */
-export function getCacheStatistics(): {
-  size: number;
-  hitCount: number;
-  hitRatio: number;
-  oldestEntryAge: number;
-  newestEntryAge: number;
-  avgEntryAge: number;
-  averageProcessingTime: number;
-} {
+export function getCacheStatistics(): CacheStatistics {
   // Convert Map to array for easier processing
   const entries = Array.from(analysisCache.entries());
   const now = Date.now();
   
   const size = entries.length;
   // Count entries with timestamps as hit count (simplified metric)
-  const hitCount = entries.filter(([_, value]) => value.timestamp).length;
-  const hitRatio = size > 0 ? hitCount / size : 0;
+  const hitCount = totalCacheHits;
+  const missCount = totalCacheMisses;
+  const hitRatio = (hitCount + missCount) > 0 ? hitCount / (hitCount + missCount) : 0;
   
   // Calculate age metrics
-  let oldestEntryAge = 0;
-  let newestEntryAge = Infinity;
-  let totalAge = 0;
+  let oldestEntryAgeMs = 0;
+  let newestEntryAgeMs = Infinity;
+  let totalAgeMs = 0;
   let totalProcessingTime = 0;
   let processingTimeCount = 0;
   
   entries.forEach(([_, value]) => {
     if (value.timestamp) {
       const age = now - value.timestamp;
-      oldestEntryAge = Math.max(oldestEntryAge, age);
-      newestEntryAge = Math.min(newestEntryAge, age);
-      totalAge += age;
+      oldestEntryAgeMs = Math.max(oldestEntryAgeMs, age);
+      newestEntryAgeMs = Math.min(newestEntryAgeMs, age);
+      totalAgeMs += age;
       
       // If the entry has processing time metadata
-      if (value.processingTimeMs) {
-        totalProcessingTime += value.processingTimeMs;
+      if (value.metrics?.processingTimeMs) {
+        totalProcessingTime += value.metrics.processingTimeMs;
         processingTimeCount++;
       }
     }
@@ -48,11 +76,13 @@ export function getCacheStatistics(): {
   return {
     size,
     hitCount,
+    missCount,
     hitRatio,
-    oldestEntryAge: oldestEntryAge || 0,
-    newestEntryAge: newestEntryAge === Infinity ? 0 : newestEntryAge,
-    avgEntryAge: size > 0 ? totalAge / size : 0,
-    averageProcessingTime: processingTimeCount > 0 ? totalProcessingTime / processingTimeCount : 0
+    oldestEntryAgeMs: oldestEntryAgeMs || 0,
+    newestEntryAgeMs: newestEntryAgeMs === Infinity ? 0 : newestEntryAgeMs,
+    averageEntryAgeMs: size > 0 ? totalAgeMs / size : 0,
+    averageProcessingTimeMs: processingTimeCount > 0 ? totalProcessingTime / processingTimeCount : 0,
+    evictionCount: totalEvictions
   };
 }
 

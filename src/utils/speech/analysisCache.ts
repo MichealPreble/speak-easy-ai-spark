@@ -1,5 +1,6 @@
 
 import { SpeechAnalysisResult } from './types';
+import { trackCacheHit, trackCacheMiss, trackCacheEviction } from './cacheStatistics';
 
 // Cache for analysis results to improve performance
 export const analysisCache = new Map<string, SpeechAnalysisResult>();
@@ -18,10 +19,12 @@ export const getCachedAnalysis = (
     
     // If cache is still valid based on time
     if (cachedResult.timestamp && (now - cachedResult.timestamp) < cacheTimeMs) {
+      trackCacheHit();
       return cachedResult;
     }
   }
   
+  trackCacheMiss();
   return null;
 };
 
@@ -48,6 +51,7 @@ export const cacheAnalysisResult = (
     // Remove the oldest entry
     if (oldestKey) {
       analysisCache.delete(oldestKey);
+      trackCacheEviction();
     }
   }
   

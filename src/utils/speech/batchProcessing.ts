@@ -1,5 +1,5 @@
 
-import { SpeechAnalysisResult, SpeechAnalysisConfig } from './types';
+import { SpeechAnalysisResult, SpeechAnalysisConfig, BatchStatistics } from './types';
 import { analyzeFullSpeech } from './syncAnalysis';
 import { analyzeFullSpeechAsync } from './asyncAnalysis';
 import { getCachedAnalysis, cacheAnalysisResult } from './analysisCache';
@@ -16,18 +16,19 @@ export async function processTranscriptBatch(
     maxConcurrent?: number;
     logCacheHits?: boolean;
   } = {}
-): Promise<Array<{
-  result: SpeechAnalysisResult;
-  processingTimeMs: number;
-  fromCache: boolean;
-  index: number;
-}>> {
+): Promise<{
+  results: Array<{
+    result: SpeechAnalysisResult;
+    fromCache: boolean;
+    index: number;
+  }>;
+  statistics: BatchStatistics;
+}> {
   const startTime = performance.now();
   const maxConcurrent = config.maxConcurrent || 3; // Default to 3 concurrent processes
   const logCacheHits = config.logCacheHits || false;
   const results: Array<{
     result: SpeechAnalysisResult;
-    processingTimeMs: number;
     fromCache: boolean;
     index: number;
   }> = [];
@@ -63,11 +64,21 @@ export async function processTranscriptBatch(
         }
       }
       
-      const processingTimeMs = performance.now() - itemStartTime;
+      const processingTimeMs = result.metrics?.processingTimeMs || 
+                               (performance.now() - itemStartTime);
+      
+      // Ensure metrics are present
+      if (!result.metrics) {
+        result.metrics = {
+          startTime: itemStartTime,
+          endTime: performance.now(),
+          processingTimeMs,
+          cacheHit: fromCache
+        };
+      }
       
       return {
         result,
-        processingTimeMs,
         fromCache,
         index: startIndex + i
       };
@@ -89,6 +100,19 @@ export async function processTranscriptBatch(
   const totalTimeMs = performance.now() - startTime;
   const cachedCount = results.filter(r => r.fromCache).length;
   
+  // Calculate batch statistics
+  const processingTimes = results.map(r => r.result.metrics?.processingTimeMs || 0).filter(t => t > 0);
+  
+  const statistics: BatchStatistics = {
+    totalAnalyses: transcripts.length,
+    totalProcessingTimeMs: totalTimeMs,
+    averageProcessingTimeMs: totalTimeMs / transcripts.length,
+    cacheHitCount: cachedCount,
+    cacheHitRatio: cachedCount / transcripts.length,
+    slowestAnalysisMs: processingTimes.length > 0 ? Math.max(...processingTimes) : 0,
+    fastestAnalysisMs: processingTimes.length > 0 ? Math.min(...processingTimes) : 0
+  };
+  
   if (config.logPerformance) {
     console.log({
       batchProcessing: {
@@ -96,10 +120,11 @@ export async function processTranscriptBatch(
         totalTimeMs: totalTimeMs.toFixed(2),
         averageTimePerTranscript: (totalTimeMs / transcripts.length).toFixed(2),
         cacheHits: cachedCount,
-        maxConcurrent
+        maxConcurrent,
+        statistics
       }
     });
   }
   
-  return results;
+  return { results, statistics };
 }

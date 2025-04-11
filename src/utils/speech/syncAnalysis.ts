@@ -1,9 +1,23 @@
 
-import { SpeechAnalysisResult, SpeechAnalysisConfig } from './types';
+import { SpeechAnalysisResult, SpeechAnalysisConfig, ProcessingMetrics } from './types';
 import { analyzeSpeechClarity } from './speechClarity';
 import { detectHesitations } from './hesitationAnalysis';
 import { analyzeRhythm } from './rhythmAnalysis';
 import { getCachedAnalysis, cacheAnalysisResult } from './analysisCache';
+
+/**
+ * Gets basic device information for metrics
+ */
+const getDeviceInfo = (): ProcessingMetrics['deviceInfo'] => {
+  if (typeof navigator === 'undefined') return {};
+  
+  return {
+    platform: navigator.platform,
+    browser: navigator.userAgent,
+    isMobile: /Mobi|Android/i.test(navigator.userAgent),
+    connectionType: (navigator as any).connection?.effectiveType || 'unknown'
+  };
+};
 
 /**
  * Synchronous function to perform full speech analysis
@@ -17,7 +31,7 @@ export const analyzeFullSpeech = (
   },
   config?: SpeechAnalysisConfig
 ): SpeechAnalysisResult => {
-  const startTime = config?.logPerformance !== 'none' ? performance.now() : 0;
+  const startTime = performance.now();
   
   // Use configuration with defaults
   const actualConfig = {
@@ -26,11 +40,19 @@ export const analyzeFullSpeech = (
     skipRhythm: config?.skipRhythm || false,
     skipHesitations: config?.skipHesitations || false,
     useCache: config?.useCache || false,
-    cacheTimeMs: config?.cacheTimeMs || 5000 // 5 seconds default cache time
+    cacheTimeMs: config?.cacheTimeMs || 5000, // 5 seconds default cache time
+    collectDeviceInfo: config?.collectDeviceInfo || false
   };
 
   // Generate cache key based on transcript and configuration
   const cacheKey = `${transcript.substring(0, 50)}-${durationSeconds}-${JSON.stringify(actualConfig)}`;
+  
+  // Initialize metrics
+  const metrics: ProcessingMetrics = {
+    startTime,
+    cacheHit: false,
+    deviceInfo: actualConfig.collectDeviceInfo ? getDeviceInfo() : undefined
+  };
   
   // Check cache if enabled
   if (actualConfig.useCache) {
@@ -40,7 +62,16 @@ export const analyzeFullSpeech = (
         const now = Date.now();
         console.log(`Using cached speech analysis result (${(now - (cachedResult.timestamp || 0))}ms old)`);
       }
-      return cachedResult;
+      
+      // Update metrics for cached result
+      metrics.cacheHit = true;
+      metrics.endTime = performance.now();
+      metrics.processingTimeMs = metrics.endTime - startTime;
+      
+      return {
+        ...cachedResult,
+        metrics
+      };
     }
   }
   
@@ -80,6 +111,10 @@ export const analyzeFullSpeech = (
   const matches = transcript.match(fillerWordRegex);
   const fillerWordCount = matches ? matches.length : 0;
   
+  // Update metrics
+  metrics.endTime = performance.now();
+  metrics.processingTimeMs = metrics.endTime - startTime;
+  
   const result: SpeechAnalysisResult = {
     clarity: clarity || {
       score: 0,
@@ -90,7 +125,8 @@ export const analyzeFullSpeech = (
     fillerWordCount,
     hesitationCount: hesitationAnalysis.count,
     rhythmScore: rhythmAnalysis?.rhythmScore || 0, // Extract just the rhythmScore from the object
-    timestamp: Date.now() // Add timestamp for cache invalidation
+    timestamp: Date.now(), // Add timestamp for cache invalidation
+    metrics
   };
   
   // Store in cache if enabled
