@@ -1,14 +1,6 @@
 
 import React from "react";
-import { 
-  ResponsiveContainer,
-  LineChart, 
-  Line,  
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip
-} from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { SpeechAnalysisResult } from "@/utils/speech/types";
 
@@ -57,10 +49,7 @@ const SpeechMetricsChart: React.FC<SpeechMetricsChartProps> = ({
           fillerWords: { color: "#1A1F2C" }
         }}
       >
-        <LineChart
-          data={chartData}
-          margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-        >
+        <LineChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="index" tick={false} />
           <YAxis hide={true} />

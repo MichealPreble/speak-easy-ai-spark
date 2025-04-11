@@ -28,7 +28,7 @@ import {
   Activity,
   Clock,
   Volume2,
-  SpeakerWave,
+  Headphones,
   PauseCircle
 } from "lucide-react";
 
@@ -157,7 +157,7 @@ const SpeechAnalysisChart: React.FC<SpeechAnalysisChartProps> = ({
           <div className="grid grid-cols-2 sm:grid-cols-4 mt-4 gap-2 text-center">
             <div className="bg-primary/5 rounded-md p-2">
               <div className="text-xs text-muted-foreground mb-1 flex items-center justify-center">
-                <SpeakerWave className="h-3 w-3 mr-1" /> Clarity
+                <Headphones className="h-3 w-3 mr-1" /> Clarity
               </div>
               <div className="font-medium">{insights.avgClarity}</div>
             </div>
@@ -192,17 +192,17 @@ const SpeechAnalysisChart: React.FC<SpeechAnalysisChartProps> = ({
           </TabsList>
           
           <TabsContent value="all" className="h-full">
-            <ChartContainer 
-              className="h-full" 
-              config={{
-                clarity: { color: "#9b87f5" },
-                rhythm: { color: "#7E69AB" },
-                pace: { color: "#F97316" },
-                hesitations: { color: "#8E9196" },
-                fillerWords: { color: "#1A1F2C" }
-              }}
-            >
-              {chartType === 'line' && (
+            {chartType === 'line' && (
+              <ChartContainer 
+                className="h-full" 
+                config={{
+                  clarity: { color: "#9b87f5" },
+                  rhythm: { color: "#7E69AB" },
+                  pace: { color: "#F97316" },
+                  hesitations: { color: "#8E9196" },
+                  fillerWords: { color: "#1A1F2C" }
+                }}
+              >
                 <LineChart data={processedData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="time" />
@@ -215,9 +215,20 @@ const SpeechAnalysisChart: React.FC<SpeechAnalysisChartProps> = ({
                   <Line type="monotone" dataKey="hesitationCount" name="Hesitations" stroke="var(--color-hesitations)" />
                   <Line type="monotone" dataKey="fillerWordCount" name="Filler Words" stroke="var(--color-fillerWords)" />
                 </LineChart>
-              )}
-              
-              {chartType === 'bar' && (
+              </ChartContainer>
+            )}
+            
+            {chartType === 'bar' && (
+              <ChartContainer 
+                className="h-full" 
+                config={{
+                  clarity: { color: "#9b87f5" },
+                  rhythm: { color: "#7E69AB" },
+                  pace: { color: "#F97316" },
+                  hesitations: { color: "#8E9196" },
+                  fillerWords: { color: "#1A1F2C" }
+                }}
+              >
                 <BarChart data={processedData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="time" />
@@ -230,9 +241,20 @@ const SpeechAnalysisChart: React.FC<SpeechAnalysisChartProps> = ({
                   <Bar dataKey="hesitationCount" name="Hesitations" fill="var(--color-hesitations)" />
                   <Bar dataKey="fillerWordCount" name="Filler Words" fill="var(--color-fillerWords)" />
                 </BarChart>
-              )}
-              
-              {chartType === 'composed' && (
+              </ChartContainer>
+            )}
+            
+            {chartType === 'composed' && (
+              <ChartContainer 
+                className="h-full" 
+                config={{
+                  clarity: { color: "#9b87f5" },
+                  rhythm: { color: "#7E69AB" },
+                  pace: { color: "#F97316" },
+                  hesitations: { color: "#8E9196" },
+                  fillerWords: { color: "#1A1F2C" }
+                }}
+              >
                 <ComposedChart data={processedData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="time" />
@@ -245,8 +267,8 @@ const SpeechAnalysisChart: React.FC<SpeechAnalysisChartProps> = ({
                   <Bar dataKey="hesitationCount" name="Hesitations" fill="var(--color-hesitations)" />
                   <Bar dataKey="fillerWordCount" name="Filler Words" fill="var(--color-fillerWords)" />
                 </ComposedChart>
-              )}
-            </ChartContainer>
+              </ChartContainer>
+            )}
           </TabsContent>
           
           <TabsContent value="clarity" className="h-full">
