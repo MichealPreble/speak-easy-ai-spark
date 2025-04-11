@@ -1,14 +1,15 @@
 
 import { Input } from "@/components/ui/input";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, X } from "lucide-react";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
 interface ChatSearchProps {
   searchQuery: string;
@@ -18,6 +19,7 @@ interface ChatSearchProps {
 const ChatSearch = ({ searchQuery, setSearchQuery }: ChatSearchProps) => {
   const isMobile = useIsMobile();
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   // Sample filter options
   const filterOptions = [
@@ -35,7 +37,12 @@ const ChatSearch = ({ searchQuery, setSearchQuery }: ChatSearchProps) => {
     );
   };
   
-  const clearFilters = () => setActiveFilters([]);
+  const clearFilters = () => {
+    setActiveFilters([]);
+    if (isMobile) {
+      setIsDrawerOpen(false);
+    }
+  };
   
   // Filter content component shared between mobile and desktop
   const FilterContent = () => (
@@ -74,9 +81,41 @@ const ChatSearch = ({ searchQuery, setSearchQuery }: ChatSearchProps) => {
     </div>
   );
   
-  // Mobile filter with bottom sheet or drawer
+  // Confirmation dialog for clearing filters
+  const ClearFiltersDialog = () => (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className={cn(
+            "text-xs h-7 px-2",
+            activeFilters.length === 0 && "hidden"
+          )}
+        >
+          Clear all
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Clear all filters?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will remove all currently active filters. This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={clearFilters}>
+            Clear all
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+  
+  // Mobile filter with bottom drawer
   const MobileFilter = () => (
-    <Drawer>
+    <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
       <DrawerTrigger asChild>
         <Button variant="outline" size="icon" className="relative">
           <Filter className="h-4 w-4" />
@@ -90,7 +129,20 @@ const ChatSearch = ({ searchQuery, setSearchQuery }: ChatSearchProps) => {
           )}
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="max-h-[85vh]">
+      <DrawerContent className="max-h-[85vh] px-0">
+        <div className="py-1 px-4 border-b flex items-center justify-between">
+          <h3 className="font-medium">Message Filters</h3>
+          {activeFilters.length > 0 && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={clearFilters}
+              className="text-xs h-7 px-2"
+            >
+              Clear all
+            </Button>
+          )}
+        </div>
         <FilterContent />
       </DrawerContent>
     </Drawer>
@@ -131,6 +183,17 @@ const ChatSearch = ({ searchQuery, setSearchQuery }: ChatSearchProps) => {
             className="w-full pl-9 bg-white/20 dark:bg-black/20 backdrop-blur-sm border-secondary-light/30 dark:border-secondary-dark/30"
             aria-label="Search messages"
           />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 text-muted-foreground hover:text-foreground"
+              onClick={() => setSearchQuery("")}
+              aria-label="Clear search"
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          )}
         </div>
         
         {isMobile ? <MobileFilter /> : <DesktopFilter />}
