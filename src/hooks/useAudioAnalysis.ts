@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getPitch, getVolume } from '@/utils/audioAnalysisUtils';
 
@@ -13,6 +14,16 @@ export function useAudioAnalysis(
   const [pitchValues, setPitchValues] = useState<number[]>([]);
   const [volumeValues, setVolumeValues] = useState<number[]>([]);
   const rafRef = useRef<number | null>(null);
+  
+  // Add tracking for speaking patterns
+  const [speakingPatterns, setSpeakingPatterns] = useState<{
+    pauses: number[],
+    sustainedSpeech: number[]
+  }>({ pauses: [], sustainedSpeech: [] });
+  
+  // Last volume threshold time tracker
+  const lastVolumeThresholdTime = useRef<number | null>(null);
+  const isSpeakingRef = useRef<boolean>(false);
   
   const getAnalysisResults = useCallback(() => {
     const avgPitch = pitchValues.length 
@@ -32,15 +43,26 @@ export function useAudioAnalysis(
       ? Math.max(...volumeValues) - Math.min(...volumeValues)
       : 0;
     
+    // Calculate speech rhythm metrics
+    const pauseDurations = speakingPatterns.pauses.length > 1 
+      ? speakingPatterns.pauses.reduce((sum, val) => sum + val, 0) / speakingPatterns.pauses.length
+      : 0;
+      
+    const speechBurstDurations = speakingPatterns.sustainedSpeech.length > 1
+      ? speakingPatterns.sustainedSpeech.reduce((sum, val) => sum + val, 0) / speakingPatterns.sustainedSpeech.length
+      : 0;
+    
     return {
       avgPitch,
       avgVolume,
       pitchVariation,
       volumeVariation,
+      pauseDurations,
+      speechBurstDurations,
       pitchValues: [...pitchValues],
       volumeValues: [...volumeValues]
     };
-  }, [pitchValues, volumeValues]);
+  }, [pitchValues, volumeValues, speakingPatterns]);
   
   // Set up and tear down audio analysis loop
   useEffect(() => {
@@ -66,6 +88,40 @@ export function useAudioAnalysis(
       
       const pitch = getPitch(analyser, audioContext);
       const volume = getVolume(analyser);
+      
+      // Track speaking patterns
+      const now = Date.now();
+      const VOLUME_THRESHOLD = 10; // Adjust based on testing
+      
+      if (volume > VOLUME_THRESHOLD) {
+        // Person is speaking
+        if (!isSpeakingRef.current && lastVolumeThresholdTime.current) {
+          // Transition from silence to speech
+          const pauseDuration = now - lastVolumeThresholdTime.current;
+          if (pauseDuration > 300) { // Ignore very short pauses
+            setSpeakingPatterns(prev => ({
+              ...prev,
+              pauses: [...prev.pauses, pauseDuration]
+            }));
+          }
+        }
+        isSpeakingRef.current = true;
+        lastVolumeThresholdTime.current = now;
+      } else {
+        // Person is not speaking
+        if (isSpeakingRef.current && lastVolumeThresholdTime.current) {
+          // Transition from speech to silence
+          const speechDuration = now - lastVolumeThresholdTime.current;
+          if (speechDuration > 300) { // Ignore very short speech bursts
+            setSpeakingPatterns(prev => ({
+              ...prev,
+              sustainedSpeech: [...prev.sustainedSpeech, speechDuration]
+            }));
+          }
+        }
+        isSpeakingRef.current = false;
+        lastVolumeThresholdTime.current = now;
+      }
       
       // Only store valid values
       if (pitch > 20 && pitch < 1000) { // Filter out unlikely pitch values
@@ -105,6 +161,7 @@ export function useAudioAnalysis(
     if (!isActive) {
       setPitchValues([]);
       setVolumeValues([]);
+      setSpeakingPatterns({ pauses: [], sustainedSpeech: [] });
     }
   }, [isActive]);
   
