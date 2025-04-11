@@ -162,8 +162,8 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
 
   const config = getChartConfig();
   
-  // Added a specific comment to ensure change is detected
-  console.log("ChartTabContent rendering with type:", chartType, "and tab:", tabValue);
+  // Added a unique console log to ensure changes are detected
+  console.log("ChartTabContent v2: Rendering", { chartType, tabValue });
   
   if (chartType === 'line') {
     return <LineChartView data={processedData} dataKeys={config.line} />;
