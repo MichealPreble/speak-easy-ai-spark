@@ -132,10 +132,10 @@ export function processTranscriptWithMetrics(
 }
 
 /**
- * Batch processes multiple transcripts with parallel processing and detailed metrics
+ * Processes multiple transcripts in batch with performance tracking and cache integration.
  * @param transcripts - Array of transcript objects with text and duration
- * @param config - Optional configuration for analysis
- * @returns Promise resolving to array of analysis results with metrics
+ * @param config - Optional configuration with batch-specific options
+ * @returns Promise resolving to array of analysis results with timings and cache status
  */
 export async function processTranscriptBatch(
   transcripts: Array<{ text: string; duration: number; audioData?: any }>,
@@ -146,18 +146,17 @@ export async function processTranscriptBatch(
 ): Promise<Array<{
   result: SpeechAnalysisResult;
   processingTimeMs: number;
-  cacheHit: boolean;
-  index: number;
   fromCache: boolean;
+  index: number;
 }>> {
   const startTime = performance.now();
   const maxConcurrent = config.maxConcurrent || 3; // Default to 3 concurrent processes
+  const logCacheHits = config.logCacheHits || false;
   const results: Array<{
     result: SpeechAnalysisResult;
     processingTimeMs: number;
-    cacheHit: boolean;
-    index: number;
     fromCache: boolean;
+    index: number;
   }> = [];
   
   // Process in batches to limit concurrency
@@ -171,9 +170,9 @@ export async function processTranscriptBatch(
       const itemStartTime = performance.now();
       const cacheKey = `${text.substring(0, 50)}-${duration}-${JSON.stringify(config || {})}`;
       const cachedResult = config.useCache !== false ? getCachedAnalysis(cacheKey, config.cacheTimeMs || 60000) : null;
-      const cacheHit = !!cachedResult;
+      const fromCache = !!cachedResult;
       
-      if (config.logCacheHits && cacheHit) {
+      if (logCacheHits && fromCache) {
         console.log(`Cache hit for transcript at index ${startIndex + i}: "${text.substring(0, 30)}..."`);
       }
       
@@ -198,8 +197,7 @@ export async function processTranscriptBatch(
       return {
         result,
         processingTimeMs,
-        cacheHit,
-        fromCache: cacheHit,
+        fromCache,
         index: startIndex + i
       };
     });
@@ -218,14 +216,15 @@ export async function processTranscriptBatch(
   results.sort((a, b) => a.index - b.index);
   
   const totalTimeMs = performance.now() - startTime;
+  const cachedCount = results.filter(r => r.fromCache).length;
   
-  if (config.logPerformance === "detailed") {
+  if (config.logPerformance) {
     console.log({
       batchProcessing: {
         totalTranscripts: transcripts.length,
         totalTimeMs: totalTimeMs.toFixed(2),
         averageTimePerTranscript: (totalTimeMs / transcripts.length).toFixed(2),
-        cacheHits: results.filter(r => r.cacheHit).length,
+        cacheHits: cachedCount,
         maxConcurrent
       }
     });
