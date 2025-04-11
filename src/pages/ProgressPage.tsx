@@ -10,6 +10,7 @@ import TimeframeSelector from "@/components/progress/TimeframeSelector";
 import SessionsTable from "@/components/progress/SessionsTable";
 import StatsPanel from "@/components/progress/StatsPanel";
 import { useProgressData } from "@/hooks/useProgressData";
+import { SpeechAnalysisResult, ClarityScore } from "@/utils/speech/types";
 
 const ProgressPage: React.FC = () => {
   const { user } = useAuth();
@@ -23,14 +24,26 @@ const ProgressPage: React.FC = () => {
     exportData 
   } = useProgressData();
 
-  // Convert ProgressData to a format compatible with SpeechAnalysisChart
-  const chartData = filteredData.map(item => ({
-    ...item,
-    // Add missing properties required by SpeechAnalysisResult type
-    fillerWordCount: item.fillerWords,
-    hesitationCount: 0,
-    rhythmScore: 0
-  }));
+  // Convert ProgressData to a format compatible with SpeechAnalysisResult
+  const chartData: SpeechAnalysisResult[] = filteredData.map(item => {
+    // Create a ClarityScore object from the number
+    const clarity: ClarityScore = {
+      score: item.clarity,
+      rating: item.clarity >= 8 ? 'excellent' : 
+              item.clarity >= 6 ? 'good' : 
+              item.clarity >= 4 ? 'fair' : 'needs improvement',
+      suggestions: []
+    };
+    
+    return {
+      clarity,
+      pace: item.pace,
+      fillerWordCount: item.fillerWords,
+      hesitationCount: 0,
+      rhythmScore: 0,
+      timestamp: new Date(item.date).getTime()
+    };
+  });
 
   return (
     <>
@@ -54,7 +67,7 @@ const ProgressPage: React.FC = () => {
           
           <div className="space-y-6">
             <SpeechAnalysisChart 
-              data={chartData} 
+              data={chartData}
               title="Speech Analysis Trends"
               description={`Showing data for ${timeframe === 'week' ? 'the last 7 days' : timeframe === 'month' ? 'the last 30 days' : 'all time'}`}
             />

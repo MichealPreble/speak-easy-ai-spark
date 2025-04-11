@@ -1,6 +1,5 @@
 
 import React from "react";
-import { AnimatePresence } from "framer-motion";
 import { useSpeechTips } from "@/hooks/useSpeechTips";
 import TipList from "./TipList";
 import PositiveFeedback from "./PositiveFeedback";
@@ -13,20 +12,18 @@ interface SpeechTipsProps {
 const SpeechTips: React.FC<SpeechTipsProps> = ({ tips, duration }) => {
   const { hasTips, showPositiveFeedback } = useSpeechTips(tips, duration);
   
+  if (!hasTips && !showPositiveFeedback) return null;
+  
   return (
-    <AnimatePresence>
-      {hasTips && (
-        <div className="p-3 border-t border-border/30">
-          <TipList tips={tips} />
-        </div>
-      )}
+    <div className="p-3 border-t border-border/30">
+      <div className="text-xs font-medium mb-2">Tips & Feedback</div>
       
-      {showPositiveFeedback && (
-        <div className="p-3 border-t border-border/30">
-          <PositiveFeedback />
-        </div>
-      )}
-    </AnimatePresence>
+      {hasTips ? (
+        <TipList tips={tips} />
+      ) : showPositiveFeedback ? (
+        <PositiveFeedback />
+      ) : null}
+    </div>
   );
 };
 
