@@ -16,6 +16,7 @@ export type SpeechAnalysisResult = {
   hesitationCount: number;
   rhythmScore: number;
   timestamp?: number; // For caching purposes
+  processingTimeMs?: number; // Optional performance metric
 };
 
 // Configuration for speech analysis with performance monitoring
@@ -26,4 +27,5 @@ export interface SpeechAnalysisConfig {
   skipHesitations?: boolean;
   useCache?: boolean;
   cacheTimeMs?: number;
+  async?: boolean; // Whether to use async analysis
 }

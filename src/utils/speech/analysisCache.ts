@@ -2,7 +2,7 @@
 import { SpeechAnalysisResult } from './types';
 
 // Cache for analysis results to improve performance
-const analysisCache = new Map<string, SpeechAnalysisResult>();
+export const analysisCache = new Map<string, SpeechAnalysisResult>();
 const MAX_CACHE_SIZE = 10;
 
 /**
@@ -51,6 +51,26 @@ export const cacheAnalysisResult = (
     }
   }
   
+  // Add timestamp if not present
+  const resultWithTimestamp = {
+    ...result,
+    timestamp: result.timestamp || Date.now()
+  };
+  
   // Add the new result to cache
-  analysisCache.set(cacheKey, result);
+  analysisCache.set(cacheKey, resultWithTimestamp);
+};
+
+/**
+ * Clear the entire analysis cache
+ */
+export const clearAnalysisCache = (): void => {
+  analysisCache.clear();
+};
+
+/**
+ * Get the current size of the cache
+ */
+export const getCacheSize = (): number => {
+  return analysisCache.size;
 };

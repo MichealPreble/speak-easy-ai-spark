@@ -9,12 +9,18 @@ import { analyzeSpeechClarity } from "./speechClarity";
 import { analyzeFullSpeech } from "./syncAnalysis";
 import { analyzeFullSpeechAsync } from "./asyncAnalysis";
 import { SpeechAnalysisResult, SpeechAnalysisConfig, ClarityScore } from "./types";
+import { getCachedAnalysis, cacheAnalysisResult, clearAnalysisCache, getCacheSize } from "./analysisCache";
+import { processTranscriptBatch } from "./batchProcessing";
+import { benchmarkSpeechAnalysis } from "./benchmarking";
+import { getCacheStatistics, isAnalysisCached } from "./cacheStatistics";
+import { validateSpeechInput } from "./validation";
 
 // Re-export all the types and functions
 export type { 
   SpeechAnalysisResult, 
   SpeechAnalysisConfig, 
-  ClarityScore 
+  ClarityScore,
+  SpeechFeedback
 };
 
 export { 
@@ -27,5 +33,24 @@ export {
   
   // Full analysis functions (both sync and async)
   analyzeFullSpeech,
-  analyzeFullSpeechAsync
+  analyzeFullSpeechAsync,
+  
+  // Cache management
+  getCachedAnalysis,
+  cacheAnalysisResult,
+  clearAnalysisCache,
+  getCacheSize,
+  
+  // Batch processing
+  processTranscriptBatch,
+  
+  // Benchmarking
+  benchmarkSpeechAnalysis,
+  
+  // Cache statistics
+  getCacheStatistics,
+  isAnalysisCached,
+  
+  // Validation
+  validateSpeechInput
 };
