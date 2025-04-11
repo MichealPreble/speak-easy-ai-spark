@@ -1,9 +1,39 @@
+
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { setupAudioAnalysis, cleanupAudio } from "@/utils/audioAnalysisUtils";
 import { useAudioAnalysis } from "@/hooks/useAudioAnalysis";
 
 declare global {
+  interface SpeechRecognitionEvent extends Event {
+    results: {
+      [index: number]: {
+        [index: number]: {
+          transcript: string;
+          confidence: number;
+        };
+      };
+      item(index: number): any;
+      length: number;
+    };
+    resultIndex: number;
+  }
+
+  interface SpeechRecognitionErrorEvent extends Event {
+    error: string;
+  }
+
+  class SpeechRecognition extends EventTarget {
+    continuous: boolean;
+    interimResults: boolean;
+    lang: string;
+    onresult: (event: SpeechRecognitionEvent) => void;
+    onerror: (event: SpeechRecognitionErrorEvent) => void;
+    onend: () => void;
+    start(): void;
+    stop(): void;
+  }
+
   interface Window {
     SpeechRecognition?: typeof SpeechRecognition;
     webkitSpeechRecognition?: typeof SpeechRecognition;
