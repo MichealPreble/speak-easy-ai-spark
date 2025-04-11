@@ -13,7 +13,7 @@ import { useProgressData } from "@/hooks/useProgressData";
 import { SpeechAnalysisResult, ClarityScore } from "@/utils/speech/types";
 
 // Adding a unique console log to verify this version is loaded
-console.log("Loading updated ProgressPage component - April 11, 2025 - v2");
+console.log("Loading updated ProgressPage component - April 11, 2025 - v3");
 
 const ProgressPage: React.FC = () => {
   const { user } = useAuth();
@@ -29,7 +29,7 @@ const ProgressPage: React.FC = () => {
 
   // Log on component mount to verify this version is running
   useEffect(() => {
-    console.log("ProgressPage mounted - April 11, 2025 - v2");
+    console.log("ProgressPage mounted - April 11, 2025 - v3");
   }, []);
 
   // Convert ProgressData to SpeechAnalysisResult for the chart and other components
