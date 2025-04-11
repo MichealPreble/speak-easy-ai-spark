@@ -88,15 +88,16 @@ const SpeechMetricsChart: React.FC<SpeechMetricsChartProps> = ({
             />
           )}
           
-          <Line 
-            type="monotone" 
-            dataKey="fillerWords" 
-            name="Filler Words" 
-            stroke="var(--color-fillerWords)" 
-            dot={false}
-            strokeWidth={1.5}
-            hide={metricToShow !== 'all'}
-          />
+          {metricToShow === 'all' && (
+            <Line 
+              type="monotone" 
+              dataKey="fillerWords" 
+              name="Filler Words" 
+              stroke="var(--color-fillerWords)" 
+              dot={false}
+              strokeWidth={1.5}
+            />
+          )}
         </LineChart>
       </ChartContainer>
     </div>
