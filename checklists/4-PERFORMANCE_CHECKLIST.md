@@ -37,14 +37,18 @@ This checklist covers all performance-related items that need to be completed be
   - [ ] Measure cache hit performance (target: 90% reduction in processing time)
   - [ ] Test cache size limits with 10+ unique speech samples
   - [ ] Profile memory usage with full cache vs. empty cache
+  - [ ] Compare performance with different cache time settings (1s, 5s, 30s)
+  - [ ] Measure cache eviction performance (should be < 5ms)
 - [ ] Validate parallel processing benefits
   - [ ] Compare parallel vs. sequential analysis with 10+ speech samples
   - [ ] Record CPU usage patterns during analysis
   - [ ] Test different detail levels of performance logging
   - [ ] Benchmark performance impact of detailed logging vs. basic logging
+  - [ ] Measure parallelization benefits across different device types
 - [ ] Profile speech analysis in production build
   - [ ] Use Chrome DevTools to identify bottlenecks
   - [ ] Optimize any functions taking >100ms
   - [ ] Verify cache size is appropriate for typical usage patterns
   - [ ] Test edge cases: extremely long speeches (10+ minutes)
   - [ ] Measure impact of caching on battery consumption (mobile)
+  - [ ] Compare memory usage with and without caching (target: <10% increase)
