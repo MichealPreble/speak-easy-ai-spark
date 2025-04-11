@@ -1,8 +1,14 @@
-
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { setupAudioAnalysis, cleanupAudio } from "@/utils/audioAnalysisUtils";
 import { useAudioAnalysis } from "@/hooks/useAudioAnalysis";
+
+declare global {
+  interface Window {
+    SpeechRecognition?: typeof SpeechRecognition;
+    webkitSpeechRecognition?: typeof SpeechRecognition;
+  }
+}
 
 export type SpeechFeedback = {
   speed: number;
@@ -25,7 +31,6 @@ export function useVoiceRecognition(
   const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // Use our audio analysis hook
   const { getAnalysisResults } = useAudioAnalysis(
     isVoiceActive, 
     analyserRef.current, 
@@ -53,7 +58,6 @@ export function useVoiceRecognition(
             const matches = transcript.match(fillerWordRegex);
             const fillerWords: string[] = matches ? matches.map(word => word.toLowerCase()) : [];
 
-            // Get audio analysis metrics
             const analysis = getAnalysisResults();
 
             const feedback: SpeechFeedback = {
@@ -67,7 +71,6 @@ export function useVoiceRecognition(
 
             onVoiceMessage(transcript, feedback);
 
-            // Cleanup audio resources
             cleanupAudio(streamRef.current, audioContextRef.current);
             streamRef.current = null;
             audioContextRef.current = null;
@@ -150,7 +153,6 @@ export function useVoiceRecognition(
       try {
         startTimeRef.current = Date.now();
         
-        // Set up audio analysis
         const audioSetup = await setupAudioAnalysis();
         if (!audioSetup.success) {
           throw new Error("Failed to set up audio analysis");
@@ -160,7 +162,6 @@ export function useVoiceRecognition(
         analyserRef.current = audioSetup.analyser;
         streamRef.current = audioSetup.stream;
         
-        // Start speech recognition
         recognitionRef.current.start();
         setIsVoiceActive(true);
         
