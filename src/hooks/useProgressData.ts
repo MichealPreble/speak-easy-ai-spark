@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
-interface ProgressData {
+export interface ProgressData {
   id: string;
   userId: string;
   date: string;
