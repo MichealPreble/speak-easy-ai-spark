@@ -41,8 +41,8 @@ export const analyzeFullSpeech = (
   // Get hesitation analysis
   const hesitationAnalysis = detectHesitations(transcript);
   
-  // Get rhythm score
-  const rhythmScore = analyzeRhythm(transcript);
+  // Get rhythm analysis - pass both transcript and duration
+  const rhythmAnalysis = analyzeRhythm(transcript, durationSeconds);
   
   // Get filler word count
   const fillerWordRegex = /\b(um|uh|like|you know|actually|basically|literally|so|right|well|i mean|kind of|sort of|anyway|whatever|hmm|er)\b/gi;
@@ -54,7 +54,7 @@ export const analyzeFullSpeech = (
     pace,
     fillerWordCount,
     hesitationCount: hesitationAnalysis.count,
-    rhythmScore
+    rhythmScore: rhythmAnalysis.rhythmScore // Extract just the rhythmScore from the object
   };
 };
 
