@@ -74,13 +74,13 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
             lines: [
               { key: "clarityScore", name: "Clarity", color: "#9b87f5", activeDot: { r: 8 }, strokeWidth: 2 }
             ]
-          } as LineChartConfig,
+          },
           bar: {
             x: baseX,
             bars: [
               { key: "clarityScore", name: "Clarity", color: "#9b87f5" }
             ]
-          } as BarChartConfig
+          }
         };
         
       case 'pace':
@@ -91,14 +91,14 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
               { key: "pace", name: "Pace (WPM)", color: "#F97316", activeDot: { r: 8 }, strokeWidth: 2 },
               { key: "rhythmScore", name: "Rhythm", color: "#7E69AB", activeDot: { r: 6 } }
             ]
-          } as LineChartConfig,
+          },
           bar: {
             x: baseX,
             bars: [
               { key: "pace", name: "Pace (WPM)", color: "#F97316" },
               { key: "rhythmScore", name: "Rhythm", color: "#7E69AB" }
             ]
-          } as BarChartConfig
+          }
         };
         
       case 'hesitations':
@@ -109,14 +109,14 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
               { key: "hesitationCount", name: "Hesitations", color: "#8E9196" },
               { key: "fillerWordCount", name: "Filler Words", color: "#1A1F2C" }
             ]
-          } as LineChartConfig,
+          },
           bar: {
             x: baseX,
             bars: [
               { key: "hesitationCount", name: "Hesitations", color: "#8E9196" },
               { key: "fillerWordCount", name: "Filler Words", color: "#1A1F2C" }
             ]
-          } as BarChartConfig
+          }
         };
         
       case 'all':
@@ -131,7 +131,7 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
               { key: "hesitationCount", name: "Hesitations", color: "#8E9196" },
               { key: "fillerWordCount", name: "Filler Words", color: "#1A1F2C" }
             ]
-          } as LineChartConfig,
+          },
           bar: {
             x: baseX,
             bars: [
@@ -141,7 +141,7 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
               { key: "hesitationCount", name: "Hesitations", color: "#8E9196" },
               { key: "fillerWordCount", name: "Filler Words", color: "#1A1F2C" }
             ]
-          } as BarChartConfig,
+          },
           composed: {
             x: baseX,
             areas: [
@@ -155,7 +155,7 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
               { key: "hesitationCount", name: "Hesitations", color: "#8E9196" },
               { key: "fillerWordCount", name: "Filler Words", color: "#1A1F2C" }
             ]
-          } as ComposedChartConfig
+          }
         };
     }
   };
@@ -163,18 +163,16 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
   const config = getChartConfig();
   
   if (chartType === 'line') {
-    // Make sure we're using line configuration
-    const lineConfig = config.line;
-    return <LineChartView data={processedData} dataKeys={lineConfig} />;
+    // Pass the line configuration to LineChartView
+    return <LineChartView data={processedData} dataKeys={config.line} />;
   }
   
   if (chartType === 'bar') {
-    // Make sure we're using bar configuration
-    const barConfig = config.bar;
-    return <BarChartView data={processedData} dataKeys={barConfig} />;
+    // Pass the bar configuration to BarChartView
+    return <BarChartView data={processedData} dataKeys={config.bar} />;
   }
   
-  if (chartType === 'composed' && tabValue === 'all') {
+  if (chartType === 'composed' && tabValue === 'all' && config.composed) {
     return <ComposedChartView data={processedData} dataKeys={config.composed} />;
   }
   
