@@ -1,22 +1,14 @@
-
 import React, { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { SpeechFeedback } from "@/hooks/useVoiceRecognition";
-import { 
-  Mic, 
-  Volume2, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
-  BarChart3, 
-  Activity,
-  MessageCircle,
-  Gauge,
-  Timer,
-  BarChart2,
-  TrendingUp
-} from "lucide-react";
+import { Mic } from "lucide-react";
 import { detectHesitations, analyzeSpokenCadence } from "@/utils/transcriptProcessing";
+
+// Import the smaller components
+import SpeechMetrics from "./SpeechMetrics";
+import SpeechQualityScore from "./SpeechQualityScore";
+import SpeechTrends from "./SpeechTrends";
+import SpeechTips from "./SpeechTips";
+import RecordingIndicator from "./RecordingIndicator";
 
 interface RealTimeFeedbackProps {
   isActive: boolean;
@@ -128,8 +120,6 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
   if (!isActive) return null;
 
   const speechScore = calculateScore(feedback);
-  const isGoodScore = speechScore >= 7;
-  const isMediumScore = speechScore >= 4 && speechScore < 7;
 
   return (
     <div className="fixed bottom-20 right-4 z-50 w-80 bg-background/95 backdrop-blur-md border rounded-lg shadow-lg overflow-hidden dark:bg-black/90">
@@ -149,144 +139,28 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
       </div>
       
       {/* Active recording indicator */}
-      {isActive && (
-        <div className="px-3 py-2 bg-rose-500/10 flex items-center text-sm text-rose-600 dark:text-rose-400">
-          <Timer className="h-4 w-4 mr-2 animate-pulse" />
-          <span className="font-medium">Recording in progress...</span>
-        </div>
-      )}
+      <RecordingIndicator isActive={isActive} />
       
       {/* Speech metrics */}
-      <div className="grid grid-cols-2 gap-2 p-3 bg-muted/30">
-        <div className="flex items-center text-sm">
-          <Clock className="h-4 w-4 mr-1.5 text-primary/70" />
-          <span>Duration: {Math.round(duration)}s</span>
-        </div>
-        
-        {metrics.speed !== null && (
-          <div className="flex items-center text-sm">
-            <Gauge className="h-4 w-4 mr-1.5 text-primary/70" />
-            <span>Pace: {metrics.speed} wpm</span>
-          </div>
-        )}
-        
-        <div className="flex items-center text-sm">
-          <MessageCircle className="h-4 w-4 mr-1.5 text-primary/70" />
-          <span>Words: {metrics.wordCount}</span>
-        </div>
-        
-        {metrics.fillerWordsCount > 0 && (
-          <div className="flex items-center text-sm">
-            <Activity className="h-4 w-4 mr-1.5 text-primary/70" />
-            <span>Fillers: {metrics.fillerWordsCount}</span>
-          </div>
-        )}
-      </div>
+      <SpeechMetrics 
+        duration={duration}
+        speed={metrics.speed}
+        wordCount={metrics.wordCount}
+        fillerWordsCount={metrics.fillerWordsCount}
+      />
       
       {/* Speech quality visualization */}
-      {duration > 3 && (
-        <div className="p-3 border-t border-border/30">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center">
-              <BarChart2 className="h-4 w-4 mr-2 text-primary" />
-              <span className="text-sm font-medium">Speech Quality</span>
-            </div>
-            
-            <div className="text-sm font-medium">
-              {isGoodScore ? 'Good' : isMediumScore ? 'Average' : 'Needs Work'}
-            </div>
-          </div>
-          
-          {/* Progress bar visualization */}
-          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-            <motion.div 
-              className={`h-full ${
-                isGoodScore 
-                  ? 'bg-green-500' 
-                  : isMediumScore 
-                    ? 'bg-amber-500' 
-                    : 'bg-red-500'
-              }`}
-              initial={{ width: 0 }}
-              animate={{ width: `${speechScore * 10}%` }}
-              transition={{ duration: 0.5 }}
-            />
-          </div>
-          
-          {/* Numeric indicator */}
-          <div className="flex justify-end mt-1">
-            <span className="text-xs text-muted-foreground">{speechScore}/10</span>
-          </div>
-        </div>
-      )}
+      <SpeechQualityScore score={speechScore} duration={duration} />
       
       {/* Speech trend analysis */}
-      {duration > 8 && feedback && (
-        <div className="p-3 border-t border-border/30">
-          <div className="flex items-center mb-2">
-            <TrendingUp className="h-4 w-4 mr-2 text-primary" />
-            <span className="text-sm font-medium">Speech Trends</span>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs">
-            <div className={`flex items-center ${metrics.speed && metrics.speed > 160 ? 'text-amber-500' : 'text-muted-foreground'}`}>
-              <span className="w-3 h-3 rounded-full mr-1.5 bg-current opacity-70"></span>
-              Pace: {metrics.speed ? (metrics.speed > 160 ? 'Fast' : metrics.speed < 120 ? 'Slow' : 'Good') : 'N/A'}
-            </div>
-            
-            <div className={`flex items-center ${metrics.fillerWordsCount > 2 ? 'text-amber-500' : 'text-muted-foreground'}`}>
-              <span className="w-3 h-3 rounded-full mr-1.5 bg-current opacity-70"></span>
-              Fillers: {metrics.fillerWordsCount > 2 ? 'Many' : 'Few'}
-            </div>
-            
-            <div className={`flex items-center ${feedback.pitchVariation < 20 ? 'text-amber-500' : 'text-muted-foreground'}`}>
-              <span className="w-3 h-3 rounded-full mr-1.5 bg-current opacity-70"></span>
-              Pitch: {feedback.pitchVariation < 20 ? 'Monotone' : 'Varied'}
-            </div>
-            
-            <div className={`flex items-center ${feedback.volumeVariation < 15 ? 'text-amber-500' : 'text-muted-foreground'}`}>
-              <span className="w-3 h-3 rounded-full mr-1.5 bg-current opacity-70"></span>
-              Volume: {feedback.volumeVariation < 15 ? 'Flat' : 'Dynamic'}
-            </div>
-          </div>
-        </div>
-      )}
+      <SpeechTrends 
+        duration={duration}
+        feedback={feedback}
+        metrics={metrics}
+      />
       
       {/* Tips section */}
-      <AnimatePresence>
-        {tips.length > 0 && (
-          <div className="p-3 border-t border-border/30">
-            <ul className="space-y-2">
-              {tips.map((tip, index) => (
-                <motion.li
-                  key={`${tip.substring(0, 10)}-${index}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3 }}
-                  className="flex items-start text-sm"
-                >
-                  <AlertTriangle className="h-4 w-4 text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>{tip}</span>
-                </motion.li>
-              ))}
-            </ul>
-          </div>
-        )}
-        
-        {tips.length === 0 && duration > 5 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="p-3 border-t border-border/30"
-          >
-            <div className="flex items-start text-sm">
-              <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-              <span>You're doing great! Keep speaking naturally.</span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <SpeechTips tips={tips} duration={duration} />
     </div>
   );
 };

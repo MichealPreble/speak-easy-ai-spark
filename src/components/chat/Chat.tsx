@@ -38,7 +38,6 @@ const Chat = ({ selectedScenario }: ChatProps) => {
   const [currentTranscript, setCurrentTranscript] = useState("");
   const [currentDuration, setCurrentDuration] = useState(0);
   const [speechFeedback, setSpeechFeedback] = useState<any>(null);
-  const [feedbackMinimized, setFeedbackMinimized] = useState(false);
   
   // Update from voice recognition data
   useEffect(() => {
@@ -54,7 +53,6 @@ const Chat = ({ selectedScenario }: ChatProps) => {
       setCurrentDuration(0);
       setCurrentTranscript("");
       setSpeechFeedback(null);
-      setFeedbackMinimized(false);
     }
   }, [isVoiceActive]);
   
