@@ -126,14 +126,12 @@ const Chat = ({ selectedScenario }: ChatProps) => {
       />
       
       {/* Real-time Feedback */}
-      {!feedbackMinimized && (
-        <RealTimeFeedback 
-          isActive={isVoiceActive}
-          transcript={currentTranscript}
-          duration={currentDuration}
-          feedback={speechFeedback}
-        />
-      )}
+      <RealTimeFeedback 
+        isActive={isVoiceActive}
+        transcript={currentTranscript}
+        duration={currentDuration}
+        feedback={speechFeedback}
+      />
     </div>
   );
 };

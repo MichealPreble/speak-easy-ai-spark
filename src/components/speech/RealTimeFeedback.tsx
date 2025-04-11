@@ -11,7 +11,10 @@ import {
   BarChart3, 
   Activity,
   MessageCircle,
-  Gauge
+  Gauge,
+  Timer,
+  BarChart2,
+  TrendingUp
 } from "lucide-react";
 import { detectHesitations, analyzeSpokenCadence } from "@/utils/transcriptProcessing";
 
@@ -145,6 +148,14 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
         </div>
       </div>
       
+      {/* Active recording indicator */}
+      {isActive && (
+        <div className="px-3 py-2 bg-rose-500/10 flex items-center text-sm text-rose-600 dark:text-rose-400">
+          <Timer className="h-4 w-4 mr-2 animate-pulse" />
+          <span className="font-medium">Recording in progress...</span>
+        </div>
+      )}
+      
       {/* Speech metrics */}
       <div className="grid grid-cols-2 gap-2 p-3 bg-muted/30">
         <div className="flex items-center text-sm">
@@ -172,29 +183,71 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
         )}
       </div>
       
-      {/* Speech score */}
+      {/* Speech quality visualization */}
       {duration > 3 && (
-        <div className="p-3 border-t border-border/30 flex justify-between items-center">
-          <div className="flex items-center">
-            <BarChart3 className="h-4 w-4 mr-2 text-primary" />
-            <span className="text-sm font-medium">Speech Quality</span>
+        <div className="p-3 border-t border-border/30">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center">
+              <BarChart2 className="h-4 w-4 mr-2 text-primary" />
+              <span className="text-sm font-medium">Speech Quality</span>
+            </div>
+            
+            <div className="text-sm font-medium">
+              {isGoodScore ? 'Good' : isMediumScore ? 'Average' : 'Needs Work'}
+            </div>
           </div>
           
-          <div className="flex items-center space-x-1.5">
-            {[...Array(10)].map((_, i) => (
-              <div 
-                key={i} 
-                className={`w-1.5 h-4 rounded-sm ${
-                  i < speechScore 
-                    ? isGoodScore 
-                      ? 'bg-green-500' 
-                      : isMediumScore 
-                        ? 'bg-amber-500' 
-                        : 'bg-red-500'
-                    : 'bg-muted'
-                }`}
-              />
-            ))}
+          {/* Progress bar visualization */}
+          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+            <motion.div 
+              className={`h-full ${
+                isGoodScore 
+                  ? 'bg-green-500' 
+                  : isMediumScore 
+                    ? 'bg-amber-500' 
+                    : 'bg-red-500'
+              }`}
+              initial={{ width: 0 }}
+              animate={{ width: `${speechScore * 10}%` }}
+              transition={{ duration: 0.5 }}
+            />
+          </div>
+          
+          {/* Numeric indicator */}
+          <div className="flex justify-end mt-1">
+            <span className="text-xs text-muted-foreground">{speechScore}/10</span>
+          </div>
+        </div>
+      )}
+      
+      {/* Speech trend analysis */}
+      {duration > 8 && feedback && (
+        <div className="p-3 border-t border-border/30">
+          <div className="flex items-center mb-2">
+            <TrendingUp className="h-4 w-4 mr-2 text-primary" />
+            <span className="text-sm font-medium">Speech Trends</span>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs">
+            <div className={`flex items-center ${metrics.speed && metrics.speed > 160 ? 'text-amber-500' : 'text-muted-foreground'}`}>
+              <span className="w-3 h-3 rounded-full mr-1.5 bg-current opacity-70"></span>
+              Pace: {metrics.speed ? (metrics.speed > 160 ? 'Fast' : metrics.speed < 120 ? 'Slow' : 'Good') : 'N/A'}
+            </div>
+            
+            <div className={`flex items-center ${metrics.fillerWordsCount > 2 ? 'text-amber-500' : 'text-muted-foreground'}`}>
+              <span className="w-3 h-3 rounded-full mr-1.5 bg-current opacity-70"></span>
+              Fillers: {metrics.fillerWordsCount > 2 ? 'Many' : 'Few'}
+            </div>
+            
+            <div className={`flex items-center ${feedback.pitchVariation < 20 ? 'text-amber-500' : 'text-muted-foreground'}`}>
+              <span className="w-3 h-3 rounded-full mr-1.5 bg-current opacity-70"></span>
+              Pitch: {feedback.pitchVariation < 20 ? 'Monotone' : 'Varied'}
+            </div>
+            
+            <div className={`flex items-center ${feedback.volumeVariation < 15 ? 'text-amber-500' : 'text-muted-foreground'}`}>
+              <span className="w-3 h-3 rounded-full mr-1.5 bg-current opacity-70"></span>
+              Volume: {feedback.volumeVariation < 15 ? 'Flat' : 'Dynamic'}
+            </div>
           </div>
         </div>
       )}
