@@ -1,141 +1,147 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { SpeechAnalysisResult } from "@/utils/speech/types";
 
-// Mock data generator for demonstration purposes
-const generateMockData = (count = 10): SpeechAnalysisResult[] => {
-  const mockData: SpeechAnalysisResult[] = [];
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - count);
-  
-  for (let i = 0; i < count; i++) {
-    const date = new Date(startDate);
-    date.setDate(date.getDate() + i);
-    
-    // Generate data with an improving trend
-    const clarityBase = 5 + (i * 0.3); // Starts at 5, improves over time
-    const paceBase = 140 + (i * 2); // Starts at 140, increases slightly
-    const hesitationBase = Math.max(1, 5 - (i * 0.4)); // Starts at 5, decreases over time
-    const fillerBase = Math.max(1, 6 - (i * 0.5)); // Starts at 6, decreases over time
-    
-    // Add some randomness
-    const clarity = Math.min(10, Math.max(1, clarityBase + (Math.random() * 2 - 1)));
-    const pace = Math.min(180, Math.max(120, paceBase + (Math.random() * 20 - 10)));
-    const hesitations = Math.max(0, Math.round(hesitationBase + (Math.random() * 2 - 1)));
-    const fillers = Math.max(0, Math.round(fillerBase + (Math.random() * 2 - 1)));
-    
-    mockData.push({
-      clarity: {
-        score: clarity,
-        rating: clarity >= 8 ? 'excellent' : clarity >= 6 ? 'good' : clarity >= 4 ? 'fair' : 'needs improvement',
-        suggestions: []
-      },
-      pace: pace,
-      fillerWordCount: fillers,
-      hesitationCount: hesitations,
-      rhythmScore: Math.min(10, Math.max(1, 6 + (i * 0.3) + (Math.random() * 2 - 1))),
-      timestamp: date.getTime(),
-      metrics: {
-        startTime: date.getTime() - 60000,
-        endTime: date.getTime(),
-        processingTimeMs: Math.round(100 + Math.random() * 200),
-        cacheHit: Math.random() > 0.7,
-        deviceInfo: {
-          platform: Math.random() > 0.7 ? 'Windows' : 'macOS',
-          browser: Math.random() > 0.5 ? 'Chrome' : 'Firefox',
-          isMobile: false,
-          connectionType: 'wifi'
-        }
-      }
-    });
-  }
-  
-  return mockData;
-};
+interface ProgressData {
+  id: string;
+  userId: string;
+  date: string;
+  score: number;
+  duration: number;
+  wordCount: number;
+  pace: number;
+  clarity: number;
+  fillerWords: number;
+  notes?: string;
+}
 
-export const useProgressData = () => {
+export function useProgressData() {
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [speechData, setSpeechData] = useState<SpeechAnalysisResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<ProgressData[]>([]);
   const [timeframe, setTimeframe] = useState<'week' | 'month' | 'all'>('week');
-
+  
   // Filter data based on selected timeframe
-  const filteredData = React.useMemo(() => {
-    if (timeframe === 'all') return speechData;
+  const filteredData = useCallback(() => {
+    if (timeframe === 'all') return data;
     
-    const now = new Date().getTime();
-    const threshold = timeframe === 'week' 
-      ? now - (7 * 24 * 60 * 60 * 1000) // 7 days
-      : now - (30 * 24 * 60 * 60 * 1000); // 30 days
+    const now = new Date();
+    const pastDate = new Date();
     
-    return speechData.filter(item => (item.timestamp || 0) >= threshold);
-  }, [speechData, timeframe]);
-
-  const loadData = async () => {
+    if (timeframe === 'week') {
+      pastDate.setDate(now.getDate() - 7);
+    } else if (timeframe === 'month') {
+      pastDate.setDate(now.getDate() - 30);
+    }
+    
+    return data.filter(item => {
+      const itemDate = new Date(item.date);
+      return itemDate >= pastDate && itemDate <= now;
+    });
+  }, [data, timeframe]);
+  
+  // Load progress data
+  const loadData = useCallback(async () => {
+    if (!user) return;
+    
     setLoading(true);
     
     try {
-      // In a real app, this would be an API call to fetch user's speech data
-      // For demo purposes, we're generating mock data
-      const data = generateMockData(15);
-      setSpeechData(data);
+      // Mock data for now - would be replaced with actual API call
+      const mockData: ProgressData[] = [
+        {
+          id: '1',
+          userId: user.id,
+          date: new Date().toISOString(),
+          score: 85,
+          duration: 120,
+          wordCount: 350,
+          pace: 175,
+          clarity: 8.2,
+          fillerWords: 3
+        },
+        {
+          id: '2',
+          userId: user.id,
+          date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+          score: 78,
+          duration: 90,
+          wordCount: 280,
+          pace: 187,
+          clarity: 7.5,
+          fillerWords: 5
+        },
+        {
+          id: '3',
+          userId: user.id,
+          date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days ago
+          score: 92,
+          duration: 180,
+          wordCount: 520,
+          pace: 173,
+          clarity: 9.1,
+          fillerWords: 1
+        }
+      ];
       
+      setData(mockData);
+    } catch (error: any) {
       toast({
-        title: "Data Loaded",
-        description: `Loaded ${data.length} speech sessions.`,
-      });
-    } catch (error) {
-      console.error("Error loading speech data:", error);
-      toast({
-        title: "Error Loading Data",
-        description: "Could not load your speech analysis data.",
+        title: "Failed to load progress data",
+        description: error.message,
         variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
-  };
-
-  // Export data as JSON file
-  const exportData = () => {
-    try {
-      const dataStr = JSON.stringify(speechData, null, 2);
-      const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
-      
-      const exportFileDefaultName = `speech-analysis-export-${new Date().toISOString().slice(0, 10)}.json`;
-      
-      const linkElement = document.createElement('a');
-      linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', exportFileDefaultName);
-      linkElement.click();
-      
+  }, [user, toast]);
+  
+  // Export data as CSV
+  const exportData = useCallback(() => {
+    const filtered = filteredData();
+    if (filtered.length === 0) {
       toast({
-        title: "Export Complete",
-        description: "Your speech analysis data has been exported."
+        title: "No data to export",
+        description: "There is no progress data available for the selected timeframe."
       });
-    } catch (error) {
-      console.error("Export error:", error);
-      toast({
-        title: "Export Failed",
-        description: "Could not export your speech analysis data.",
-        variant: "destructive"
-      });
+      return;
     }
-  };
-
-  // Load data on initial render
+    
+    // Create CSV content
+    const headers = "Date,Score,Duration (s),Word Count,Pace (WPM),Clarity,Filler Words,Notes\n";
+    const rows = filtered.map(item => 
+      `${new Date(item.date).toLocaleDateString()},${item.score},${item.duration},${item.wordCount},${item.pace},${item.clarity},${item.fillerWords},${item.notes || ""}`
+    ).join("\n");
+    const csvContent = `data:text/csv;charset=utf-8,${headers}${rows}`;
+    
+    // Create download link
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `speech_progress_${timeframe}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Data exported",
+      description: `Progress data for the ${timeframe === 'week' ? 'last 7 days' : timeframe === 'month' ? 'last 30 days' : 'all time'} has been exported.`
+    });
+  }, [filteredData, timeframe, toast]);
+  
+  // Load data on mount
   useEffect(() => {
     loadData();
-  }, []);
-
+  }, [loadData]);
+  
   return {
-    speechData,
-    filteredData,
+    filteredData: filteredData(),
     loading,
     timeframe,
     setTimeframe,
     loadData,
     exportData
   };
-};
+}
