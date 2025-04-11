@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { SpeechFeedback } from "@/hooks/useVoiceRecognition";
 import { Mic } from "lucide-react";
-import { detectHesitations, analyzeSpokenCadence } from "@/utils/speech";
+import { detectHesitations, analyzeSpokenCadence, analyzeSpeechClarity } from "@/utils/speech";
 
 // Import the smaller components
 import SpeechMetrics from "./SpeechMetrics";
@@ -10,6 +10,7 @@ import SpeechQualityScore from "./SpeechQualityScore";
 import SpeechTrends from "./SpeechTrends";
 import SpeechTips from "./SpeechTips";
 import RecordingIndicator from "./RecordingIndicator";
+import SpeechClarityFeedback from "./SpeechClarityFeedback";
 
 interface RealTimeFeedbackProps {
   isActive: boolean;
@@ -35,6 +36,16 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
     wordCount: 0,
     pitchVariation: null,
     fillerWordsCount: 0
+  });
+  
+  const [clarityAnalysis, setClarityAnalysis] = useState<{
+    score: number;
+    rating: 'excellent' | 'good' | 'fair' | 'needs improvement';
+    suggestions: string[];
+  }>({
+    score: 0,
+    rating: 'fair',
+    suggestions: []
   });
   
   // Score calculation based on metrics
@@ -76,6 +87,12 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
     };
     
     setMetrics(newMetrics);
+    
+    // Get clarity analysis
+    if (transcript.length > 20) {
+      const clarity = analyzeSpeechClarity(transcript);
+      setClarityAnalysis(clarity);
+    }
     
     // Analyze speech in real-time and provide feedback
     if (feedback) {
@@ -149,6 +166,15 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
         wordCount={metrics.wordCount}
         fillerWordsCount={metrics.fillerWordsCount}
       />
+      
+      {/* Speech clarity feedback */}
+      <div className="p-3 border-t border-border/30">
+        <SpeechClarityFeedback 
+          score={clarityAnalysis.score} 
+          rating={clarityAnalysis.rating} 
+          suggestions={clarityAnalysis.suggestions} 
+        />
+      </div>
       
       {/* Speech quality visualization */}
       <SpeechQualityScore score={speechScore} duration={duration} />
