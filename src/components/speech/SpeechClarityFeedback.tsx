@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Info, CheckCircle, AlertCircle, XCircle } from "lucide-react";
