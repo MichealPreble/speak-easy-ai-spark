@@ -123,7 +123,8 @@ const Hero = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>
+        {`
         @keyframes dash {
           to {
             stroke-dashoffset: 0;
@@ -134,7 +135,8 @@ const Hero = () => {
           stroke-dashoffset: 100;
           animation: dash 1.5s ease-in-out forwards;
         }
-      `}</style>
+        `}
+      </style>
     </section>
   );
 };
