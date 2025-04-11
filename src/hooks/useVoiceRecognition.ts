@@ -1,44 +1,8 @@
-
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { setupAudioAnalysis, cleanupAudio } from "@/utils/audioAnalysisUtils";
 import { useAudioAnalysis } from "@/hooks/useAudioAnalysis";
-
-declare global {
-  interface SpeechRecognitionEvent extends Event {
-    results: {
-      [index: number]: {
-        [index: number]: {
-          transcript: string;
-          confidence: number;
-        };
-      };
-      item(index: number): any;
-      length: number;
-    };
-    resultIndex: number;
-  }
-
-  interface SpeechRecognitionErrorEvent extends Event {
-    error: string;
-  }
-
-  class SpeechRecognition extends EventTarget {
-    continuous: boolean;
-    interimResults: boolean;
-    lang: string;
-    onresult: (event: SpeechRecognitionEvent) => void;
-    onerror: (event: SpeechRecognitionErrorEvent) => void;
-    onend: () => void;
-    start(): void;
-    stop(): void;
-  }
-
-  interface Window {
-    SpeechRecognition?: typeof SpeechRecognition;
-    webkitSpeechRecognition?: typeof SpeechRecognition;
-  }
-}
+import { isSpeechRecognitionSupported, getSpeechErrorMessage } from "@/utils/speechRecognitionTypes";
 
 export type SpeechFeedback = {
   speed: number;
@@ -69,9 +33,11 @@ export function useVoiceRecognition(
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        setIsBrowserSupported(true);
+      const isSupported = isSpeechRecognitionSupported();
+      setIsBrowserSupported(isSupported);
+      
+      if (isSupported) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognitionRef.current = new SpeechRecognition();
         recognitionRef.current.continuous = false;
         recognitionRef.current.interimResults = false;
@@ -116,14 +82,7 @@ export function useVoiceRecognition(
         };
 
         recognitionRef.current.onerror = (event: any) => {
-          let errorMessage = "Could not recognize speech. Please try again.";
-          if (event.error === 'no-speech') {
-            errorMessage = "No speech detected. Please try again.";
-          } else if (event.error === 'audio-capture') {
-            errorMessage = "No microphone detected. Please check your microphone settings.";
-          } else if (event.error === 'not-allowed') {
-            errorMessage = "Microphone access denied. Please allow microphone access.";
-          }
+          const errorMessage = getSpeechErrorMessage(event.error);
           setIsVoiceActive(false);
           toast({
             title: "Voice recognition error",
@@ -135,8 +94,6 @@ export function useVoiceRecognition(
         recognitionRef.current.onend = () => {
           setIsVoiceActive(false);
         };
-      } else {
-        setIsBrowserSupported(false);
       }
     }
 
