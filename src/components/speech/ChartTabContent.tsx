@@ -44,6 +44,13 @@ interface ComposedChartConfig {
   }>;
 }
 
+// Define the return type for getChartConfig
+interface ChartConfigs {
+  line: LineChartConfig;
+  bar: BarChartConfig;
+  composed?: ComposedChartConfig;
+}
+
 interface ChartTabContentProps {
   tabValue: string;
   chartType: 'line' | 'bar' | 'composed';
@@ -56,7 +63,7 @@ const ChartTabContent: React.FC<ChartTabContentProps> = ({
   processedData 
 }) => {
   // Define chart configurations for each tab
-  const getChartConfig = () => {
+  const getChartConfig = (): ChartConfigs => {
     const baseX = "time";
     
     switch(tabValue) {
