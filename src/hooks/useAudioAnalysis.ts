@@ -1,84 +1,112 @@
-
-import { useRef, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getPitch, getVolume } from '@/utils/audioAnalysisUtils';
 
 /**
- * Hook to track pitch and volume data from an audio stream
+ * Hook for real-time audio analysis
+ * Tracks pitch and volume from an audio analyzer node
  */
 export function useAudioAnalysis(
   isActive: boolean,
-  analyserNode: AnalyserNode | null,
+  analyser: AnalyserNode | null,
   audioContext: AudioContext | null
 ) {
-  const pitchDataRef = useRef<number[]>([]);
-  const volumeDataRef = useRef<number[]>([]);
-  const animationFrameRef = useRef<number | null>(null);
-
-  // Start or stop analysis based on isActive state
-  useEffect(() => {
-    // Clear data when analysis starts
-    if (isActive) {
-      pitchDataRef.current = [];
-      volumeDataRef.current = [];
-    }
-
-    // Start analysis if active and we have the necessary audio nodes
-    if (isActive && analyserNode && audioContext) {
-      const analyze = () => {
-        if (!isActive || !analyserNode || !audioContext) {
-          if (animationFrameRef.current) {
-            cancelAnimationFrame(animationFrameRef.current);
-            animationFrameRef.current = null;
-          }
-          return;
-        }
-        
-        // Get current pitch and volume measurements
-        const pitch = getPitch(analyserNode, audioContext);
-        const volume = getVolume(analyserNode);
-        
-        // Only store valid measurements
-        if (pitch > 50 && pitch < 400) pitchDataRef.current.push(pitch);
-        if (volume > 0) volumeDataRef.current.push(volume);
-        
-        // Continue analysis loop
-        animationFrameRef.current = requestAnimationFrame(analyze);
-      };
-      
-      // Start the analysis loop
-      analyze();
-    }
-
-    // Clean up animation frame on unmount or when isActive changes
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-    };
-  }, [isActive, analyserNode, audioContext]);
-
-  // Calculate variation metrics
-  const getAnalysisResults = () => {
-    const pitchVariation = pitchDataRef.current.length > 0
-      ? Math.max(...pitchDataRef.current) - Math.min(...pitchDataRef.current)
+  const [pitchValues, setPitchValues] = useState<number[]>([]);
+  const [volumeValues, setVolumeValues] = useState<number[]>([]);
+  const rafRef = useRef<number | null>(null);
+  
+  const getAnalysisResults = useCallback(() => {
+    const avgPitch = pitchValues.length 
+      ? pitchValues.reduce((sum, val) => sum + val, 0) / pitchValues.length 
       : 0;
-      
-    const volumeVariation = volumeDataRef.current.length > 0
-      ? Math.max(...volumeDataRef.current) - Math.min(...volumeDataRef.current)
+    
+    const avgVolume = volumeValues.length 
+      ? volumeValues.reduce((sum, val) => sum + val, 0) / volumeValues.length 
       : 0;
-
-    // Reset data after retrieving results
-    pitchDataRef.current = [];
-    volumeDataRef.current = [];
+    
+    // Calculate variation as max - min
+    const pitchVariation = pitchValues.length > 1
+      ? Math.max(...pitchValues) - Math.min(...pitchValues)
+      : 0;
+    
+    const volumeVariation = volumeValues.length > 1
+      ? Math.max(...volumeValues) - Math.min(...volumeValues)
+      : 0;
     
     return {
-      pitchVariation: Math.round(pitchVariation),
-      volumeVariation: Math.round(volumeVariation)
+      avgPitch,
+      avgVolume,
+      pitchVariation,
+      volumeVariation,
+      pitchValues: [...pitchValues],
+      volumeValues: [...volumeValues]
     };
-  };
-
-  return {
-    getAnalysisResults
-  };
+  }, [pitchValues, volumeValues]);
+  
+  // Set up and tear down audio analysis loop
+  useEffect(() => {
+    // Don't run analysis if inactive or missing dependencies
+    if (!isActive || !analyser || !audioContext) {
+      // Clear any existing animation frame
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      return;
+    }
+    
+    // Analysis loop
+    const analyze = () => {
+      if (!isActive || !analyser || !audioContext) {
+        if (rafRef.current) {
+          cancelAnimationFrame(rafRef.current);
+          rafRef.current = null;
+        }
+        return;
+      }
+      
+      const pitch = getPitch(analyser, audioContext);
+      const volume = getVolume(analyser);
+      
+      // Only store valid values
+      if (pitch > 20 && pitch < 1000) { // Filter out unlikely pitch values
+        setPitchValues(prev => {
+          const newValues = [...prev, pitch];
+          // Keep last 100 values to limit memory usage
+          return newValues.slice(-100);
+        });
+      }
+      
+      if (volume > 0) {
+        setVolumeValues(prev => {
+          const newValues = [...prev, volume];
+          // Keep last 100 values to limit memory usage
+          return newValues.slice(-100);
+        });
+      }
+      
+      // Continue the loop
+      rafRef.current = requestAnimationFrame(analyze);
+    };
+    
+    // Start the analysis loop
+    analyze();
+    
+    // Cleanup function
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, [isActive, analyser, audioContext]);
+  
+  // Reset stored values when analysis stops
+  useEffect(() => {
+    if (!isActive) {
+      setPitchValues([]);
+      setVolumeValues([]);
+    }
+  }, [isActive]);
+  
+  return { getAnalysisResults };
 }
