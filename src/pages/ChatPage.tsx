@@ -1,12 +1,13 @@
 
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import Chat from "@/components/chat/Chat";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut } from "lucide-react";
+import { LogOut, BarChart2 } from "lucide-react";
 
 const scenarios = [
   { value: "small-team", label: "Present to a Small Team" },
@@ -56,6 +57,16 @@ const ChatPage = () => {
                 <div className="text-sm text-muted-foreground mr-2">
                   Signed in as <span className="font-medium">{user.email}</span>
                 </div>
+                <Link to="/progress">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="glass-button mr-2"
+                  >
+                    <BarChart2 className="w-4 h-4 mr-2" />
+                    Progress
+                  </Button>
+                </Link>
                 <Button 
                   variant="outline" 
                   size="sm" 

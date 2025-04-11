@@ -13,8 +13,9 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Auth from "./pages/Auth";
 
-// Lazy load the chat page to improve initial load performance
+// Lazy load pages to improve initial load performance
 const ChatPage = lazy(() => import("./pages/ChatPage"));
+const ProgressPage = lazy(() => import("./pages/ProgressPage"));
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -94,6 +95,25 @@ const AppRoutes = () => {
               </div>
             }>
               <ChatPage />
+            </Suspense>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/progress" 
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={
+              <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-pulse text-center">
+                  <div className="h-12 w-12 rounded-full bg-primary/20 mx-auto mb-4 flex items-center justify-center">
+                    <span className="text-primary font-medium">AI</span>
+                  </div>
+                  <p className="text-muted-foreground">Loading progress data...</p>
+                </div>
+              </div>
+            }>
+              <ProgressPage />
             </Suspense>
           </ProtectedRoute>
         } 

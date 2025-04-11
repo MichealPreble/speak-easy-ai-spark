@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from "react";
 import { SpeechFeedback } from "@/hooks/useVoiceRecognition";
-import { Mic } from "lucide-react";
+import { Mic, ChevronUp, ChevronDown } from "lucide-react";
 import { detectHesitations, analyzeSpokenCadence, analyzeSpeechClarity } from "@/utils/speech";
 
 // Import the smaller components
@@ -11,6 +10,7 @@ import SpeechTrends from "./SpeechTrends";
 import SpeechTips from "./SpeechTips";
 import RecordingIndicator from "./RecordingIndicator";
 import SpeechClarityFeedback from "./SpeechClarityFeedback";
+import SpeechMetricsChart from "./SpeechMetricsChart";
 
 interface RealTimeFeedbackProps {
   isActive: boolean;
@@ -48,7 +48,15 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
     suggestions: []
   });
   
-  // Score calculation based on metrics
+  const [expanded, setExpanded] = useState(true);
+  const [metricsHistory, setMetricsHistory] = useState<Array<{
+    pace?: number;
+    clarity?: number;
+    hesitations?: number;
+    fillerWords?: number;
+    timestamp?: number;
+  }>>([]);
+  
   const calculateScore = (feedbackData?: SpeechFeedback): number => {
     if (!feedbackData) return 0;
     
@@ -73,6 +81,36 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
   };
   
   useEffect(() => {
+    if (!isActive) {
+      setMetricsHistory([]);
+      return;
+    }
+    
+    const interval = setInterval(() => {
+      if (duration > 2 && feedback) {
+        setMetricsHistory(prev => {
+          const newHistory = [...prev];
+          if (newHistory.length >= 20) {
+            newHistory.shift();
+          }
+          
+          newHistory.push({
+            pace: feedback.speed,
+            clarity: clarityAnalysis.score,
+            hesitations: detectHesitations(transcript).count,
+            fillerWords: feedback.fillerWords.length,
+            timestamp: Date.now()
+          });
+          
+          return newHistory;
+        });
+      }
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, [isActive, duration, feedback, clarityAnalysis.score, transcript]);
+  
+  useEffect(() => {
     if (!isActive || !transcript || transcript.length < 10) {
       setTips([]);
       return;
@@ -88,50 +126,41 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
     
     setMetrics(newMetrics);
     
-    // Get clarity analysis
     if (transcript.length > 20) {
       const clarity = analyzeSpeechClarity(transcript);
       setClarityAnalysis(clarity);
     }
     
-    // Analyze speech in real-time and provide feedback
     if (feedback) {
-      // Check speaking speed
       if (feedback.speed > 180) {
         newTips.push("Try slowing down a bit for better clarity");
       } else if (feedback.speed < 120 && duration > 5) {
         newTips.push("Consider speaking a bit faster to maintain engagement");
       }
       
-      // Check for filler words
       if (feedback.fillerWords.length > 0 && feedback.duration > 5) {
         newTips.push(`Watch for filler words like "${feedback.fillerWords.join('", "')}"`);
       }
       
-      // Check pitch variation
       if (feedback.pitchVariation < 30 && duration > 8) {
         newTips.push("Try varying your pitch more to sound more engaging");
       }
       
-      // Check volume variation
       if (feedback.volumeVariation < 10 && duration > 8) {
         newTips.push("Add more volume variation for emphasis");
       }
     }
     
-    // Analyze hesitations
     const hesitations = detectHesitations(transcript);
     if (hesitations.count > 2) {
       newTips.push(`You've repeated words ${hesitations.count} times. Try to speak more fluidly.`);
     }
     
-    // Analyze cadence
     const cadenceScore = analyzeSpokenCadence(transcript, duration);
     if (cadenceScore < 5 && duration > 10) {
       newTips.push("Your speech rhythm could be more balanced. Try varying sentence length.");
     }
     
-    // Only keep the most recent 3 tips to avoid overwhelming the user
     setTips(newTips.slice(0, 3));
   }, [isActive, transcript, duration, feedback]);
 
@@ -141,53 +170,63 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
 
   return (
     <div className="fixed bottom-20 right-4 z-50 w-80 bg-background/95 backdrop-blur-md border rounded-lg shadow-lg overflow-hidden dark:bg-black/90">
-      <div className="flex items-center justify-between p-3 bg-primary/10">
+      <div className="flex items-center justify-between p-3 bg-primary/10 cursor-pointer" onClick={() => setExpanded(!expanded)}>
         <div className="flex items-center">
           <Mic className="h-5 w-5 text-primary mr-2" />
           <h3 className="font-medium">Real-time Feedback</h3>
         </div>
-        <div className="flex space-x-1">
+        <div className="flex items-center space-x-2">
           {isActive && (
             <span className="flex h-3 w-3 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
             </span>
           )}
+          {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </div>
       </div>
       
-      {/* Active recording indicator */}
-      <RecordingIndicator isActive={isActive} />
-      
-      {/* Speech metrics */}
-      <SpeechMetrics 
-        duration={duration}
-        speed={metrics.speed}
-        wordCount={metrics.wordCount}
-        fillerWordsCount={metrics.fillerWordsCount}
-      />
-      
-      {/* Speech clarity feedback */}
-      <div className="p-3 border-t border-border/30">
-        <SpeechClarityFeedback 
-          score={clarityAnalysis.score} 
-          rating={clarityAnalysis.rating} 
-          suggestions={clarityAnalysis.suggestions} 
-        />
-      </div>
-      
-      {/* Speech quality visualization */}
-      <SpeechQualityScore score={speechScore} duration={duration} />
-      
-      {/* Speech trend analysis */}
-      <SpeechTrends 
-        duration={duration}
-        feedback={feedback}
-        metrics={metrics}
-      />
-      
-      {/* Tips section */}
-      <SpeechTips tips={tips} duration={duration} />
+      {expanded && (
+        <>
+          <RecordingIndicator isActive={isActive} />
+          
+          <SpeechMetrics 
+            duration={duration}
+            speed={metrics.speed}
+            wordCount={metrics.wordCount}
+            fillerWordsCount={metrics.fillerWordsCount}
+          />
+          
+          <div className="p-3 border-t border-border/30">
+            <SpeechClarityFeedback 
+              score={clarityAnalysis.score} 
+              rating={clarityAnalysis.rating} 
+              suggestions={clarityAnalysis.suggestions} 
+            />
+          </div>
+          
+          {metricsHistory.length > 1 && (
+            <div className="px-3 pt-1 pb-3 border-t border-border/30">
+              <div className="text-xs font-medium mb-2">Real-time Metrics</div>
+              <SpeechMetricsChart 
+                data={metricsHistory} 
+                height={80} 
+                metricToShow="all"
+              />
+            </div>
+          )}
+          
+          <SpeechQualityScore score={speechScore} duration={duration} />
+          
+          <SpeechTrends 
+            duration={duration}
+            feedback={feedback}
+            metrics={metrics}
+          />
+          
+          <SpeechTips tips={tips} duration={duration} />
+        </>
+      )}
     </div>
   );
 };
