@@ -13,7 +13,7 @@ import { useProgressData } from "@/hooks/useProgressData";
 import { SpeechAnalysisResult, ClarityScore } from "@/utils/speech/types";
 
 // Adding a unique console log to verify this version is loaded
-console.log("Loading updated ProgressPage component - April 11, 2025");
+console.log("Loading updated ProgressPage component - April 11, 2025 - v2");
 
 const ProgressPage: React.FC = () => {
   const { user } = useAuth();
@@ -29,10 +29,10 @@ const ProgressPage: React.FC = () => {
 
   // Log on component mount to verify this version is running
   useEffect(() => {
-    console.log("ProgressPage mounted - April 11, 2025");
+    console.log("ProgressPage mounted - April 11, 2025 - v2");
   }, []);
 
-  // Convert ProgressData to SpeechAnalysisResult for the chart
+  // Convert ProgressData to SpeechAnalysisResult for the chart and other components
   const chartData: SpeechAnalysisResult[] = filteredData.map(item => {
     // Create a ClarityScore object from the number
     const clarity: ClarityScore = {
@@ -47,8 +47,8 @@ const ProgressPage: React.FC = () => {
       clarity,
       pace: item.pace,
       fillerWordCount: item.fillerWords,
-      hesitationCount: 0, // Default value since ProgressData doesn't have this
-      rhythmScore: 0,     // Default value since ProgressData doesn't have this
+      hesitationCount: item.fillerWords / 2, // Approximating hesitations based on filler words
+      rhythmScore: item.clarity * 0.8, // Approximating rhythm score based on clarity
       timestamp: new Date(item.date).getTime()
     };
   });

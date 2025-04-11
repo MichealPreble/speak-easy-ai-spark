@@ -64,7 +64,7 @@ const StatsPanel: React.FC<StatsPanelProps> = ({ data }) => {
                     const lastThree = data.slice(-3);
                     const firstAvg = firstThree.reduce((sum, item) => sum + item.fillerWordCount, 0) / firstThree.length;
                     const lastAvg = lastThree.reduce((sum, item) => sum + item.fillerWordCount, 0) / lastThree.length;
-                    const percentChange = ((firstAvg - lastAvg) / firstAvg) * 100;
+                    const percentChange = firstAvg === 0 ? 0 : ((firstAvg - lastAvg) / firstAvg) * 100;
                     
                     return percentChange > 0 
                       ? <span className="text-green-500">-{percentChange.toFixed(0)}%</span>
@@ -89,7 +89,7 @@ const StatsPanel: React.FC<StatsPanelProps> = ({ data }) => {
                     const lastThree = data.slice(-3);
                     const firstAvg = firstThree.reduce((sum, item) => sum + item.hesitationCount, 0) / firstThree.length;
                     const lastAvg = lastThree.reduce((sum, item) => sum + item.hesitationCount, 0) / lastThree.length;
-                    const percentChange = ((firstAvg - lastAvg) / firstAvg) * 100;
+                    const percentChange = firstAvg === 0 ? 0 : ((firstAvg - lastAvg) / firstAvg) * 100;
                     
                     return percentChange > 0 
                       ? <span className="text-green-500">-{percentChange.toFixed(0)}%</span>
@@ -114,7 +114,7 @@ const StatsPanel: React.FC<StatsPanelProps> = ({ data }) => {
                     const lastThree = data.slice(-3);
                     const firstAvg = firstThree.reduce((sum, item) => sum + item.clarity.score, 0) / firstThree.length;
                     const lastAvg = lastThree.reduce((sum, item) => sum + item.clarity.score, 0) / lastThree.length;
-                    const percentChange = ((lastAvg - firstAvg) / firstAvg) * 100;
+                    const percentChange = firstAvg === 0 ? 0 : ((lastAvg - firstAvg) / firstAvg) * 100;
                     
                     return percentChange > 0 
                       ? <span className="text-green-500">+{percentChange.toFixed(0)}%</span>
