@@ -1,7 +1,8 @@
+
 import React, { useEffect, useState } from "react";
 import { SpeechFeedback } from "@/hooks/useVoiceRecognition";
 import { Mic } from "lucide-react";
-import { detectHesitations, analyzeSpokenCadence } from "@/utils/transcriptProcessing";
+import { detectHesitations, analyzeSpokenCadence } from "@/utils/speech";
 
 // Import the smaller components
 import SpeechMetrics from "./SpeechMetrics";

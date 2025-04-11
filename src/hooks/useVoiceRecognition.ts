@@ -1,11 +1,10 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { isSpeechRecognitionSupported } from "@/utils/speechRecognitionTypes";
 import { useAudioSetup } from "@/hooks/useAudioSetup";
 import { useRecognitionSetup } from "@/hooks/useRecognitionSetup";
 import { useAudioAnalysis } from "@/hooks/useAudioAnalysis";
-import { processTranscript } from "@/utils/transcriptProcessing";
+import { processTranscript } from "@/utils/speech/transcriptCore";
 
 export type SpeechFeedback = {
   speed: number;
