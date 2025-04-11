@@ -2,18 +2,22 @@
 import { Bot, Mic, MessageSquare, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const Hero = () => {
+  const { trackTryItYourself } = useAnalytics();
+  
   return (
     <section className="container mx-auto px-4 pt-20 pb-16 md:pt-32 md:pb-24 relative overflow-hidden">
       {/* Enhanced background gradient elements with improved animations */}
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/20 rounded-full filter blur-3xl opacity-70 animate-pulse"></div>
       <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-secondary/20 rounded-full filter blur-3xl opacity-70 animate-pulse" style={{animationDelay: "1s", animationDuration: "8s"}}></div>
       <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-primary/10 rounded-full filter blur-2xl opacity-50 animate-pulse" style={{animationDelay: "1.5s", animationDuration: "7s"}}></div>
+      <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-secondary/15 rounded-full filter blur-xl opacity-60 animate-pulse" style={{animationDelay: "2s", animationDuration: "9s"}}></div>
       
       <div className="flex flex-col items-center text-center relative z-10">
-        <div className="inline-flex items-center justify-center p-2 bg-primary/10 rounded-full mb-6 backdrop-blur-sm shadow-sm">
-          <Mic className="h-6 w-6 text-primary mr-2" aria-hidden="true" />
+        <div className="inline-flex items-center justify-center p-2 bg-primary/10 rounded-full mb-6 backdrop-blur-sm shadow-sm hover:bg-primary/15 transition-colors duration-300">
+          <Mic className="h-6 w-6 text-primary mr-2 animate-pulse" aria-hidden="true" style={{animationDuration: "4s"}} />
           <span className="text-sm font-medium">Public Speaking AI Assistant</span>
         </div>
         
@@ -22,13 +26,21 @@ const Hero = () => {
           <span className="text-primary relative inline-block">
             SpeakEasy<span className="text-primary">AI</span>
             <svg className="absolute w-full h-3 -bottom-1 left-0" viewBox="0 0 100 10" preserveAspectRatio="none">
-              <path d="M0,5 Q25,0 50,5 T100,5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+              <path 
+                d="M0,5 Q25,0 50,5 T100,5" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                fill="none" 
+                strokeLinecap="round"
+                className="animate-dash" 
+              />
             </svg>
           </span>
         </h1>
         
         <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mb-10 leading-relaxed">
-          Practice speeches, receive balanced feedback, and craft compelling narratives with personalized AI coaching.
+          Practice speeches, receive balanced feedback, and craft compelling narratives with 
+          <span className="font-semibold text-primary"> personalized AI coaching</span>.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-5 mb-16">
@@ -63,7 +75,7 @@ const Hero = () => {
                   <Bot className="h-4 w-4 text-primary" aria-hidden="true" />
                 </div>
                 <div>
-                  <div className="p-3 rounded-lg bg-muted text-left shadow-sm">
+                  <div className="p-3 rounded-lg bg-muted text-left shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
                     <p className="text-sm">Welcome! I'm your AI speech coach. Would you like to practice a presentation, work on eliminating filler words, or get feedback on your delivery?</p>
                   </div>
                 </div>
@@ -76,7 +88,7 @@ const Hero = () => {
                   <MessageSquare className="h-4 w-4 text-secondary" aria-hidden="true" />
                 </div>
                 <div>
-                  <div className="p-3 rounded-lg bg-primary text-primary-foreground text-left shadow-sm">
+                  <div className="p-3 rounded-lg bg-primary text-primary-foreground text-left shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
                     <p className="text-sm">I need help preparing for my team presentation. Can you help me eliminate my filler words?</p>
                   </div>
                 </div>
@@ -89,7 +101,7 @@ const Hero = () => {
                   <Bot className="h-4 w-4 text-primary" aria-hidden="true" />
                 </div>
                 <div>
-                  <div className="p-3 rounded-lg bg-muted text-left shadow-sm">
+                  <div className="p-3 rounded-lg bg-muted text-left shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
                     <p className="text-sm">Absolutely! Let's practice together. Try recording a short segment of your presentation, and I'll analyze your use of filler words and provide feedback.</p>
                   </div>
                 </div>
@@ -100,6 +112,7 @@ const Hero = () => {
               size="sm" 
               className="absolute bottom-4 left-1/2 transform -translate-x-1/2 mt-4 bg-primary/90 hover:bg-primary shadow-md transition-all duration-300 group hover:scale-105"
               asChild
+              onClick={trackTryItYourself}
             >
               <Link to="/chat" className="flex items-center">
                 Try it yourself
@@ -109,6 +122,19 @@ const Hero = () => {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes dash {
+          to {
+            stroke-dashoffset: 0;
+          }
+        }
+        .animate-dash {
+          stroke-dasharray: 100;
+          stroke-dashoffset: 100;
+          animation: dash 1.5s ease-in-out forwards;
+        }
+      `}</style>
     </section>
   );
 };
