@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Info, CheckCircle, AlertCircle, XCircle } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { 
   Tooltip,
   TooltipContent,
@@ -43,8 +44,18 @@ const SpeechClarityFeedback = ({ score, rating, suggestions }: SpeechClarityProp
     }
   };
 
+  const getRatingProgressColor = () => {
+    switch(rating) {
+      case 'excellent': return "bg-green-500";
+      case 'good': return "bg-blue-500";
+      case 'fair': return "bg-amber-500";
+      case 'needs improvement': return "bg-red-500";
+      default: return "bg-gray-500";
+    }
+  };
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <span className="text-sm font-medium text-muted-foreground">Clarity</span>
@@ -66,6 +77,18 @@ const SpeechClarityFeedback = ({ score, rating, suggestions }: SpeechClarityProp
             {getRatingIcon()}
             <span className="font-semibold">{score}/10</span>
           </Badge>
+        </div>
+      </div>
+      
+      <div className="w-full space-y-1">
+        <Progress 
+          value={score * 10} 
+          className="h-2"
+          indicatorClassName={getRatingProgressColor()}
+        />
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>Needs work</span>
+          <span>Excellent</span>
         </div>
       </div>
       
