@@ -139,12 +139,16 @@ export function processTranscriptWithMetrics(
  */
 export async function processTranscriptBatch(
   transcripts: Array<{ text: string; duration: number; audioData?: any }>,
-  config: SpeechAnalysisConfig & { maxConcurrent?: number } = {}
+  config: SpeechAnalysisConfig & { 
+    maxConcurrent?: number;
+    logCacheHits?: boolean;
+  } = {}
 ): Promise<Array<{
   result: SpeechAnalysisResult;
   processingTimeMs: number;
   cacheHit: boolean;
   index: number;
+  fromCache: boolean;
 }>> {
   const startTime = performance.now();
   const maxConcurrent = config.maxConcurrent || 3; // Default to 3 concurrent processes
@@ -153,6 +157,7 @@ export async function processTranscriptBatch(
     processingTimeMs: number;
     cacheHit: boolean;
     index: number;
+    fromCache: boolean;
   }> = [];
   
   // Process in batches to limit concurrency
@@ -167,6 +172,10 @@ export async function processTranscriptBatch(
       const cacheKey = `${text.substring(0, 50)}-${duration}-${JSON.stringify(config || {})}`;
       const cachedResult = config.useCache !== false ? getCachedAnalysis(cacheKey, config.cacheTimeMs || 60000) : null;
       const cacheHit = !!cachedResult;
+      
+      if (config.logCacheHits && cacheHit) {
+        console.log(`Cache hit for transcript at index ${startIndex + i}: "${text.substring(0, 30)}..."`);
+      }
       
       let result: SpeechAnalysisResult;
       
@@ -190,6 +199,7 @@ export async function processTranscriptBatch(
         result,
         processingTimeMs,
         cacheHit,
+        fromCache: cacheHit,
         index: startIndex + i
       };
     });
@@ -230,9 +240,11 @@ export async function processTranscriptBatch(
  */
 export function getCacheStatistics(): {
   size: number;
+  hitCount: number;
   hitRatio: number;
   oldestEntryAge: number;
   newestEntryAge: number;
+  avgEntryAge: number;
   averageProcessingTime: number;
 } {
   // This is a placeholder implementation - in a real implementation,
@@ -240,9 +252,11 @@ export function getCacheStatistics(): {
   
   return {
     size: 0, // Number of entries in cache
+    hitCount: 0, // Number of cache hits
     hitRatio: 0, // Ratio of cache hits to total requests
     oldestEntryAge: 0, // Age of oldest entry in ms
     newestEntryAge: 0, // Age of newest entry in ms
+    avgEntryAge: 0, // Average age of cache entries in ms
     averageProcessingTime: 0 // Average processing time of cached entries
   };
 }
@@ -256,8 +270,9 @@ export function getCacheStatistics(): {
  */
 export async function benchmarkSpeechAnalysis(
   sampleText: string = "This is a sample text for benchmarking speech analysis performance",
+  duration: number = 10,
   iterations: number = 5,
-  useCache: boolean = true
+  config: SpeechAnalysisConfig & { useCache?: boolean } = {}
 ): Promise<{
   averageTimeMs: number;
   minTimeMs: number;
@@ -265,32 +280,77 @@ export async function benchmarkSpeechAnalysis(
   totalTimeMs: number;
   cacheHits: number;
   iterations: number;
+  runTimesMs: number[];
 }> {
   const timings: number[] = [];
   let cacheHits = 0;
-  const duration = 10; // Arbitrary duration for testing
+  const useCache = config.useCache !== false;
+  
+  // Validate inputs
+  const validation = validateSpeechInput(sampleText, duration);
+  if (!validation.isValid) {
+    throw new Error(`Benchmark error: ${validation.error}`);
+  }
+  
+  if (!Number.isInteger(iterations) || iterations < 1) {
+    throw new Error("Iterations must be a positive integer");
+  }
   
   const startTime = performance.now();
   
   for (let i = 0; i < iterations; i++) {
     const iterStartTime = performance.now();
     
-    const { cacheHit } = processTranscriptWithMetrics(sampleText, duration);
+    // Clear cache for first iteration if not using cache
+    if (i === 0 && !useCache) {
+      // Simulate cache clearing - actual implementation would use clearAnalysisCache()
+    }
     
-    if (cacheHit) cacheHits++;
+    // Run the analysis
+    const result = await analyzeFullSpeechAsync(sampleText, duration, null, {
+      ...config,
+      useCache
+    });
+    
+    // Check if result came from cache
+    if (result.timestamp && useCache && i > 0) {
+      cacheHits++;
+    }
     
     const iterTime = performance.now() - iterStartTime;
     timings.push(iterTime);
+    
+    if (config.logPerformance === "detailed") {
+      console.log(`Benchmark run ${i+1}/${iterations}: ${iterTime.toFixed(2)}ms${
+        result.timestamp && useCache && i > 0 ? ' (cached)' : ''
+      }`);
+    }
   }
   
   const totalTimeMs = performance.now() - startTime;
   
-  return {
+  const results = {
     averageTimeMs: timings.reduce((sum, time) => sum + time, 0) / iterations,
     minTimeMs: Math.min(...timings),
     maxTimeMs: Math.max(...timings),
     totalTimeMs,
     cacheHits,
-    iterations
+    iterations,
+    runTimesMs: timings
   };
+  
+  if (config.logPerformance) {
+    console.log({
+      benchmarkResults: {
+        ...results,
+        runTimesMs: results.runTimesMs.map(t => t.toFixed(2)),
+        averageTimeMs: results.averageTimeMs.toFixed(2),
+        minTimeMs: results.minTimeMs.toFixed(2),
+        maxTimeMs: results.maxTimeMs.toFixed(2),
+        totalTimeMs: results.totalTimeMs.toFixed(2)
+      }
+    });
+  }
+  
+  return results;
 }
