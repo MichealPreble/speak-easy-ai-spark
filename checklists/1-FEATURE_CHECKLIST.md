@@ -24,11 +24,14 @@ This checklist covers all feature-related items that need to be completed before
   - [ ] Validate performance logging output for all detail levels
   - [ ] Confirm proper error handling with invalid inputs
   - [ ] Test caching mechanism with repeated analysis
+  - [ ] Verify cache hit reduces processing time by at least 80%
+  - [ ] Test cache eviction when maximum size is reached
 - [ ] Test performance optimization
   - [ ] Verify async parallel processing is faster than sequential for complex analyses
   - [ ] Benchmark CPU usage on low-end devices (<15% CPU)
   - [ ] Confirm memory usage remains stable during long recording sessions
   - [ ] Compare execution time with and without caching enabled
+  - [ ] Benchmark multiple repeated analyses with cache (should show significant improvement)
 - [ ] Validate speech analysis accuracy
   - [ ] Clarity scores match expert ratings within ±1 point
   - [ ] Rhythm analysis correctly identifies speech patterns
