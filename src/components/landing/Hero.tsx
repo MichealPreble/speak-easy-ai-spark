@@ -1,11 +1,18 @@
 
-import { Bot, Mic, MessageSquare, ArrowRight } from "lucide-react";
+import { Bot, Mic, MessageSquare, ArrowRight, Sparkles, Users, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { useState } from "react";
 
 const Hero = () => {
   const { trackTryItYourself } = useAnalytics();
+  const [animationState, setAnimationState] = useState('idle');
+  
+  const triggerAnimation = () => {
+    setAnimationState('active');
+    setTimeout(() => setAnimationState('idle'), 2000);
+  };
   
   return (
     <section className="container mx-auto px-4 pt-20 pb-16 md:pt-32 md:pb-24 relative overflow-hidden">
@@ -16,9 +23,13 @@ const Hero = () => {
       <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-secondary/15 rounded-full filter blur-xl opacity-60 animate-pulse" style={{animationDelay: "2s", animationDuration: "9s"}}></div>
       
       <div className="flex flex-col items-center text-center relative z-10">
-        <div className="inline-flex items-center justify-center p-2 bg-primary/10 rounded-full mb-6 backdrop-blur-sm shadow-sm hover:bg-primary/15 transition-colors duration-300">
-          <Mic className="h-6 w-6 text-primary mr-2 animate-pulse" aria-hidden="true" style={{animationDuration: "4s"}} />
+        <div 
+          className="inline-flex items-center justify-center p-2 bg-primary/10 rounded-full mb-6 backdrop-blur-sm shadow-sm hover:bg-primary/15 transition-colors duration-300"
+          onClick={triggerAnimation}
+        >
+          <Mic className={`h-6 w-6 text-primary mr-2 ${animationState === 'active' ? 'animate-bounce' : 'animate-pulse'}`} aria-hidden="true" style={{animationDuration: "4s"}} />
           <span className="text-sm font-medium">Public Speaking AI Assistant</span>
+          <Sparkles className="h-5 w-5 text-primary/70 ml-2" />
         </div>
         
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-6">
@@ -43,7 +54,7 @@ const Hero = () => {
           <span className="font-semibold text-primary"> personalized AI coaching</span>.
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-5 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-12 w-full max-w-lg">
           <Button size="lg" asChild className="text-base group transition-all duration-300 shadow-lg hover:shadow-primary/25 relative overflow-hidden transform hover:scale-105">
             <Link to="/chat">
               <span className="relative z-10 flex items-center">
@@ -54,8 +65,26 @@ const Hero = () => {
             </Link>
           </Button>
           <Button size="lg" variant="outline" className="text-base border-primary/20 hover:bg-primary/5 transform hover:scale-105 transition-all duration-300">
-            <a href="#features">Explore Features</a>
+            <a href="#features" className="flex items-center">
+              <Users className="mr-2 h-4 w-4" />
+              <span>Explore Features</span>
+            </a>
           </Button>
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-4 mb-12">
+          <div className="flex items-center bg-muted/50 px-4 py-2 rounded-full">
+            <Clock className="h-4 w-4 mr-2 text-primary" />
+            <span className="text-sm">Save 30% of preparation time</span>
+          </div>
+          <div className="flex items-center bg-muted/50 px-4 py-2 rounded-full">
+            <Sparkles className="h-4 w-4 mr-2 text-primary" />
+            <span className="text-sm">AI-powered speech analysis</span>
+          </div>
+          <div className="flex items-center bg-muted/50 px-4 py-2 rounded-full">
+            <Users className="h-4 w-4 mr-2 text-primary" />
+            <span className="text-sm">Join 10k+ speakers</span>
+          </div>
         </div>
         
         <div 
