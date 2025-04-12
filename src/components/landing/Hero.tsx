@@ -3,11 +3,25 @@ import { Bot, Mic, MessageSquare, ArrowRight, Sparkles, Users, Clock } from "luc
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
 
 const Hero = () => {
   const { trackTryItYourself } = useAnalytics();
   const [animationState, setAnimationState] = useState('idle');
+  const [typedText, setTypedText] = useState('');
+  const fullText = "Practice speeches, receive balanced feedback, and craft compelling narratives with personalized AI coaching.";
+  const [textIndex, setTextIndex] = useState(0);
+  
+  useEffect(() => {
+    if (textIndex < fullText.length) {
+      const typingTimer = setTimeout(() => {
+        setTypedText(fullText.substring(0, textIndex + 1));
+        setTextIndex(textIndex + 1);
+      }, 40); // Adjust typing speed
+      return () => clearTimeout(typingTimer);
+    }
+  }, [textIndex, fullText]);
   
   const triggerAnimation = () => {
     setAnimationState('active');
@@ -23,14 +37,15 @@ const Hero = () => {
       <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-secondary/15 rounded-full filter blur-xl opacity-60 animate-pulse" style={{animationDelay: "2s", animationDuration: "9s"}}></div>
       
       <div className="flex flex-col items-center text-center relative z-10">
-        <div 
-          className="inline-flex items-center justify-center p-2 bg-primary/10 rounded-full mb-6 backdrop-blur-sm shadow-sm hover:bg-primary/15 transition-colors duration-300"
+        <Badge 
+          variant="outline" 
+          className="px-4 py-2 text-base font-medium bg-primary/10 backdrop-blur-sm hover:bg-primary/15 transition-all duration-300 cursor-pointer mb-6"
           onClick={triggerAnimation}
         >
           <Mic className={`h-6 w-6 text-primary mr-2 ${animationState === 'active' ? 'animate-bounce' : 'animate-pulse'}`} aria-hidden="true" style={{animationDuration: "4s"}} />
-          <span className="text-sm font-medium">Public Speaking AI Assistant</span>
+          <span>Public Speaking AI Assistant</span>
           <Sparkles className="h-5 w-5 text-primary/70 ml-2" />
-        </div>
+        </Badge>
         
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-6">
           Master Public Speaking with{" "}
@@ -43,16 +58,18 @@ const Hero = () => {
                 strokeWidth="2" 
                 fill="none" 
                 strokeLinecap="round"
-                className="animate-dash" 
+                className="animate-drawing" 
               />
             </svg>
           </span>
         </h1>
         
-        <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mb-10 leading-relaxed">
-          Practice speeches, receive balanced feedback, and craft compelling narratives with 
-          <span className="font-semibold text-primary"> personalized AI coaching</span>.
-        </p>
+        <div className="h-24 mb-10">
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl leading-relaxed">
+            {typedText}
+            <span className="animate-blink">|</span>
+          </p>
+        </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-12 w-full max-w-lg">
           <Button size="lg" asChild className="text-base group transition-all duration-300 shadow-lg hover:shadow-primary/25 relative overflow-hidden transform hover:scale-105">
@@ -88,9 +105,10 @@ const Hero = () => {
         </div>
         
         <div 
-          className="relative w-full max-w-4xl h-[300px] md:h-[400px] rounded-2xl bg-gradient-to-br from-primary/5 via-secondary/10 to-primary/5 border border-border shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden backdrop-blur-sm transform hover:translate-y-[-5px]"
+          className={`relative w-full max-w-4xl h-[300px] md:h-[400px] rounded-2xl bg-gradient-to-br from-primary/5 via-secondary/10 to-primary/5 border border-border shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden backdrop-blur-sm transform hover:translate-y-[-5px] ${animationState === 'active' ? 'scale-[1.02]' : ''}`}
           role="img"
           aria-label="AI Speech Coach Conversation Preview"
+          onClick={triggerAnimation}
         >
           {/* Enhanced decorative elements with staggered animations */}
           <div className="absolute top-6 right-6 h-2 w-2 rounded-full bg-primary animate-ping"></div>
@@ -104,7 +122,7 @@ const Hero = () => {
                   <Bot className="h-4 w-4 text-primary" aria-hidden="true" />
                 </div>
                 <div>
-                  <div className="p-3 rounded-lg bg-muted text-left shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
+                  <div className={`p-3 rounded-lg bg-muted text-left shadow-sm transform transition-all duration-300 hover:shadow-md ${animationState === 'active' ? 'scale-[1.03]' : 'hover:scale-[1.02]'}`}>
                     <p className="text-sm">Welcome! I'm your AI speech coach. Would you like to practice a presentation, work on eliminating filler words, or get feedback on your delivery?</p>
                   </div>
                 </div>
@@ -117,7 +135,7 @@ const Hero = () => {
                   <MessageSquare className="h-4 w-4 text-secondary" aria-hidden="true" />
                 </div>
                 <div>
-                  <div className="p-3 rounded-lg bg-primary text-primary-foreground text-left shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
+                  <div className={`p-3 rounded-lg bg-primary text-primary-foreground text-left shadow-sm transform transition-all duration-300 hover:shadow-md ${animationState === 'active' ? 'scale-[1.03]' : 'hover:scale-[1.02]'}`}>
                     <p className="text-sm">I need help preparing for my team presentation. Can you help me eliminate my filler words?</p>
                   </div>
                 </div>
@@ -130,7 +148,7 @@ const Hero = () => {
                   <Bot className="h-4 w-4 text-primary" aria-hidden="true" />
                 </div>
                 <div>
-                  <div className="p-3 rounded-lg bg-muted text-left shadow-sm transform transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
+                  <div className={`p-3 rounded-lg bg-muted text-left shadow-sm transform transition-all duration-300 hover:shadow-md ${animationState === 'active' ? 'scale-[1.03]' : 'hover:scale-[1.02]'}`}>
                     <p className="text-sm">Absolutely! Let's practice together. Try recording a short segment of your presentation, and I'll analyze your use of filler words and provide feedback.</p>
                   </div>
                 </div>
@@ -139,9 +157,12 @@ const Hero = () => {
             
             <Button 
               size="sm" 
-              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 mt-4 bg-primary/90 hover:bg-primary shadow-md transition-all duration-300 group hover:scale-105"
+              className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 mt-4 bg-primary/90 hover:bg-primary shadow-md transition-all duration-300 group hover:scale-105 ${animationState === 'active' ? 'animate-pulse' : ''}`}
               asChild
-              onClick={trackTryItYourself}
+              onClick={(e) => {
+                e.stopPropagation();
+                trackTryItYourself();
+              }}
             >
               <Link to="/chat" className="flex items-center">
                 Try it yourself
@@ -154,15 +175,30 @@ const Hero = () => {
 
       <style>
         {`
-        @keyframes dash {
-          to {
+        @keyframes drawing {
+          0% {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+          }
+          100% {
+            stroke-dasharray: 100;
             stroke-dashoffset: 0;
           }
         }
-        .animate-dash {
-          stroke-dasharray: 100;
-          stroke-dashoffset: 100;
-          animation: dash 1.5s ease-in-out forwards;
+        .animate-drawing {
+          animation: drawing 1.5s ease-in-out forwards;
+        }
+        
+        @keyframes blink {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0;
+          }
+        }
+        .animate-blink {
+          animation: blink 1s step-end infinite;
         }
         `}
       </style>
