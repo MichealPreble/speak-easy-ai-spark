@@ -10,7 +10,10 @@
   - [x] Verify microphone access works consistently
     - Tested permission flows across Chrome, Edge, Firefox, Safari (macOS), Safari iOS, Chrome Android
     - Verified error handling, persistence, and multiple microphone support
-  - [ ] Confirm real-time transcription displays correctly
+  - [x] Confirm real-time transcription displays correctly
+    - Tested transcription accuracy and display in Chat component
+    - Verified text appears in real-time with minimal latency
+    - Confirmed proper handling of punctuation and special characters
   - [ ] Test error handling for unsupported browsers
   - [ ] Verify graceful fallbacks when speech recognition fails
 
