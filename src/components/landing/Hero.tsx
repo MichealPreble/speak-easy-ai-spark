@@ -5,10 +5,13 @@ import HeroDescription from "./HeroDescription";
 import HeroButtons from "./HeroButtons";
 import HeroFeatures from "./HeroFeatures";
 import HeroPreview from "./HeroPreview";
-import { Bot, MessageSquare } from "lucide-react";
+import { Bot, MessageSquare, Sun, Moon } from "lucide-react";
+import { Toggle } from "@/components/ui/toggle";
+import { useThemeMode } from "@/hooks/useThemeMode";
 
 const Hero = () => {
   const fullText = "Practice speeches, receive balanced feedback, and craft compelling narratives with personalized AI coaching.";
+  const { isDarkMode, toggleDarkMode } = useThemeMode();
   
   // Example of custom conversation content
   const botMessages = [
@@ -39,6 +42,21 @@ const Hero = () => {
       <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-secondary/20 rounded-full filter blur-3xl opacity-70 animate-pulse" style={{animationDelay: "1s", animationDuration: "8s"}}></div>
       <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-primary/10 rounded-full filter blur-2xl opacity-50 animate-pulse" style={{animationDelay: "1.5s", animationDuration: "7s"}}></div>
       <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-secondary/15 rounded-full filter blur-xl opacity-60 animate-pulse" style={{animationDelay: "2s", animationDuration: "9s"}}></div>
+      
+      {/* Theme toggle button */}
+      <div className="absolute top-4 right-4 z-20">
+        <Toggle 
+          pressed={isDarkMode} 
+          onPressedChange={toggleDarkMode}
+          aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+          className="w-10 h-10 rounded-full bg-background/70 backdrop-blur-sm hover:bg-background/90 border border-border transition-all duration-300"
+        >
+          {isDarkMode ? 
+            <Sun className="h-4 w-4 text-yellow-400" /> : 
+            <Moon className="h-4 w-4 text-primary" />
+          }
+        </Toggle>
+      </div>
       
       <div className="flex flex-col items-center text-center relative z-10">
         <HeroHeader />
