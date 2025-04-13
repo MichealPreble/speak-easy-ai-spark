@@ -5,9 +5,32 @@ import HeroDescription from "./HeroDescription";
 import HeroButtons from "./HeroButtons";
 import HeroFeatures from "./HeroFeatures";
 import HeroPreview from "./HeroPreview";
+import { Bot, MessageSquare } from "lucide-react";
 
 const Hero = () => {
   const fullText = "Practice speeches, receive balanced feedback, and craft compelling narratives with personalized AI coaching.";
+  
+  // Example of custom conversation content
+  const botMessages = [
+    {
+      content: "Welcome! I'm your AI speech coach. Would you like to practice a presentation, work on eliminating filler words, or get feedback on your delivery?",
+      sender: 'bot' as const,
+      icon: <Bot className="h-4 w-4 text-primary" aria-hidden="true" />
+    },
+    {
+      content: "Absolutely! Let's practice together. Try recording a short segment of your presentation, and I'll analyze your use of filler words and provide feedback.",
+      sender: 'bot' as const,
+      icon: <Bot className="h-4 w-4 text-primary" aria-hidden="true" />
+    }
+  ];
+  
+  const userMessages = [
+    {
+      content: "I need help preparing for my team presentation. Can you help me eliminate my filler words?",
+      sender: 'user' as const,
+      icon: <MessageSquare className="h-4 w-4 text-secondary" aria-hidden="true" />
+    }
+  ];
   
   return (
     <section className="container mx-auto px-4 pt-20 pb-16 md:pt-32 md:pb-24 relative overflow-hidden">
@@ -22,7 +45,12 @@ const Hero = () => {
         <HeroDescription fullText={fullText} />
         <HeroButtons />
         <HeroFeatures />
-        <HeroPreview />
+        <HeroPreview 
+          botMessages={botMessages}
+          userMessages={userMessages}
+          ctaText="Try it yourself"
+          ctaLink="/chat"
+        />
       </div>
 
       <style>
