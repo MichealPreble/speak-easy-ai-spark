@@ -37,7 +37,12 @@
     - Confirmed proper display of filler word count in feedback components
     - Validated detection works consistently across different browsers and devices
     - Tested edge cases including fast speech, multiple fillers in sequence, and background noise
-  - [ ] Confirm speaking pace (WPM) calculates accurately
+  - [x] Confirm speaking pace (WPM) calculates accurately
+    - Verified pace calculation formula correctly counts words per minute
+    - Tested across various speaking speeds (slow ~80 WPM, normal ~120 WPM, fast ~180 WPM)
+    - Confirmed WPM display updates in real-time in SpeechMetrics component
+    - Validated accuracy across different speech durations (short 5s, medium 30s, long 2min)
+    - Tested edge cases including pauses, varying speeds within same recording
   - [ ] Validate real-time feedback during speech
   - [ ] Test hesitation detection
 
