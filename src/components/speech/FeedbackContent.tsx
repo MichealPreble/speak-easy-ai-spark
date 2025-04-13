@@ -20,6 +20,11 @@ interface FeedbackContentProps {
     rating: 'excellent' | 'good' | 'fair' | 'needs improvement';
     suggestions: string[];
   };
+  hesitationAnalysis?: {
+    count: number;
+    percentage: number;
+    patterns: string[];
+  };
   metricsHistory: Array<{
     pace?: number;
     clarity?: number;
@@ -37,6 +42,7 @@ const FeedbackContent: React.FC<FeedbackContentProps> = ({
   tips,
   metrics,
   clarityAnalysis,
+  hesitationAnalysis,
   metricsHistory,
   speechScore
 }) => {
@@ -49,6 +55,8 @@ const FeedbackContent: React.FC<FeedbackContentProps> = ({
         speed={metrics.speed}
         wordCount={metrics.wordCount}
         fillerWordsCount={metrics.fillerWordsCount}
+        hesitationsCount={hesitationAnalysis?.count}
+        hesitationsPercentage={hesitationAnalysis?.percentage}
       />
       
       <div className="p-3 border-t border-border/30">
@@ -58,6 +66,20 @@ const FeedbackContent: React.FC<FeedbackContentProps> = ({
           suggestions={clarityAnalysis.suggestions} 
         />
       </div>
+      
+      {hesitationAnalysis && hesitationAnalysis.patterns.length > 0 && (
+        <div className="px-3 pb-2 border-t border-border/30">
+          <div className="text-xs font-medium mb-1">Detected Hesitation Patterns</div>
+          <div className="text-xs text-muted-foreground">
+            {hesitationAnalysis.patterns.slice(0, 3).map((pattern, index) => (
+              <div key={index} className="bg-muted px-2 py-1 rounded mb-1">{pattern}</div>
+            ))}
+            {hesitationAnalysis.patterns.length > 3 && (
+              <div className="text-xs opacity-70 mt-1">+{hesitationAnalysis.patterns.length - 3} more patterns</div>
+            )}
+          </div>
+        </div>
+      )}
       
       {metricsHistory.length > 1 && (
         <div className="px-3 pt-1 pb-3 border-t border-border/30">

@@ -27,6 +27,16 @@ export function useSpeechFeedback(isActive: boolean, transcript: string, duratio
     suggestions: []
   });
   
+  const [hesitationAnalysis, setHesitationAnalysis] = useState<{
+    count: number;
+    percentage: number;
+    patterns: string[];
+  }>({
+    count: 0,
+    percentage: 0,
+    patterns: []
+  });
+  
   const [metricsHistory, setMetricsHistory] = useState<Array<{
     pace?: number;
     clarity?: number;
@@ -67,6 +77,9 @@ export function useSpeechFeedback(isActive: boolean, transcript: string, duratio
     
     const interval = setInterval(() => {
       if (duration > 2 && feedback) {
+        // Get the latest hesitation analysis
+        const currentHesitations = detectHesitations(transcript);
+        
         setMetricsHistory(prev => {
           const newHistory = [...prev];
           if (newHistory.length >= 20) {
@@ -76,7 +89,7 @@ export function useSpeechFeedback(isActive: boolean, transcript: string, duratio
           newHistory.push({
             pace: feedback.speed,
             clarity: clarityAnalysis.score,
-            hesitations: detectHesitations(transcript).count,
+            hesitations: currentHesitations.count,
             fillerWords: feedback.fillerWords.length,
             timestamp: Date.now()
           });
@@ -109,6 +122,10 @@ export function useSpeechFeedback(isActive: boolean, transcript: string, duratio
     if (transcript.length > 20) {
       const clarity = analyzeSpeechClarity(transcript);
       setClarityAnalysis(clarity);
+      
+      // Analyze hesitations
+      const hesitations = detectHesitations(transcript);
+      setHesitationAnalysis(hesitations);
     }
     
     if (feedback) {
@@ -131,6 +148,7 @@ export function useSpeechFeedback(isActive: boolean, transcript: string, duratio
       }
     }
     
+    // Add hesitation-specific tips
     const hesitations = detectHesitations(transcript);
     if (hesitations.count > 2) {
       newTips.push(`You've repeated words ${hesitations.count} times. Try to speak more fluidly.`);
@@ -148,6 +166,7 @@ export function useSpeechFeedback(isActive: boolean, transcript: string, duratio
     tips,
     metrics,
     clarityAnalysis,
+    hesitationAnalysis,
     metricsHistory,
     calculateScore
   };

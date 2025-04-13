@@ -25,6 +25,7 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
     metrics,
     clarityAnalysis,
     metricsHistory,
+    hesitationAnalysis,
     calculateScore
   } = useSpeechFeedback(isActive, transcript, duration, feedback);
 
@@ -48,6 +49,7 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
           tips={tips}
           metrics={metrics}
           clarityAnalysis={clarityAnalysis}
+          hesitationAnalysis={hesitationAnalysis}
           metricsHistory={metricsHistory}
           speechScore={speechScore}
         />

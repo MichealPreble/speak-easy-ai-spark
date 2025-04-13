@@ -1,43 +1,72 @@
 
 import React from "react";
-import { Clock, MessageCircle, Gauge, Activity } from "lucide-react";
+import { Clock, Monitor, Activity, Volume2, Hash } from "lucide-react";
 
 interface SpeechMetricsProps {
   duration: number;
   speed: number | null;
   wordCount: number;
   fillerWordsCount: number;
+  hesitationsCount?: number;
+  hesitationsPercentage?: number;
 }
 
 const SpeechMetrics: React.FC<SpeechMetricsProps> = ({
   duration,
   speed,
   wordCount,
-  fillerWordsCount
+  fillerWordsCount,
+  hesitationsCount,
+  hesitationsPercentage
 }) => {
   return (
-    <div className="grid grid-cols-2 gap-2 p-3 bg-muted/30">
-      <div className="flex items-center text-sm">
-        <Clock className="h-4 w-4 mr-1.5 text-primary/70" />
-        <span>Duration: {Math.round(duration)}s</span>
-      </div>
-      
-      {speed !== null && (
-        <div className="flex items-center text-sm">
-          <Gauge className="h-4 w-4 mr-1.5 text-primary/70" />
-          <span>Pace: {speed} wpm</span>
+    <div className="grid grid-cols-2 gap-2 p-3">
+      <div className="flex items-center">
+        <Clock className="w-4 h-4 mr-2 text-muted-foreground" />
+        <div>
+          <div className="text-xs font-medium">Duration</div>
+          <div className="text-sm">{duration.toFixed(0)}s</div>
         </div>
-      )}
-      
-      <div className="flex items-center text-sm">
-        <MessageCircle className="h-4 w-4 mr-1.5 text-primary/70" />
-        <span>Words: {wordCount}</span>
       </div>
       
-      {fillerWordsCount > 0 && (
-        <div className="flex items-center text-sm">
-          <Activity className="h-4 w-4 mr-1.5 text-primary/70" />
-          <span>Fillers: {fillerWordsCount}</span>
+      <div className="flex items-center">
+        <Activity className="w-4 h-4 mr-2 text-muted-foreground" />
+        <div>
+          <div className="text-xs font-medium">Pace</div>
+          <div className="text-sm">{speed || 0} WPM</div>
+        </div>
+      </div>
+      
+      <div className="flex items-center">
+        <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
+        <div>
+          <div className="text-xs font-medium">Words</div>
+          <div className="text-sm">{wordCount}</div>
+        </div>
+      </div>
+      
+      <div className="flex items-center">
+        <Volume2 className="w-4 h-4 mr-2 text-muted-foreground" />
+        <div>
+          <div className="text-xs font-medium">Fillers</div>
+          <div className="text-sm">{fillerWordsCount}</div>
+        </div>
+      </div>
+      
+      {hesitationsCount !== undefined && (
+        <div className="flex items-center col-span-2">
+          <Monitor className="w-4 h-4 mr-2 text-muted-foreground" />
+          <div>
+            <div className="text-xs font-medium">Hesitations</div>
+            <div className="text-sm">
+              {hesitationsCount} 
+              {hesitationsPercentage !== undefined && hesitationsPercentage > 0 && 
+                <span className="text-xs text-muted-foreground ml-1">
+                  ({hesitationsPercentage}% of speech)
+                </span>
+              }
+            </div>
+          </div>
         </div>
       )}
     </div>
