@@ -88,7 +88,7 @@ const FeedbackContent: React.FC<FeedbackContentProps> = ({
               </div>
             ))}
             {hesitationAnalysis.patterns.length > 3 && (
-              <div className="text-xs opacity-70 text-center pt-1">
+              <div className="text-xs text-muted-foreground/70 text-center mt-2 py-1 bg-muted/50 rounded">
                 +{hesitationAnalysis.patterns.length - 3} more pattern{hesitationAnalysis.patterns.length - 3 > 1 ? 's' : ''}
               </div>
             )}
