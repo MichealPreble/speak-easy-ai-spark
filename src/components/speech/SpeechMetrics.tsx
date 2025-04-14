@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Clock, Monitor, Activity, Volume2, Hash } from "lucide-react";
+import { Clock, Monitor, Activity, Volume2, Hash, PauseCircle } from "lucide-react";
 
 interface SpeechMetricsProps {
   duration: number;
@@ -55,7 +55,7 @@ const SpeechMetrics: React.FC<SpeechMetricsProps> = ({
       
       {hesitationsCount !== undefined && (
         <div className="flex items-center col-span-2">
-          <Monitor className="w-4 h-4 mr-2 text-muted-foreground" />
+          <PauseCircle className="w-4 h-4 mr-2 text-muted-foreground" />
           <div>
             <div className="text-xs font-medium">Hesitations</div>
             <div className="text-sm">

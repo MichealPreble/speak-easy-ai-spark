@@ -8,6 +8,7 @@ import SpeechTips from "./SpeechTips";
 import SpeechClarityFeedback from "./SpeechClarityFeedback";
 import SpeechMetricsChart from "./SpeechMetricsChart";
 import { TrendMetrics } from "@/hooks/useSpeechTrends";
+import { useSpeechTips } from "@/hooks/useSpeechTips";
 
 interface FeedbackContentProps {
   isActive: boolean;
@@ -46,6 +47,8 @@ const FeedbackContent: React.FC<FeedbackContentProps> = ({
   metricsHistory,
   speechScore
 }) => {
+  const { hasTips, showPositiveFeedback } = useSpeechTips(tips, duration);
+  
   if (!isActive) return null;
   
   return (
@@ -68,14 +71,14 @@ const FeedbackContent: React.FC<FeedbackContentProps> = ({
       </div>
       
       {hesitationAnalysis && hesitationAnalysis.patterns.length > 0 && (
-        <div className="px-3 pb-2 border-t border-border/30">
-          <div className="text-xs font-medium mb-1">Detected Hesitation Patterns</div>
-          <div className="text-xs text-muted-foreground">
+        <div className="px-3 pb-3 pt-2 border-t border-border/30">
+          <div className="text-xs font-medium mb-2">Detected Hesitation Patterns</div>
+          <div className="text-xs text-muted-foreground max-h-[100px] overflow-y-auto pr-1">
             {hesitationAnalysis.patterns.slice(0, 3).map((pattern, index) => (
-              <div key={index} className="bg-muted px-2 py-1 rounded mb-1">{pattern}</div>
+              <div key={index} className="bg-muted px-2 py-1.5 rounded mb-1.5 text-xs">{pattern}</div>
             ))}
             {hesitationAnalysis.patterns.length > 3 && (
-              <div className="text-xs opacity-70 mt-1">+{hesitationAnalysis.patterns.length - 3} more patterns</div>
+              <div className="text-xs opacity-70 mt-1 text-center">+{hesitationAnalysis.patterns.length - 3} more patterns</div>
             )}
           </div>
         </div>
