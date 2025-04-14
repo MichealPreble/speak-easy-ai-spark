@@ -1,6 +1,7 @@
 
 import React from "react";
 import { SpeechFeedback } from "@/hooks/useVoiceRecognition";
+import { useSpeechFeedback } from "@/hooks/useSpeechFeedback";
 import SpeechMetrics from "./SpeechMetrics";
 import SpeechQualityScore from "./SpeechQualityScore";
 import SpeechTrends from "./SpeechTrends";
@@ -72,13 +73,24 @@ const FeedbackContent: React.FC<FeedbackContentProps> = ({
       
       {hesitationAnalysis && hesitationAnalysis.patterns.length > 0 && (
         <div className="px-3 pb-3 pt-2 border-t border-border/30">
-          <div className="text-xs font-medium mb-2">Detected Hesitation Patterns</div>
-          <div className="text-xs text-muted-foreground max-h-[100px] overflow-y-auto pr-1">
+          <div className="text-xs font-medium mb-2 flex items-center justify-between">
+            <span>Detected Hesitation Patterns</span>
+            {hesitationAnalysis.patterns.length > 3 && (
+              <span className="text-xs text-muted-foreground">
+                Showing {Math.min(3, hesitationAnalysis.patterns.length)} of {hesitationAnalysis.patterns.length}
+              </span>
+            )}
+          </div>
+          <div className="text-xs text-muted-foreground max-h-[100px] overflow-y-auto pr-1 space-y-1.5">
             {hesitationAnalysis.patterns.slice(0, 3).map((pattern, index) => (
-              <div key={index} className="bg-muted px-2 py-1.5 rounded mb-1.5 text-xs">{pattern}</div>
+              <div key={index} className="bg-muted px-2.5 py-1.5 rounded text-xs leading-relaxed break-words">
+                {pattern}
+              </div>
             ))}
             {hesitationAnalysis.patterns.length > 3 && (
-              <div className="text-xs opacity-70 mt-1 text-center">+{hesitationAnalysis.patterns.length - 3} more patterns</div>
+              <div className="text-xs opacity-70 text-center pt-1">
+                +{hesitationAnalysis.patterns.length - 3} more pattern{hesitationAnalysis.patterns.length - 3 > 1 ? 's' : ''}
+              </div>
             )}
           </div>
         </div>

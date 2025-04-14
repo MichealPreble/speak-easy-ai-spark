@@ -34,7 +34,7 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
   const speechScore = calculateScore(feedback);
 
   return (
-    <div className="fixed bottom-20 right-4 z-50 w-[90%] max-w-xs sm:max-w-sm md:max-w-md bg-background/95 backdrop-blur-md border rounded-lg shadow-lg overflow-hidden dark:bg-black/90 sm:w-80">
+    <div className="fixed bottom-20 right-4 z-50 w-[95%] max-w-xs sm:max-w-sm md:max-w-md bg-background/95 backdrop-blur-md border rounded-lg shadow-lg overflow-hidden dark:bg-black/90 sm:w-80">
       <FeedbackHeader 
         isActive={isActive}
         expanded={expanded}

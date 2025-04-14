@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Clock, Monitor, Activity, Volume2, Hash, PauseCircle } from "lucide-react";
+import { Clock, Activity, Volume2, Hash, PauseCircle } from "lucide-react";
 
 interface SpeechMetricsProps {
   duration: number;
@@ -20,9 +20,9 @@ const SpeechMetrics: React.FC<SpeechMetricsProps> = ({
   hesitationsPercentage
 }) => {
   return (
-    <div className="grid grid-cols-2 gap-2 p-3">
+    <div className="grid grid-cols-2 gap-x-2 gap-y-2.5 p-3">
       <div className="flex items-center">
-        <Clock className="w-4 h-4 mr-2 text-muted-foreground" />
+        <Clock className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
         <div>
           <div className="text-xs font-medium">Duration</div>
           <div className="text-sm">{duration.toFixed(0)}s</div>
@@ -30,7 +30,7 @@ const SpeechMetrics: React.FC<SpeechMetricsProps> = ({
       </div>
       
       <div className="flex items-center">
-        <Activity className="w-4 h-4 mr-2 text-muted-foreground" />
+        <Activity className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
         <div>
           <div className="text-xs font-medium">Pace</div>
           <div className="text-sm">{speed || 0} WPM</div>
@@ -38,7 +38,7 @@ const SpeechMetrics: React.FC<SpeechMetricsProps> = ({
       </div>
       
       <div className="flex items-center">
-        <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
+        <Hash className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
         <div>
           <div className="text-xs font-medium">Words</div>
           <div className="text-sm">{wordCount}</div>
@@ -46,7 +46,7 @@ const SpeechMetrics: React.FC<SpeechMetricsProps> = ({
       </div>
       
       <div className="flex items-center">
-        <Volume2 className="w-4 h-4 mr-2 text-muted-foreground" />
+        <Volume2 className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
         <div>
           <div className="text-xs font-medium">Fillers</div>
           <div className="text-sm">{fillerWordsCount}</div>
@@ -55,13 +55,13 @@ const SpeechMetrics: React.FC<SpeechMetricsProps> = ({
       
       {hesitationsCount !== undefined && (
         <div className="flex items-center col-span-2">
-          <PauseCircle className="w-4 h-4 mr-2 text-muted-foreground" />
+          <PauseCircle className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
           <div>
             <div className="text-xs font-medium">Hesitations</div>
-            <div className="text-sm">
-              {hesitationsCount} 
+            <div className="text-sm flex flex-wrap items-center">
+              <span>{hesitationsCount}</span>
               {hesitationsPercentage !== undefined && hesitationsPercentage > 0 && 
-                <span className="text-xs text-muted-foreground ml-1">
+                <span className="text-xs text-muted-foreground ml-1 break-normal">
                   ({hesitationsPercentage}% of speech)
                 </span>
               }
