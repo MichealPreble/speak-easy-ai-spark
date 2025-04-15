@@ -1,0 +1,79 @@
+
+import { vi } from "vitest";
+import { BrowserRouter } from "react-router-dom";
+import { render } from "@testing-library/react";
+import UserProfile from "../UserProfile";
+import "@testing-library/jest-dom";
+
+// Common mock setup
+export const mockUpdateProfile = vi.fn().mockResolvedValue(undefined);
+export const mockSendVerificationEmail = vi.fn().mockResolvedValue(undefined);
+export const mockToast = vi.fn();
+
+// Mock react-router-dom
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => vi.fn(),
+  };
+});
+
+// Mock the toast hook
+vi.mock("@/hooks/use-toast", async () => {
+  return {
+    useToast: () => ({
+      toast: mockToast,
+    }),
+    toast: mockToast,
+  };
+});
+
+// Base user object for testing
+export const testUser = {
+  email: "test@example.com",
+  user_metadata: {
+    full_name: "Test User",
+    avatar_url: "https://example.com/avatar.jpg"
+  }
+};
+
+// Default auth mock with verified email
+export const createAuthMock = (overrides = {}) => {
+  return {
+    user: testUser,
+    isEmailVerified: true,
+    updateProfile: mockUpdateProfile,
+    sendVerificationEmail: mockSendVerificationEmail,
+    ...overrides
+  };
+};
+
+// Setup AuthContext mock with custom values
+export const setupAuthMock = (authValues = {}) => {
+  vi.mock("@/context/AuthContext", async () => {
+    return {
+      useAuth: () => createAuthMock(authValues),
+      AuthProvider: ({ children }) => <div>{children}</div>,
+    };
+  });
+};
+
+// Reset all mocks between tests
+export const resetMocks = () => {
+  vi.clearAllMocks();
+  mockUpdateProfile.mockClear();
+  mockSendVerificationEmail.mockClear();
+  mockToast.mockClear();
+};
+
+// Utility function to render the component with specified auth values
+export const renderUserProfile = (authValues = {}) => {
+  setupAuthMock(authValues);
+  
+  return render(
+    <BrowserRouter>
+      <UserProfile />
+    </BrowserRouter>
+  );
+};
