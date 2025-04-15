@@ -1,9 +1,11 @@
+
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi, describe, test, expect, beforeEach } from "vitest";
 import { BrowserRouter } from "react-router-dom";
 import ForgotPassword from "../ForgotPassword";
 import { AuthProvider } from "@/context/AuthContext";
 import * as toastHook from "@/hooks/use-toast";
+import "@testing-library/jest-dom"; // Add this import for DOM matchers
 
 // Mock the AuthContext
 vi.mock("@/context/AuthContext", async () => {

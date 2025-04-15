@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import UpdatePassword from "../UpdatePassword";
 import { AuthProvider } from "@/context/AuthContext";
 import * as toastHook from "@/hooks/use-toast";
+import "@testing-library/jest-dom"; // Add this import for DOM matchers
 
 // Mock react-router-dom navigate
 vi.mock("react-router-dom", async () => {
