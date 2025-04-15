@@ -1,6 +1,9 @@
+
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import { BrowserRouter } from "react-router-dom";
+import EmailVerification from "../EmailVerification";
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
