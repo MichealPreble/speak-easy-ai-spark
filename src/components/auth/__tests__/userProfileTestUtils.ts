@@ -54,7 +54,7 @@ export const setupAuthMock = (authValues = {}) => {
   vi.mock("@/context/AuthContext", async () => {
     return {
       useAuth: () => createAuthMock(authValues),
-      AuthProvider: ({ children }) => <div>{children}</div>,
+      AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     };
   });
 };
@@ -67,7 +67,7 @@ export const resetMocks = () => {
   mockToast.mockClear();
 };
 
-// Utility function to render the component with specified auth values
+// Utility function to render the component
 export const renderUserProfile = (authValues = {}) => {
   setupAuthMock(authValues);
   
@@ -77,3 +77,4 @@ export const renderUserProfile = (authValues = {}) => {
     </BrowserRouter>
   );
 };
+

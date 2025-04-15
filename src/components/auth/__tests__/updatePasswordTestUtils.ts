@@ -1,3 +1,4 @@
+
 import { vi } from "vitest";
 import { BrowserRouter } from "react-router-dom";
 import { render } from "@testing-library/react";
@@ -35,7 +36,7 @@ vi.mock("@/context/AuthContext", async () => {
     useAuth: () => ({
       updatePassword: mockUpdatePassword,
     }),
-    AuthProvider: ({ children }) => <div>{children}</div>,
+    AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   };
 });
 
@@ -65,3 +66,4 @@ export const renderUpdatePassword = () => {
     </BrowserRouter>
   );
 };
+
