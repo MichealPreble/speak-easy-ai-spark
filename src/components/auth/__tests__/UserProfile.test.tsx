@@ -5,7 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import UserProfile from "../UserProfile";
 import { AuthProvider } from "@/context/AuthContext";
 import * as toastHook from "@/hooks/use-toast";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom"; // Add this import for DOM matchers
 
 // Mock react-router-dom
 vi.mock("react-router-dom", async () => {
