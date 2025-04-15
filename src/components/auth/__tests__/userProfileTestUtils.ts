@@ -77,4 +77,3 @@ export const renderUserProfile = (authValues = {}) => {
     </BrowserRouter>
   );
 };
-
