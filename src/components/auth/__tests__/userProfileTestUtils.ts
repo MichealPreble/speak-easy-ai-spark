@@ -12,22 +12,18 @@ export const mockSendVerificationEmail = vi.fn().mockResolvedValue(undefined);
 export const mockToast = vi.fn();
 
 // Mock react-router-dom
-vi.mock("react-router-dom", () => {
-  return {
-    ...vi.importActual("react-router-dom"),
-    useNavigate: () => vi.fn(),
-  };
-});
+vi.mock("react-router-dom", () => ({
+  ...vi.importActual("react-router-dom"),
+  useNavigate: () => vi.fn(),
+}));
 
 // Mock the toast hook
-vi.mock("@/hooks/use-toast", () => {
-  return {
-    useToast: () => ({
-      toast: mockToast,
-    }),
+vi.mock("@/hooks/use-toast", () => ({
+  useToast: () => ({
     toast: mockToast,
-  };
-});
+  }),
+  toast: mockToast,
+}));
 
 // Base user object for testing
 export const testUser = {
@@ -51,12 +47,10 @@ export const createAuthMock = (overrides = {}) => {
 
 // Setup AuthContext mock with custom values
 export const setupAuthMock = (authValues = {}) => {
-  vi.mock("@/context/AuthContext", () => {
-    return {
-      useAuth: () => createAuthMock(authValues),
-      AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    };
-  });
+  vi.mock("@/context/AuthContext", () => ({
+    useAuth: () => createAuthMock(authValues),
+    AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  }));
 };
 
 // Reset all mocks between tests

@@ -22,32 +22,26 @@ export const mockUpdatePassword = vi.fn().mockImplementation((password) => {
 export const mockToast = vi.fn();
 
 // Mock react-router-dom
-vi.mock("react-router-dom", () => {
-  return {
-    ...vi.importActual("react-router-dom"),
-    useNavigate: () => mockNavigate,
-  };
-});
+vi.mock("react-router-dom", () => ({
+  ...vi.importActual("react-router-dom"),
+  useNavigate: () => mockNavigate,
+}));
 
 // Mock the AuthContext
-vi.mock("@/context/AuthContext", () => {
-  return {
-    useAuth: () => ({
-      updatePassword: mockUpdatePassword,
-    }),
-    AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  };
-});
+vi.mock("@/context/AuthContext", () => ({
+  useAuth: () => ({
+    updatePassword: mockUpdatePassword,
+  }),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
 
 // Mock the toast hook
-vi.mock("@/hooks/use-toast", () => {
-  return {
-    useToast: () => ({
-      toast: mockToast,
-    }),
+vi.mock("@/hooks/use-toast", () => ({
+  useToast: () => ({
     toast: mockToast,
-  };
-});
+  }),
+  toast: mockToast,
+}));
 
 // Reset all mocks between tests
 export const resetMocks = () => {
