@@ -6,6 +6,7 @@ import * as z from "zod";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { Mail } from "lucide-react";
 
 import {
   Form,
@@ -78,11 +79,16 @@ export default function ForgotPassword() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="your.email@example.com" 
-                          {...field} 
-                          className="glass-card" 
-                        />
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                          <Input 
+                            placeholder="your.email@example.com" 
+                            {...field} 
+                            className="glass-card pl-10" 
+                            type="email"
+                            autoComplete="email"
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -92,13 +98,14 @@ export default function ForgotPassword() {
                   type="submit" 
                   className="w-full glass-button"
                   disabled={isLoading}
+                  data-testid="submit-button"
                 >
                   {isLoading ? "Sending..." : "Send Reset Link"}
                 </Button>
               </form>
             </Form>
           ) : (
-            <div className="text-center py-4">
+            <div className="text-center py-4" aria-live="polite">
               <p className="mb-4">We've sent a password reset link to your email.</p>
               <p className="text-sm text-muted-foreground">
                 Didn't receive an email? Check your spam folder or{" "}
@@ -122,3 +129,4 @@ export default function ForgotPassword() {
     </div>
   );
 }
+
