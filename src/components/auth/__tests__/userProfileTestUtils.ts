@@ -12,13 +12,15 @@ export const mockSendVerificationEmail = vi.fn().mockResolvedValue(undefined);
 export const mockToast = vi.fn();
 
 // Mock react-router-dom
-vi.mock("react-router-dom", () => ({
-  ...vi.importActual("react-router-dom"),
+vi.mock('react-router-dom', () => ({
+  __esModule: true,
+  ...vi.importActual('react-router-dom'),
   useNavigate: () => vi.fn(),
 }));
 
 // Mock the toast hook
-vi.mock("@/hooks/use-toast", () => ({
+vi.mock('@/hooks/use-toast', () => ({
+  __esModule: true,
   useToast: () => ({
     toast: mockToast,
   }),
@@ -47,7 +49,8 @@ export const createAuthMock = (overrides = {}) => {
 
 // Setup AuthContext mock with custom values
 export const setupAuthMock = (authValues = {}) => {
-  vi.mock("@/context/AuthContext", () => ({
+  vi.mock('@/context/AuthContext', () => ({
+    __esModule: true,
     useAuth: () => createAuthMock(authValues),
     AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   }));
