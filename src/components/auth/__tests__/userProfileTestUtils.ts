@@ -1,6 +1,6 @@
 
-import { vi } from "vitest";
 import React from 'react';
+import { vi } from "vitest";
 import { BrowserRouter } from "react-router-dom";
 import { render } from "@testing-library/react";
 import UserProfile from "../UserProfile";
@@ -55,7 +55,7 @@ export const setupAuthMock = (authValues = {}) => {
   vi.mock("@/context/AuthContext", async () => {
     return {
       useAuth: () => createAuthMock(authValues),
-      AuthProvider: ({ children }) => <div>{children}</div>,
+      AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     };
   });
 };
