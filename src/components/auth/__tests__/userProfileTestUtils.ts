@@ -52,7 +52,7 @@ export const setupAuthMock = (authValues = {}) => {
   vi.mock('@/context/AuthContext', () => ({
     __esModule: true,
     useAuth: () => createAuthMock(authValues),
-    AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    AuthProvider: ({ children }) => React.createElement('div', null, children),
   }));
 };
 
@@ -69,8 +69,8 @@ export const renderUserProfile = (authValues = {}) => {
   setupAuthMock(authValues);
   
   return render(
-    <BrowserRouter>
-      <UserProfile />
-    </BrowserRouter>
+    React.createElement(BrowserRouter, null,
+      React.createElement(UserProfile, null)
+    )
   );
 };

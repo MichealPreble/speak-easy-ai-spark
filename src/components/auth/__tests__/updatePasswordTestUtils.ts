@@ -35,7 +35,7 @@ vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({
     updatePassword: mockUpdatePassword,
   }),
-  AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AuthProvider: ({ children }) => React.createElement('div', null, children),
 }));
 
 // Mock the toast hook
@@ -58,8 +58,8 @@ export const resetMocks = () => {
 // Utility function to render the component
 export const renderUpdatePassword = () => {
   return render(
-    <BrowserRouter>
-      <UpdatePassword />
-    </BrowserRouter>
+    React.createElement(BrowserRouter, null,
+      React.createElement(UpdatePassword, null)
+    )
   );
 };
