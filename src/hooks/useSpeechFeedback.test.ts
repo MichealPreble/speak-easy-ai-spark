@@ -4,21 +4,21 @@ import { useSpeechFeedback } from './useSpeechFeedback';
 import { detectHesitations, analyzeSpokenCadence, analyzeSpeechClarity } from "@/utils/speech";
 
 // Mock the speech analysis utilities
-jest.mock('@/utils/speech', () => ({
-  detectHesitations: jest.fn(),
-  analyzeSpokenCadence: jest.fn(),
-  analyzeSpeechClarity: jest.fn(),
+vi.mock('@/utils/speech', () => ({
+  detectHesitations: vi.fn(),
+  analyzeSpokenCadence: vi.fn(),
+  analyzeSpeechClarity: vi.fn(),
 }));
 
 describe('useSpeechFeedback', () => {
   // Reset mocks before each test
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     
     // Set up default mock implementations
-    (detectHesitations as jest.Mock).mockReturnValue({ count: 0 });
-    (analyzeSpokenCadence as jest.Mock).mockReturnValue(8);
-    (analyzeSpeechClarity as jest.Mock).mockReturnValue({
+    (detectHesitations as Mock).mockReturnValue({ count: 0 });
+    (analyzeSpokenCadence as Mock).mockReturnValue(8);
+    (analyzeSpeechClarity as Mock).mockReturnValue({
       score: 7,
       rating: 'good',
       suggestions: []
@@ -97,7 +97,7 @@ describe('useSpeechFeedback', () => {
 
   test('should update tips based on feedback', async () => {
     // Mock hesitation detection for this test
-    (detectHesitations as jest.Mock).mockReturnValue({ count: 3 });
+    (detectHesitations as Mock).mockReturnValue({ count: 3 });
     
     const feedback = {
       speed: 190,
@@ -149,7 +149,7 @@ describe('useSpeechFeedback', () => {
   });
 
   test('should update metricsHistory when active', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     
     const feedback = {
       speed: 150,
@@ -166,7 +166,7 @@ describe('useSpeechFeedback', () => {
     
     // Fast-forward 3 seconds
     act(() => {
-      jest.advanceTimersByTime(3000);
+      vi.advanceTimersByTime(3000);
     });
     
     // Verify metrics history is updated
@@ -175,13 +175,13 @@ describe('useSpeechFeedback', () => {
     
     // Fast-forward another 3 seconds
     act(() => {
-      jest.advanceTimersByTime(3000);
+      vi.advanceTimersByTime(3000);
     });
     
     // Verify metrics history is updated again
     expect(result.current.metricsHistory.length).toBe(2);
     
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('should reset when not active', () => {
