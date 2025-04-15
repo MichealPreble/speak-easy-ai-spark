@@ -1,7 +1,6 @@
-
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi, describe, test, expect, beforeEach } from "vitest";
-import { useNavigate } from "react-router-dom";
+import { BrowserRouter, useNavigate } from "react-router-dom";
 import UpdatePassword from "../UpdatePassword";
 import { AuthProvider } from "@/context/AuthContext";
 import * as toastHook from "@/hooks/use-toast";
@@ -9,10 +8,11 @@ import "@testing-library/jest-dom"; // Add this import for DOM matchers
 
 // Mock react-router-dom navigate
 vi.mock("react-router-dom", async () => {
+  const mockNavigate = vi.fn();
   const actual = await vi.importActual("react-router-dom");
   return {
     ...actual,
-    useNavigate: () => vi.fn(),
+    useNavigate: () => mockNavigate,
   };
 });
 
@@ -21,9 +21,11 @@ vi.mock("@/context/AuthContext", async () => {
   return {
     useAuth: () => ({
       updatePassword: vi.fn().mockImplementation((password) => {
-        if (password === "weak") {
-          return Promise.reject(new Error("Password is too weak"));
+        // For testing error scenario
+        if (password === "errorTrigger123") {
+          return Promise.reject(new Error("Failed to update password"));
         }
+        // Otherwise succeed
         return Promise.resolve();
       }),
     }),
@@ -49,7 +51,9 @@ describe("UpdatePassword Component", () => {
 
   const renderComponent = () => {
     return render(
-      <UpdatePassword />
+      <BrowserRouter>
+        <UpdatePassword />
+      </BrowserRouter>
     );
   };
 
@@ -58,123 +62,141 @@ describe("UpdatePassword Component", () => {
     renderComponent();
     
     expect(screen.getByText("Update Password")).toBeInTheDocument();
-    expect(screen.getByLabelText(/new password/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /update password/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/New Password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Confirm Password/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Update Password/i })).toBeInTheDocument();
   });
 
-  // Test 2: Password validation works
-  test("shows validation error for weak password", async () => {
+  // Test 2: Password validation works - too short
+  test("shows validation error when password is too short", async () => {
     renderComponent();
     
-    const passwordInput = screen.getByLabelText(/new password/i);
-    const confirmInput = screen.getByLabelText(/confirm password/i);
-    const submitButton = screen.getByRole("button", { name: /update password/i });
+    const passwordInput = screen.getByLabelText(/New Password/i);
+    const confirmInput = screen.getByLabelText(/Confirm Password/i);
+    const submitButton = screen.getByRole("button", { name: /Update Password/i });
     
-    // Try entering a short password
-    fireEvent.change(passwordInput, { target: { value: "123" } });
-    fireEvent.change(confirmInput, { target: { value: "123" } });
+    // Type short password and submit
+    fireEvent.change(passwordInput, { target: { value: "short" } });
+    fireEvent.change(confirmInput, { target: { value: "short" } });
     fireEvent.click(submitButton);
     
-    // Check for validation error (password too short)
+    // Check for validation error
     await waitFor(() => {
-      expect(screen.getByText(/password must be at least 8 characters/i)).toBeInTheDocument();
-    });
-    
-    // Try password without uppercase
-    fireEvent.change(passwordInput, { target: { value: "12345678" } });
-    fireEvent.change(confirmInput, { target: { value: "12345678" } });
-    fireEvent.click(submitButton);
-    
-    // Check for validation error (missing uppercase)
-    await waitFor(() => {
-      expect(screen.getByText(/password must contain at least one uppercase letter/i)).toBeInTheDocument();
+      expect(screen.getByText(/Password must be at least 8 characters/i)).toBeInTheDocument();
     });
   });
 
-  // Test 3: Password mismatch validation
-  test("shows error when passwords don't match", async () => {
+  // Test 3: Password validation works - no uppercase
+  test("shows validation error when password has no uppercase letter", async () => {
     renderComponent();
     
-    const passwordInput = screen.getByLabelText(/new password/i);
-    const confirmInput = screen.getByLabelText(/confirm password/i);
-    const submitButton = screen.getByRole("button", { name: /update password/i });
+    const passwordInput = screen.getByLabelText(/New Password/i);
+    const confirmInput = screen.getByLabelText(/Confirm Password/i);
+    const submitButton = screen.getByRole("button", { name: /Update Password/i });
     
-    // Enter different passwords
-    fireEvent.change(passwordInput, { target: { value: "StrongPass123" } });
-    fireEvent.change(confirmInput, { target: { value: "DifferentPass123" } });
+    // Type password without uppercase and submit
+    fireEvent.change(passwordInput, { target: { value: "password123" } });
+    fireEvent.change(confirmInput, { target: { value: "password123" } });
     fireEvent.click(submitButton);
     
-    // Check for password mismatch error
+    // Check for validation error
     await waitFor(() => {
-      expect(screen.getByText(/passwords don't match/i)).toBeInTheDocument();
+      expect(screen.getByText(/Password must contain at least one uppercase letter/i)).toBeInTheDocument();
     });
   });
 
-  // Test 4: Successful password update
+  // Test 4: Password validation works - passwords don't match
+  test("shows validation error when passwords don't match", async () => {
+    renderComponent();
+    
+    const passwordInput = screen.getByLabelText(/New Password/i);
+    const confirmInput = screen.getByLabelText(/Confirm Password/i);
+    const submitButton = screen.getByRole("button", { name: /Update Password/i });
+    
+    // Type non-matching passwords and submit
+    fireEvent.change(passwordInput, { target: { value: "Password123" } });
+    fireEvent.change(confirmInput, { target: { value: "Password456" } });
+    fireEvent.click(submitButton);
+    
+    // Check for validation error
+    await waitFor(() => {
+      expect(screen.getByText(/Passwords don't match/i)).toBeInTheDocument();
+    });
+  });
+
+  // Test 5: Successful password update
   test("successfully updates password with valid input", async () => {
+    const { useNavigate } = await import("react-router-dom");
     const { useAuth } = await import("@/context/AuthContext");
-    const { useToast } = await import("@/hooks/use-toast");
-    const navigate = useNavigate();
+    const { toast } = toastHook.useToast();
     
     renderComponent();
     
-    const passwordInput = screen.getByLabelText(/new password/i);
-    const confirmInput = screen.getByLabelText(/confirm password/i);
-    const submitButton = screen.getByRole("button", { name: /update password/i });
+    const passwordInput = screen.getByLabelText(/New Password/i);
+    const confirmInput = screen.getByLabelText(/Confirm Password/i);
+    const submitButton = screen.getByRole("button", { name: /Update Password/i });
     
-    // Enter valid matching passwords
-    fireEvent.change(passwordInput, { target: { value: "StrongPass123" } });
-    fireEvent.change(confirmInput, { target: { value: "StrongPass123" } });
+    // Type valid matching passwords and submit
+    fireEvent.change(passwordInput, { target: { value: "ValidPassword123" } });
+    fireEvent.change(confirmInput, { target: { value: "ValidPassword123" } });
     fireEvent.click(submitButton);
     
-    // Check loading state
-    expect(submitButton).toHaveTextContent(/updating/i);
+    // Check for loading state
+    expect(submitButton).toHaveTextContent(/Updating/i);
     
-    // Verify updatePassword was called
+    // Verify updatePassword was called with correct value
     await waitFor(() => {
-      expect(useAuth().updatePassword).toHaveBeenCalledWith("StrongPass123");
+      expect(useAuth().updatePassword).toHaveBeenCalledWith("ValidPassword123");
     });
     
-    // Verify toast and navigation
-    expect(useToast().toast).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: "Password updated",
-        description: expect.any(String),
-      })
-    );
+    // Verify success toast was shown
+    await waitFor(() => {
+      expect(toast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "Password updated",
+          description: expect.any(String),
+        })
+      );
+    });
+    
+    // Verify navigation occurred
+    await waitFor(() => {
+      expect(useNavigate()).toHaveBeenCalledWith("/");
+    });
   });
 
-  // Test 5: Error handling
+  // Test 6: Error handling
   test("shows error toast when update fails", async () => {
-    const { useToast } = await import("@/hooks/use-toast");
+    const { toast } = toastHook.useToast();
     
     renderComponent();
     
-    const passwordInput = screen.getByLabelText(/new password/i);
-    const confirmInput = screen.getByLabelText(/confirm password/i);
-    const submitButton = screen.getByRole("button", { name: /update password/i });
+    const passwordInput = screen.getByLabelText(/New Password/i);
+    const confirmInput = screen.getByLabelText(/Confirm Password/i);
+    const submitButton = screen.getByRole("button", { name: /Update Password/i });
     
-    // Enter password that will trigger an error in our mock
-    fireEvent.change(passwordInput, { target: { value: "weak" } });
-    fireEvent.change(confirmInput, { target: { value: "weak" } });
+    // Type the password that triggers an error
+    fireEvent.change(passwordInput, { target: { value: "errorTrigger123" } });
+    fireEvent.change(confirmInput, { target: { value: "errorTrigger123" } });
     fireEvent.click(submitButton);
     
-    // Check loading state
-    expect(submitButton).toHaveTextContent(/updating/i);
+    // Check for loading state
+    expect(submitButton).toHaveTextContent(/Updating/i);
     
     // Verify error toast was shown
     await waitFor(() => {
-      expect(useToast().toast).toHaveBeenCalledWith(
+      expect(toast).toHaveBeenCalledWith(
         expect.objectContaining({
           title: "Error",
-          description: "Password is too weak",
+          description: "Failed to update password",
           variant: "destructive",
         })
       );
     });
     
     // Verify button returns to normal state
-    expect(submitButton).toHaveTextContent(/update password/i);
+    await waitFor(() => {
+      expect(submitButton).toHaveTextContent(/Update Password/i);
+    });
   });
 });
