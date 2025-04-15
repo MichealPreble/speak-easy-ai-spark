@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { vi } from "vitest";
 import { BrowserRouter } from "react-router-dom";
@@ -23,16 +22,15 @@ export const mockUpdatePassword = vi.fn().mockImplementation((password) => {
 export const mockToast = vi.fn();
 
 // Mock react-router-dom
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
+vi.mock("react-router-dom", () => {
   return {
-    ...actual,
+    ...vi.importActual("react-router-dom"),
     useNavigate: () => mockNavigate,
   };
 });
 
 // Mock the AuthContext
-vi.mock("@/context/AuthContext", async () => {
+vi.mock("@/context/AuthContext", () => {
   return {
     useAuth: () => ({
       updatePassword: mockUpdatePassword,
@@ -42,7 +40,7 @@ vi.mock("@/context/AuthContext", async () => {
 });
 
 // Mock the toast hook
-vi.mock("@/hooks/use-toast", async () => {
+vi.mock("@/hooks/use-toast", () => {
   return {
     useToast: () => ({
       toast: mockToast,
