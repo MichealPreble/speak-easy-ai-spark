@@ -12,6 +12,10 @@ import NotFound from "./pages/NotFound";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Auth from "./pages/Auth";
+import ForgotPassword from "@/components/auth/ForgotPassword";
+import UpdatePassword from "@/components/auth/UpdatePassword";
+import EmailVerification from "@/components/auth/EmailVerification";
+import ProfilePage from "./pages/ProfilePage";
 
 // Lazy load pages to improve initial load performance
 const ChatPage = lazy(() => import("./pages/ChatPage"));
@@ -80,6 +84,18 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/auth" element={user ? <Navigate to="/chat" replace /> : <Auth />} />
+      <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+      <Route path="/auth/update-password" element={<UpdatePassword />} />
+      <Route path="/auth/verify" element={<EmailVerification />} />
+      <Route path="/auth/confirm" element={<EmailVerification />} />
+      <Route 
+        path="/profile" 
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        } 
+      />
       <Route 
         path="/chat" 
         element={

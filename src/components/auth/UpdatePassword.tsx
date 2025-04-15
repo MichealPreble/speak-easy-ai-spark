@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import {
   Form,
@@ -18,18 +18,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import SEO from "@/components/SEO";
 
 const formSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
-  const { signInWithEmail, signUpWithEmail } = useAuth();
+export default function UpdatePassword() {
+  const { updatePassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -37,33 +42,24 @@ export default function Auth() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true);
     try {
-      if (isLogin) {
-        await signInWithEmail(values.email, values.password);
-        toast({
-          title: "Welcome back!",
-          description: "You have successfully signed in.",
-        });
-        navigate("/chat");
-      } else {
-        await signUpWithEmail(values.email, values.password);
-        toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
-        });
-        navigate("/auth/verify");
-      }
+      await updatePassword(values.password);
+      toast({
+        title: "Password updated",
+        description: "Your password has been updated successfully.",
+      });
+      navigate("/");
     } catch (error: any) {
       toast({
-        title: "Authentication error",
-        description: error.message || "There was a problem with authentication",
+        title: "Error",
+        description: error.message || "Failed to update password",
         variant: "destructive",
       });
     } finally {
@@ -73,20 +69,13 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-light/10 to-white dark:from-primary-dark/10 dark:to-background flex items-center justify-center p-4">
-      <SEO 
-        title={isLogin ? "Sign In - SpeakEasyAI" : "Create Account - SpeakEasyAI"}
-        description="Access your SpeakEasyAI account to practice public speaking with personalized AI feedback."
-      />
-      
       <Card className="w-full max-w-md glass-panel">
         <CardHeader>
           <CardTitle className="text-2xl text-center text-primary">
-            {isLogin ? "Sign In" : "Create Account"}
+            Update Password
           </CardTitle>
           <CardDescription className="text-center">
-            {isLogin 
-              ? "Enter your credentials to access your account" 
-              : "Create an account to save your progress and speech practices"}
+            Create a new strong password for your account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -94,23 +83,10 @@ export default function Auth() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="your.email@example.com" {...field} className="glass-card" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>New Password</FormLabel>
                     <FormControl>
                       <Input 
                         type="password" 
@@ -123,38 +99,36 @@ export default function Auth() {
                   </FormItem>
                 )}
               />
-              {isLogin && (
-                <div className="text-sm">
-                  <Link 
-                    to="/auth/forgot-password" 
-                    className="text-primary hover:underline"
-                  >
-                    Forgot your password?
-                  </Link>
-                </div>
-              )}
+              
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password" 
+                        placeholder="••••••••" 
+                        {...field} 
+                        className="glass-card" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <Button 
                 type="submit" 
                 className="w-full glass-button"
                 disabled={isLoading}
               >
-                {isLoading ? "Processing..." : isLogin ? "Sign In" : "Create Account"}
+                {isLoading ? "Updating..." : "Update Password"}
               </Button>
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
-          <div className="text-sm text-center text-muted-foreground">
-            {isLogin ? "Don't have an account?" : "Already have an account?"}
-            <Button
-              variant="link"
-              className="pl-1.5"
-              onClick={() => setIsLogin(!isLogin)}
-            >
-              {isLogin ? "Sign up" : "Sign in"}
-            </Button>
-          </div>
-        </CardFooter>
       </Card>
     </div>
   );
