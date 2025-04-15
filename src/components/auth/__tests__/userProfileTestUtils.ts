@@ -54,7 +54,7 @@ export const setupAuthMock = (authValues = {}) => {
   vi.mock("@/context/AuthContext", async () => {
     return {
       useAuth: () => createAuthMock(authValues),
-      AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+      AuthProvider: ({ children }) => <div>{children}</div>,
     };
   });
 };

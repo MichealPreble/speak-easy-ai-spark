@@ -35,7 +35,7 @@ vi.mock("@/context/AuthContext", async () => {
     useAuth: () => ({
       updatePassword: mockUpdatePassword,
     }),
-    AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    AuthProvider: ({ children }) => <div>{children}</div>,
   };
 });
 
