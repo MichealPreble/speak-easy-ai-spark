@@ -33,6 +33,39 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
   );
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
+  const getStatusConfig = () => {
+    switch (status) {
+      case 'online':
+        return {
+          icon: <Wifi className="w-4 h-4" data-testid="icon-wifi" />,
+          color: onlineColor,
+          label: 'Online',
+          tooltip: 'Connected',
+        };
+      case 'offline':
+        return {
+          icon: <WifiOff className="w-4 h-4" data-testid="icon-wifioff" />,
+          color: offlineColor,
+          label: 'Offline',
+          tooltip: 'No connection',
+        };
+      case 'error':
+        return {
+          icon: <AlertCircle className="w-4 h-4" data-testid="icon-alertcircle" />,
+          color: errorColor,
+          label: 'Connection Error',
+          tooltip: 'Network issue',
+        };
+      default:
+        return {
+          icon: <WifiOff className="w-4 h-4" data-testid="icon-wifioff" />,
+          color: offlineColor,
+          label: 'Offline',
+          tooltip: 'No connection',
+        };
+    }
+  };
+
   useEffect(() => {
     let debounceTimeout: NodeJS.Timeout;
 
@@ -67,40 +100,7 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
     };
   }, [pingUrl, debounceMs]);
 
-  const getStatusConfig = () => {
-    switch (status) {
-      case 'online':
-        return {
-          icon: <Wifi className="w-4 h-4 mr-2" data-testid="icon-wifi" />,
-          color: onlineColor,
-          text: 'Online',
-          tooltip: 'You are connected to the internet',
-        };
-      case 'offline':
-        return {
-          icon: <WifiOff className="w-4 h-4 mr-2" data-testid="icon-wifioff" />,
-          color: offlineColor,
-          text: 'Offline',
-          tooltip: 'No internet connection',
-        };
-      case 'error':
-        return {
-          icon: <AlertCircle className="w-4 h-4 mr-2" data-testid="icon-alertcircle" />,
-          color: errorColor,
-          text: 'Connection Error',
-          tooltip: 'Experiencing connection issues',
-        };
-      default:
-        return {
-          icon: <WifiOff className="w-4 h-4 mr-2" data-testid="icon-wifioff" />,
-          color: offlineColor,
-          text: 'Offline',
-          tooltip: 'No internet connection',
-        };
-    }
-  };
-
-  const { icon, color, text, tooltip } = getStatusConfig();
+  const { icon, color, label, tooltip } = getStatusConfig();
 
   return (
     <TooltipProvider>
@@ -108,12 +108,13 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
         <TooltipTrigger asChild>
           <Badge
             data-testid="connection-status"
-            className={`flex items-center cursor-pointer ${color} text-white ${className}`}
+            className={`inline-flex items-center gap-1 ${color} text-white text-xs ${className}`}
             role="status"
             aria-live="polite"
+            aria-label={`Connection status: ${label}`}
           >
             {icon}
-            {text}
+            <span>{label}</span>
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
