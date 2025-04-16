@@ -1,7 +1,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { describe, test, expect, beforeEach } from 'vitest';
-import { useSpeechFeedback } from '../../useSpeechFeedback';
+import { useSpeechFeedback } from '../../speech-feedback';
 import { resetMocksWithDefaults } from './setup';
 import { detectHesitations } from "@/utils/speech";
 

@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { SpeechFeedback } from "@/hooks/useVoiceRecognition";
-import { useSpeechFeedback } from "@/hooks/useSpeechFeedback";
+import { useSpeechFeedback } from "@/hooks/speech-feedback";
 import FeedbackHeader from "./FeedbackHeader";
 import FeedbackContent from "./FeedbackContent";
 

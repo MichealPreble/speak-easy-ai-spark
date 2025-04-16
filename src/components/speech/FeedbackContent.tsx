@@ -1,14 +1,13 @@
 
 import React from "react";
 import { SpeechFeedback } from "@/hooks/useVoiceRecognition";
-import { useSpeechFeedback } from "@/hooks/useSpeechFeedback";
-import SpeechMetrics from "./SpeechMetrics";
+import { SpeechMetrics, ClarityAnalysis } from "@/hooks/speech-feedback";
+import SpeechMetricsDisplay from "./SpeechMetrics";
 import SpeechQualityScore from "./SpeechQualityScore";
 import SpeechTrends from "./SpeechTrends";
 import SpeechTips from "./SpeechTips";
 import SpeechClarityFeedback from "./SpeechClarityFeedback";
 import SpeechMetricsChart from "./SpeechMetricsChart";
-import { TrendMetrics } from "@/hooks/useSpeechTrends";
 import { useSpeechTips } from "@/hooks/useSpeechTips";
 
 interface FeedbackContentProps {
@@ -16,12 +15,8 @@ interface FeedbackContentProps {
   duration: number;
   feedback?: SpeechFeedback;
   tips: string[];
-  metrics: TrendMetrics;
-  clarityAnalysis: {
-    score: number;
-    rating: 'excellent' | 'good' | 'fair' | 'needs improvement';
-    suggestions: string[];
-  };
+  metrics: SpeechMetrics;
+  clarityAnalysis: ClarityAnalysis;
   hesitationAnalysis?: {
     count: number;
     percentage: number;
@@ -54,7 +49,7 @@ const FeedbackContent: React.FC<FeedbackContentProps> = ({
   
   return (
     <>
-      <SpeechMetrics 
+      <SpeechMetricsDisplay 
         duration={duration}
         speed={metrics.speed}
         wordCount={metrics.wordCount}
@@ -118,6 +113,6 @@ const FeedbackContent: React.FC<FeedbackContentProps> = ({
       <SpeechTips tips={tips} duration={duration} />
     </>
   );
-};
+}
 
 export default FeedbackContent;

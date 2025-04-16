@@ -1,7 +1,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { describe, test, expect, beforeEach, vi } from 'vitest';
-import { useSpeechFeedback } from '../../useSpeechFeedback';
+import { useSpeechFeedback } from '../../speech-feedback';
 import { resetMocksWithDefaults } from './setup';
 
 describe('useSpeechFeedback history tracking', () => {
