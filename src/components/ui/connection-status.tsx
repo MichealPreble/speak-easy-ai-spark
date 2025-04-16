@@ -27,33 +27,36 @@ const ConnectionStatusBadge = ({ status }: { status: ConnectionStatus }) => {
       icon: Wifi,
       label: "Online",
       className: "bg-green-500 hover:bg-green-600",
+      iconTestId: "icon-wifi",
     },
     offline: {
       variant: "secondary" as const,
       icon: WifiOff,
       label: "Offline",
       className: "bg-red-500 hover:bg-red-600",
+      iconTestId: "icon-wifioff",
     },
     error: {
       variant: "destructive" as const,
       icon: AlertCircle,
       label: "Connection Error",
       className: "bg-yellow-500 hover:bg-yellow-600",
+      iconTestId: "icon-alertcircle",
     },
   };
 
-  const { icon: Icon, label, className, variant } = variants[status];
+  const { icon: Icon, label, className, variant, iconTestId } = variants[status];
 
   return (
     <Badge 
       variant={variant}
       className={`inline-flex items-center gap-1 ${className}`}
-      data-testid={`connection-status-${status}`}
+      data-testid="connection-status"
       aria-label={`Connection status: ${label}`}
       role="status"
       aria-live="polite"
     >
-      <Icon className="h-3 w-3" />
+      <Icon className="h-3 w-3" data-testid={iconTestId} />
       <span className="text-xs">{label}</span>
     </Badge>
   );
