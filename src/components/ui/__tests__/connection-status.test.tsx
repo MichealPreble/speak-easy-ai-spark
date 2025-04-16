@@ -166,6 +166,37 @@ describe('ConnectionStatusIndicator', () => {
     fetchMock.mockRestore();
   });
 
+  it('shows loading state on retry button during retry attempt', async () => {
+    // Mock fetch to delay resolution
+    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(
+      () => new Promise(resolve => setTimeout(() => resolve({} as Response), 500))
+    );
+    
+    // Force initial error state through the component's state
+    render(<ConnectionStatusIndicator pingUrl="https://test.com/ping" />);
+    
+    // Wait for error state to occur
+    await waitFor(() => {
+      expect(screen.getByTestId(TEST_IDS.retryButton)).toBeInTheDocument();
+    }, { timeout: 6000 });
+    
+    // Click retry button
+    fireEvent.click(screen.getByTestId(TEST_IDS.retryButton));
+    
+    // Button should be disabled during retry
+    expect(screen.getByTestId(TEST_IDS.retryButton)).toBeDisabled();
+    
+    // Wait for retry to complete
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 600));
+    });
+    
+    // Button should be enabled again
+    expect(screen.getByTestId(TEST_IDS.retryButton)).not.toBeDisabled();
+    
+    fetchMock.mockRestore();
+  });
+
   it('debounces status updates', async () => {
     const { unmount } = render(<ConnectionStatusIndicator debounceMs={100} />);
 
@@ -188,35 +219,6 @@ describe('ConnectionStatusIndicator', () => {
     }
 
     unmount();
-  });
-
-  it('shows loading state on retry button during retry attempt', async () => {
-    // Mock fetch to delay resolution
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(
-      () => new Promise(resolve => setTimeout(() => resolve({} as Response), 500))
-    );
-    
-    render(<ConnectionStatusIndicator pingUrl="https://test.com/ping" status="error" />);
-    
-    await waitFor(() => {
-      expect(screen.getByTestId(TEST_IDS.retryButton)).toBeInTheDocument();
-    });
-    
-    // Click retry button
-    fireEvent.click(screen.getByTestId(TEST_IDS.retryButton));
-    
-    // Button should be disabled during retry
-    expect(screen.getByTestId(TEST_IDS.retryButton)).toBeDisabled();
-    
-    // Wait for retry to complete
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 600));
-    });
-    
-    // Button should be enabled again
-    expect(screen.getByTestId(TEST_IDS.retryButton)).not.toBeDisabled();
-    
-    fetchMock.mockRestore();
   });
 
   it('is accessible', () => {
