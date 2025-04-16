@@ -23,6 +23,9 @@ describe('ConnectionStatusIndicator', () => {
     // Mock window event listeners
     window.addEventListener = vi.fn();
     window.removeEventListener = vi.fn();
+
+    // Mock setTimeout and clearTimeout
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
@@ -32,6 +35,7 @@ describe('ConnectionStatusIndicator', () => {
     });
 
     vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   test('renders online status when connected', () => {
@@ -58,15 +62,45 @@ describe('ConnectionStatusIndicator', () => {
     // Mock failing fetch
     global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
     
-    render(<ConnectionStatusIndicator />);
+    render(<ConnectionStatusIndicator pingUrl="/api/ping" />);
     
     // Wait for the async operation to complete
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await vi.runAllTimersAsync();
     });
     
     expect(screen.getByTestId('connection-status-error')).toBeInTheDocument();
     expect(screen.getByText('Connection Error')).toBeInTheDocument();
+  });
+
+  test('debounces status changes', async () => {
+    mockOnline = true;
+    
+    render(<ConnectionStatusIndicator debounceMs={1000} />);
+    
+    // Initially online
+    expect(screen.getByTestId('connection-status-online')).toBeInTheDocument();
+    
+    // Change to offline
+    mockOnline = false;
+    const offlineHandler = window.addEventListener.mock.calls.find(
+      call => call[0] === 'offline'
+    )[1];
+    
+    act(() => {
+      offlineHandler();
+    });
+    
+    // Status should still be online before debounce time
+    expect(screen.getByTestId('connection-status-online')).toBeInTheDocument();
+    
+    // Advance timer past debounce period
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1001);
+    });
+    
+    // Now status should be offline
+    expect(screen.getByTestId('connection-status-offline')).toBeInTheDocument();
   });
 
   test('registers event listeners for online/offline events', () => {

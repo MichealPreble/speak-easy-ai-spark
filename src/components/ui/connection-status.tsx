@@ -1,16 +1,26 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Wifi, WifiOff, AlertCircle } from "lucide-react";
 
-type ConnectionStatus = "online" | "offline" | "error";
-
-interface ConnectionStatusBadgeProps {
-  status: ConnectionStatus;
+interface ConnectionStatusIndicatorProps {
+  onlineColor?: string;
+  offlineColor?: string;
+  errorColor?: string;
+  pingUrl?: string;
+  debounceMs?: number;
+  className?: string;
 }
 
-const ConnectionStatusBadge = ({ status }: ConnectionStatusBadgeProps) => {
+type ConnectionStatus = 'online' | 'offline' | 'error';
+
+const ConnectionStatusBadge = ({ status }: { status: ConnectionStatus }) => {
   const variants = {
     online: {
       variant: "default" as const,
@@ -22,13 +32,13 @@ const ConnectionStatusBadge = ({ status }: ConnectionStatusBadgeProps) => {
       variant: "secondary" as const,
       icon: WifiOff,
       label: "Offline",
-      className: "bg-gray-500 hover:bg-gray-600",
+      className: "bg-red-500 hover:bg-red-600",
     },
     error: {
       variant: "destructive" as const,
       icon: AlertCircle,
       label: "Connection Error",
-      className: "",
+      className: "bg-yellow-500 hover:bg-yellow-600",
     },
   };
 
@@ -47,62 +57,97 @@ const ConnectionStatusBadge = ({ status }: ConnectionStatusBadgeProps) => {
   );
 };
 
-export function ConnectionStatusIndicator() {
-  const [status, setStatus] = useState<ConnectionStatus>("online");
+export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
+  onlineColor = "bg-green-500 hover:bg-green-600",
+  offlineColor = "bg-red-500 hover:bg-red-600",
+  errorColor = "bg-yellow-500 hover:bg-yellow-600",
+  pingUrl,
+  debounceMs = 500,
+  className,
+}) => {
+  const [status, setStatus] = useState<ConnectionStatus>(
+    navigator.onLine ? "online" : "offline"
+  );
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
   useEffect(() => {
-    const handleOnline = () => setStatus("online");
-    const handleOffline = () => setStatus("offline");
+    let debounceTimeout: NodeJS.Timeout;
 
-    // Check initial status
-    if (navigator.onLine) {
-      setStatus("online");
-    } else {
-      setStatus("offline");
-    }
+    const updateStatus = (newStatus: ConnectionStatus) => {
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(() => setStatus(newStatus), debounceMs);
+    };
+
+    const handleOnline = () => updateStatus("online");
+    const handleOffline = () => updateStatus("offline");
 
     // Add event listeners for online/offline events
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
-    // Error handling example - could be expanded based on specific requirements
-    const checkConnection = async () => {
-      if (navigator.onLine) {
+    // Optional ping to verify actual connectivity
+    let pingInterval: NodeJS.Timeout | undefined;
+    if (pingUrl) {
+      pingInterval = setInterval(async () => {
         try {
-          const response = await fetch("/api/ping", { method: "HEAD" });
+          const response = await fetch(pingUrl, { method: "HEAD" });
           if (!response.ok) {
-            setStatus("error");
+            updateStatus("error");
+          } else {
+            updateStatus("online");
           }
         } catch (e) {
-          setStatus("error");
+          updateStatus("error");
         }
-      }
-    };
+      }, 5000);
+    }
 
-    // Check connection on mount
-    checkConnection();
+    // Initial connectivity check
+    if (pingUrl && navigator.onLine) {
+      (async () => {
+        try {
+          const response = await fetch(pingUrl, { method: "HEAD" });
+          if (!response.ok) {
+            updateStatus("error");
+          }
+        } catch (e) {
+          updateStatus("error");
+        }
+      })();
+    }
 
     // Cleanup
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+      if (pingInterval) clearInterval(pingInterval);
+      clearTimeout(debounceTimeout);
     };
-  }, []);
+  }, [pingUrl, debounceMs]);
+
+  const getTooltipContent = () => {
+    switch (status) {
+      case "online": 
+        return "You're connected to the internet";
+      case "offline": 
+        return "You're currently offline";
+      case "error": 
+        return "There's an issue with your connection";
+    }
+  };
 
   return (
     <TooltipProvider>
-      <Tooltip>
+      <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
         <TooltipTrigger asChild>
-          <div className="inline-block">
+          <div className={`inline-block ${className}`}>
             <ConnectionStatusBadge status={status} />
           </div>
         </TooltipTrigger>
         <TooltipContent side="bottom">
-          {status === "online" && "You're connected to the internet"}
-          {status === "offline" && "You're currently offline"}
-          {status === "error" && "There's an issue with your connection"}
+          {getTooltipContent()}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
-}
+};
