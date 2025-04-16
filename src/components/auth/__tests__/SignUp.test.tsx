@@ -63,10 +63,9 @@ describe('SignUp', () => {
     const passwordInput = screen.getByLabelText(/^Password$/i);
     const confirmPasswordInput = screen.getByLabelText(/Confirm Password/i);
     
-    // Find toggle buttons by their parent elements since they don't have labels
-    const toggleButtons = screen.getAllByRole('button', { name: '' });
-    const togglePassword = toggleButtons[0];
-    const toggleConfirmPassword = toggleButtons[1];
+    // Find toggle buttons by their aria-label
+    const togglePassword = screen.getByLabelText('Show password');
+    const toggleConfirmPassword = screen.getByLabelText('Show confirm password');
     
     expect(passwordInput).toHaveAttribute('type', 'password');
     expect(confirmPasswordInput).toHaveAttribute('type', 'password');
