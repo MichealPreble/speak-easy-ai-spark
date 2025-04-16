@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Progress } from "@/components/ui/progress";
 
 interface PasswordStrengthIndicatorProps {
   password: string;
@@ -40,9 +39,13 @@ const PasswordStrengthIndicator = ({ password, className }: PasswordStrengthIndi
 
   return (
     <div className={`mt-2 ${className}`}>
-      <Progress 
-        value={passwordStrength} 
-        className={getPasswordStrengthColor(passwordStrength)} 
+      <div 
+        className={`h-1 rounded transition-all ${getPasswordStrengthColor(passwordStrength)}`}
+        style={{ width: `${passwordStrength}%` }}
+        role="progressbar"
+        aria-valuenow={passwordStrength}
+        aria-valuemin={0}
+        aria-valuemax={100}
       />
       <p className="text-xs text-muted-foreground mt-1">
         Password strength: {getPasswordStrengthText(passwordStrength)}
