@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Wifi, WifiOff, AlertCircle } from "lucide-react";
+} from '@/components/ui/tooltip';
+import { Wifi, WifiOff, AlertCircle } from 'lucide-react';
 
 interface ConnectionStatusIndicatorProps {
   onlineColor?: string;
@@ -20,58 +20,16 @@ interface ConnectionStatusIndicatorProps {
 
 type ConnectionStatus = 'online' | 'offline' | 'error';
 
-const ConnectionStatusBadge = ({ status }: { status: ConnectionStatus }) => {
-  const variants = {
-    online: {
-      variant: "default" as const,
-      icon: Wifi,
-      label: "Online",
-      className: "bg-green-500 hover:bg-green-600",
-      iconTestId: "icon-wifi",
-    },
-    offline: {
-      variant: "secondary" as const,
-      icon: WifiOff,
-      label: "Offline",
-      className: "bg-red-500 hover:bg-red-600",
-      iconTestId: "icon-wifioff",
-    },
-    error: {
-      variant: "destructive" as const,
-      icon: AlertCircle,
-      label: "Connection Error",
-      className: "bg-yellow-500 hover:bg-yellow-600",
-      iconTestId: "icon-alertcircle",
-    },
-  };
-
-  const { icon: Icon, label, className, variant, iconTestId } = variants[status];
-
-  return (
-    <Badge 
-      variant={variant}
-      className={`inline-flex items-center gap-1 ${className}`}
-      data-testid="connection-status"
-      aria-label={`Connection status: ${label}`}
-      role="status"
-      aria-live="polite"
-    >
-      <Icon className="h-3 w-3" data-testid={iconTestId} />
-      <span className="text-xs">{label}</span>
-    </Badge>
-  );
-};
-
 export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
-  onlineColor = "bg-green-500 hover:bg-green-600",
-  offlineColor = "bg-red-500 hover:bg-red-600",
-  errorColor = "bg-yellow-500 hover:bg-yellow-600",
+  onlineColor = 'bg-green-500 hover:bg-green-600',
+  offlineColor = 'bg-red-500 hover:bg-red-600',
+  errorColor = 'bg-yellow-500 hover:bg-yellow-600',
   pingUrl,
   debounceMs = 500,
   className,
 }) => {
   const [status, setStatus] = useState<ConnectionStatus>(
-    navigator.onLine ? "online" : "offline"
+    navigator.onLine ? 'online' : 'offline'
   );
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
@@ -83,74 +41,83 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
       debounceTimeout = setTimeout(() => setStatus(newStatus), debounceMs);
     };
 
-    const handleOnline = () => updateStatus("online");
-    const handleOffline = () => updateStatus("offline");
+    const handleOnline = () => updateStatus('online');
+    const handleOffline = () => updateStatus('offline');
 
-    // Add event listeners for online/offline events
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
-    // Optional ping to verify actual connectivity
     let pingInterval: NodeJS.Timeout | undefined;
     if (pingUrl) {
       pingInterval = setInterval(async () => {
         try {
-          const response = await fetch(pingUrl, { method: "HEAD" });
-          if (!response.ok) {
-            updateStatus("error");
-          } else {
-            updateStatus("online");
-          }
-        } catch (e) {
-          updateStatus("error");
+          await fetch(pingUrl, { mode: 'no-cors' });
+          updateStatus('online');
+        } catch {
+          updateStatus('error');
         }
       }, 5000);
     }
 
-    // Initial connectivity check
-    if (pingUrl && navigator.onLine) {
-      (async () => {
-        try {
-          const response = await fetch(pingUrl, { method: "HEAD" });
-          if (!response.ok) {
-            updateStatus("error");
-          }
-        } catch (e) {
-          updateStatus("error");
-        }
-      })();
-    }
-
-    // Cleanup
     return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
       if (pingInterval) clearInterval(pingInterval);
       clearTimeout(debounceTimeout);
     };
   }, [pingUrl, debounceMs]);
 
-  const getTooltipContent = () => {
+  const getStatusConfig = () => {
     switch (status) {
-      case "online": 
-        return "You are connected to the internet";
-      case "offline": 
-        return "You're currently offline";
-      case "error": 
-        return "There's an issue with your connection";
+      case 'online':
+        return {
+          icon: <Wifi className="w-4 h-4 mr-2" data-testid="icon-wifi" />,
+          color: onlineColor,
+          text: 'Online',
+          tooltip: 'You are connected to the internet',
+        };
+      case 'offline':
+        return {
+          icon: <WifiOff className="w-4 h-4 mr-2" data-testid="icon-wifioff" />,
+          color: offlineColor,
+          text: 'Offline',
+          tooltip: 'No internet connection',
+        };
+      case 'error':
+        return {
+          icon: <AlertCircle className="w-4 h-4 mr-2" data-testid="icon-alertcircle" />,
+          color: errorColor,
+          text: 'Connection Error',
+          tooltip: 'Experiencing connection issues',
+        };
+      default:
+        return {
+          icon: <WifiOff className="w-4 h-4 mr-2" data-testid="icon-wifioff" />,
+          color: offlineColor,
+          text: 'Offline',
+          tooltip: 'No internet connection',
+        };
     }
   };
+
+  const { icon, color, text, tooltip } = getStatusConfig();
 
   return (
     <TooltipProvider>
       <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
         <TooltipTrigger asChild>
-          <div className={`inline-block ${className}`}>
-            <ConnectionStatusBadge status={status} />
-          </div>
+          <Badge
+            data-testid="connection-status"
+            className={`flex items-center cursor-pointer ${color} text-white ${className}`}
+            role="status"
+            aria-live="polite"
+          >
+            {icon}
+            {text}
+          </Badge>
         </TooltipTrigger>
-        <TooltipContent side="bottom">
-          {getTooltipContent()}
+        <TooltipContent>
+          <p>{tooltip}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
