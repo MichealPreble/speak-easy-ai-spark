@@ -1,11 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/AuthContext';
-import { PasswordField } from './PasswordField';
-import { TermsCheckbox } from './TermsCheckbox';
+import { z } from 'zod';
+import PasswordField from './PasswordField';
+import TermsCheckbox from './TermsCheckbox';
 import { Loader2 } from 'lucide-react';
 
 interface PasswordStrengthProps {
@@ -56,6 +57,17 @@ const PasswordStrength: React.FC<PasswordStrengthProps> = ({ password }) => {
   );
 };
 
+const signupSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  confirmPassword: z.string().min(1, 'Confirm password is required'),
+  acceptTerms: z.literal(true, { errorMap: () => ({ message: 'You must agree to the terms' }) }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+});
+
 interface SignUpFormProps {
   onSwitchTab: () => void;
 }
@@ -71,22 +83,27 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchTab }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const validate = () => {
-    const newErrors: Record<string, string> = {};
-    
-    if (!name.trim()) newErrors.name = 'Name is required';
-    if (!email.trim()) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = 'Invalid email address';
-    
-    if (!password) newErrors.password = 'Password is required';
-    else if (password.length < 8) newErrors.password = 'Password must be at least 8 characters';
-    
-    if (!confirmPassword) newErrors.confirmPassword = 'Confirm password is required';
-    else if (confirmPassword !== password) newErrors.confirmPassword = 'Passwords do not match';
-    
-    if (!termsAccepted) newErrors.terms = 'You must agree to the terms';
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    try {
+      signupSchema.parse({
+        name,
+        email,
+        password,
+        confirmPassword,
+        acceptTerms: termsAccepted,
+      });
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const newErrors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path) {
+            newErrors[err.path[0]] = err.message;
+          }
+        });
+        setErrors(newErrors);
+      }
+      return false;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -139,33 +156,84 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchTab }) => {
         {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
       </div>
       
-      <PasswordField
-        id="password"
-        label="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Create a password"
-        error={errors.password}
-        disabled={isLoading}
-      />
-      {password && <PasswordStrength password={password} />}
+      <div>
+        <Label htmlFor="password">Password</Label>
+        <div className="relative">
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Create a password"
+            disabled={isLoading}
+            aria-invalid={!!errors.password}
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            onClick={() => {
+              const input = document.getElementById('password') as HTMLInputElement;
+              if (input) {
+                input.type = input.type === 'password' ? 'text' : 'password';
+              }
+            }}
+            tabIndex={-1}
+            aria-label="Show password"
+          >
+            {/* Eye icon will be rendered here */}
+          </button>
+        </div>
+        {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+        {password && <PasswordStrength password={password} />}
+      </div>
       
-      <PasswordField
-        id="confirmPassword"
-        label="Confirm Password"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        placeholder="Confirm your password"
-        error={errors.confirmPassword}
-        disabled={isLoading}
-      />
+      <div>
+        <Label htmlFor="confirmPassword">Confirm Password</Label>
+        <div className="relative">
+          <Input
+            id="confirmPassword"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm your password"
+            disabled={isLoading}
+            aria-invalid={!!errors.confirmPassword}
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            onClick={() => {
+              const input = document.getElementById('confirmPassword') as HTMLInputElement;
+              if (input) {
+                input.type = input.type === 'password' ? 'text' : 'password';
+              }
+            }}
+            tabIndex={-1}
+            aria-label="Show confirm password"
+          >
+            {/* Eye icon will be rendered here */}
+          </button>
+        </div>
+        {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
+      </div>
       
-      <TermsCheckbox
-        checked={termsAccepted}
-        onCheckedChange={setTermsAccepted}
-        error={errors.terms}
-        disabled={isLoading}
-      />
+      <div className="flex items-start space-x-2">
+        <input
+          type="checkbox"
+          id="terms"
+          checked={termsAccepted}
+          onChange={(e) => setTermsAccepted(e.target.checked)}
+          className="mt-1"
+          disabled={isLoading}
+        />
+        <label 
+          htmlFor="terms" 
+          className="text-sm font-medium leading-none"
+        >
+          I agree to the Terms and Conditions
+        </label>
+      </div>
+      {errors.acceptTerms && <p className="text-red-500 text-xs mt-1">{errors.acceptTerms}</p>}
       
       <Button type="submit" disabled={isLoading} className="w-full">
         {isLoading ? (

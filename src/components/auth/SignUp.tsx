@@ -3,11 +3,11 @@ import React from "react";
 import { SignUpForm } from "./SignUpForm";
 
 interface SignUpProps {
-  setActiveTab: (tab: string) => void;
+  onSwitchTab: () => void;
 }
 
-const SignUp = ({ setActiveTab }: SignUpProps) => {
-  return <SignUpForm onSwitchTab={() => setActiveTab("signin")} />;
+export const SignUp = ({ onSwitchTab }: SignUpProps) => {
+  return <SignUpForm onSwitchTab={onSwitchTab} />;
 };
 
 export default SignUp;
