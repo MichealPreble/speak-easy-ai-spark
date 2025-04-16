@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { z } from 'zod';
@@ -42,7 +42,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchTab }) => {
       email: '',
       password: '',
       confirmPassword: '',
-      acceptTerms: false,
+      acceptTerms: false as any, // Use type assertion to avoid type error during initialization
     },
   });
 
