@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -32,7 +32,7 @@ const formSchema = z
     email: z.string().email("Please enter a valid email address"),
     password: passwordSchema,
     confirmPassword: z.string(),
-    acceptTerms: z.literal(true, {
+    acceptTerms: z.literal<boolean>(true, {
       errorMap: () => ({ message: "You must accept the terms and conditions" }),
     }),
   })

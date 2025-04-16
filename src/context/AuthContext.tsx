@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 // Define the shape of the user object
@@ -13,6 +12,14 @@ interface User {
   };
 }
 
+// Update the interface to use consistent naming
+interface UpdateProfileData {
+  name?: string;
+  email?: string;
+  full_name?: string;
+  avatar_url?: string;
+}
+
 // Update the AuthContextType to include all required methods
 interface AuthContextType {
   user: User | null;
@@ -21,10 +28,10 @@ interface AuthContextType {
   signIn: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   signUp: (email: string, password: string, name?: string) => Promise<void>;
   signOut: () => Promise<void>;
-  logout: () => Promise<void>; // Alias for signOut for backward compatibility
+  logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
-  updateProfile: (data: { name?: string; email?: string }) => Promise<void>;
+  updateProfile: (data: UpdateProfileData) => Promise<void>;
   sendVerificationEmail: () => Promise<void>;
 }
 
@@ -144,11 +151,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   // Placeholder implementation for updateProfile
-  const updateProfile = async (data: { name?: string; email?: string }) => {
+  const updateProfile = async (data: UpdateProfileData) => {
     setLoading(true);
     try {
-      // TODO: Implement actual profile update logic
-      console.log('Updating profile', data);
       if (user) {
         setUser({
           ...user,
@@ -157,6 +162,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           user_metadata: {
             ...user.user_metadata,
             ...(data.name && { name: data.name, full_name: data.name }),
+            ...(data.avatar_url && { avatar_url: data.avatar_url }),
           }
         });
       }
