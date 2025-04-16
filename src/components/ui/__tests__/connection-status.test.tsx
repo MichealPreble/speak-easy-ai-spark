@@ -91,13 +91,13 @@ describe('ConnectionStatusIndicator', () => {
     // Trigger tooltip with mouse enter
     fireEvent.mouseEnter(badge);
     await waitFor(() => {
-      expect(screen.getByText('You are connected to the internet')).toBeInTheDocument();
+      expect(screen.getByText('Connected')).toBeInTheDocument();
     });
 
     // Hide tooltip with mouse leave
     fireEvent.mouseLeave(badge);
     await waitFor(() => {
-      expect(screen.queryByText('You are connected to the internet')).not.toBeInTheDocument();
+      expect(screen.queryByText('Connected')).not.toBeInTheDocument();
     }, { timeout: 1000 });
   });
 
@@ -146,6 +146,7 @@ describe('ConnectionStatusIndicator', () => {
     const badge = screen.getByTestId(TEST_IDS.badge);
     expect(badge).toHaveAttribute('role', 'status');
     expect(badge).toHaveAttribute('aria-live', 'polite');
+    expect(badge).toHaveAttribute('aria-label', 'Connection status: Online');
   });
 });
 
