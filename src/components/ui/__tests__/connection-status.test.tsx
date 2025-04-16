@@ -1,7 +1,15 @@
+
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { ConnectionStatusIndicator } from '../connection-status';
-import { Wifi, WifiOff, AlertCircle } from 'lucide-react';
+import { Wifi, WifiOff, AlertCircle, RefreshCw } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+
+// Mock toast
+jest.mock('@/hooks/use-toast', () => ({
+  toast: jest.fn(),
+  useToast: jest.fn().mockReturnValue({ toast: jest.fn() }),
+}));
 
 // Configurable test IDs to match component implementation
 const TEST_IDS = {
@@ -9,6 +17,7 @@ const TEST_IDS = {
   iconOnline: 'icon-wifi',
   iconOffline: 'icon-wifioff',
   iconError: 'icon-alertcircle',
+  retryButton: 'retry-button',
 };
 
 // Mock navigator.onLine
@@ -83,18 +92,131 @@ describe('ConnectionStatusIndicator', () => {
   });
 
   it('shows tooltip on mouse enter and hides on mouse leave', async () => {
+    // Using fireEvent for manual tooltip testing due to shadcn/ui Tooltip behavior
     render(<ConnectionStatusIndicator />);
     const badge = screen.getByTestId(TEST_IDS.badge);
 
+    // Trigger tooltip with mouse enter
     fireEvent.mouseEnter(badge);
     await waitFor(() => {
       expect(screen.getByText('Active')).toBeInTheDocument();
     });
 
+    // Hide tooltip with mouse leave
     fireEvent.mouseLeave(badge);
     await waitFor(() => {
       expect(screen.queryByText('Active')).not.toBeInTheDocument();
     }, { timeout: 1000 });
+  });
+
+  it('updates to error status on failed ping', async () => {
+    // Mock fetch with proper restoration
+    const fetchMock = jest.spyOn(global, 'fetch').mockRejectedValue(new Error('Network error'));
+
+    render(<ConnectionStatusIndicator pingUrl="https://test.com/ping" />);
+
+    await waitFor(() => {
+      const badge = screen.getByTestId(TEST_IDS.badge);
+      expect(badge).toHaveTextContent('Connection Error');
+      expect(badge).toHaveClass('bg-yellow-500');
+      expect(screen.getByTestId(TEST_IDS.iconError)).toBeInTheDocument();
+      expect(screen.getByText('Problems')).toBeInTheDocument();
+    }, { timeout: 6000 });
+
+    fetchMock.mockRestore();
+  });
+
+  it('shows retry button in error state', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockRejectedValue(new Error('Network error'));
+    
+    render(<ConnectionStatusIndicator pingUrl="https://test.com/ping" />);
+    
+    await waitFor(() => {
+      expect(screen.getByTestId(TEST_IDS.retryButton)).toBeInTheDocument();
+    }, { timeout: 6000 });
+    
+    fetchMock.mockRestore();
+  });
+
+  it('attempts reconnection when retry button is clicked', async () => {
+    // First reject to trigger error state, then resolve on retry
+    const fetchMock = jest.spyOn(global, 'fetch')
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockResolvedValueOnce(undefined);
+    
+    render(<ConnectionStatusIndicator pingUrl="https://test.com/ping" />);
+    
+    // Wait for error state
+    await waitFor(() => {
+      expect(screen.getByTestId(TEST_IDS.retryButton)).toBeInTheDocument();
+    }, { timeout: 6000 });
+    
+    // Click retry button
+    fireEvent.click(screen.getByTestId(TEST_IDS.retryButton));
+    
+    // Should show toast on successful reconnection
+    await waitFor(() => {
+      expect(toast).toHaveBeenCalledWith(expect.objectContaining({
+        title: "Connection restored",
+        description: "You're back online"
+      }));
+      expect(screen.getByTestId(TEST_IDS.badge)).toHaveTextContent('Online');
+    });
+    
+    fetchMock.mockRestore();
+  });
+
+  it('debounces status updates', async () => {
+    const { unmount } = render(<ConnectionStatusIndicator debounceMs={100} />);
+
+    const offlineHandler = (addEventListenerMock as jest.Mock).mock.calls?.find(
+      (call) => call[0] === 'offline'
+    )?.[1];
+
+    if (offlineHandler) {
+      (navigator as any).onLine = false;
+      offlineHandler();
+      // Status should not update immediately due to debounce
+      expect(screen.getByTestId(TEST_IDS.badge)).toHaveTextContent('Online');
+
+      await waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.badge)).toHaveTextContent('Offline');
+        expect(screen.getByText('Disconnected')).toBeInTheDocument();
+      }, { timeout: 200 });
+    } else {
+      throw new Error('Offline handler not found');
+    }
+
+    unmount();
+  });
+
+  it('shows loading state on retry button during retry attempt', async () => {
+    // Mock fetch to delay resolution
+    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(
+      () => new Promise(resolve => setTimeout(() => resolve({} as Response), 500))
+    );
+    
+    render(<ConnectionStatusIndicator pingUrl="https://test.com/ping" status="error" />);
+    
+    await waitFor(() => {
+      expect(screen.getByTestId(TEST_IDS.retryButton)).toBeInTheDocument();
+    });
+    
+    // Click retry button
+    fireEvent.click(screen.getByTestId(TEST_IDS.retryButton));
+    
+    // Button should be disabled during retry
+    expect(screen.getByTestId(TEST_IDS.retryButton)).toBeDisabled();
+    
+    // Wait for retry to complete
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 600));
+    });
+    
+    // Button should be enabled again
+    expect(screen.getByTestId(TEST_IDS.retryButton)).not.toBeDisabled();
+    
+    fetchMock.mockRestore();
   });
 
   it('is accessible', () => {
@@ -111,4 +233,5 @@ jest.mock('lucide-react', () => ({
   Wifi: (props: any) => <svg data-testid="icon-wifi" {...props} />,
   WifiOff: (props: any) => <svg data-testid="icon-wifioff" {...props} />,
   AlertCircle: (props: any) => <svg data-testid="icon-alertcircle" {...props} />,
+  RefreshCw: (props: any) => <svg data-testid="refresh-icon" {...props} />,
 }));

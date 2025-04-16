@@ -1,13 +1,15 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Wifi, WifiOff, AlertCircle } from 'lucide-react';
+import { Wifi, WifiOff, AlertCircle, RefreshCw } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface ConnectionStatusIndicatorProps {
   onlineColor?: string;
@@ -32,6 +34,7 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
     navigator.onLine ? 'online' : 'offline'
   );
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   const getStatusConfig = () => {
     switch (status) {
@@ -66,6 +69,31 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
     }
   };
 
+  const checkConnection = useCallback(async () => {
+    if (!pingUrl) return;
+    
+    try {
+      setIsRetrying(true);
+      await fetch(pingUrl, { mode: 'no-cors' });
+      setStatus('online');
+      if (status === 'error') {
+        toast({
+          title: "Connection restored",
+          description: "You're back online",
+          duration: 3000,
+        });
+      }
+    } catch {
+      setStatus('error');
+    } finally {
+      setIsRetrying(false);
+    }
+  }, [pingUrl, status]);
+
+  const handleRetry = () => {
+    checkConnection();
+  };
+
   useEffect(() => {
     let debounceTimeout: NodeJS.Timeout;
 
@@ -82,14 +110,7 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
 
     let pingInterval: NodeJS.Timeout | undefined;
     if (pingUrl) {
-      pingInterval = setInterval(async () => {
-        try {
-          await fetch(pingUrl, { mode: 'no-cors' });
-          updateStatus('online');
-        } catch {
-          updateStatus('error');
-        }
-      }, 5000);
+      pingInterval = setInterval(checkConnection, 5000);
     }
 
     return () => {
@@ -98,7 +119,7 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
       if (pingInterval) clearInterval(pingInterval);
       clearTimeout(debounceTimeout);
     };
-  }, [pingUrl, debounceMs]);
+  }, [pingUrl, debounceMs, checkConnection]);
 
   const { icon, color, label, tooltip } = getStatusConfig();
 
@@ -106,16 +127,31 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
     <TooltipProvider>
       <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
         <TooltipTrigger asChild>
-          <Badge
-            data-testid="connection-status"
-            className={`inline-flex items-center gap-1 ${color} text-white text-xs ${className}`}
-            role="status"
-            aria-live="polite"
-            aria-label={`Connection status: ${label}`}
-          >
-            {icon}
-            <span>{label}</span>
-          </Badge>
+          <div className="inline-flex items-center gap-1">
+            <Badge
+              data-testid="connection-status"
+              className={`inline-flex items-center gap-1 ${color} text-white text-xs ${className}`}
+              role="status"
+              aria-live="polite"
+              aria-label={`Connection status: ${label}`}
+            >
+              {icon}
+              <span>{label}</span>
+            </Badge>
+            {status === 'error' && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-6 px-2 ml-1" 
+                onClick={handleRetry}
+                disabled={isRetrying}
+                data-testid="retry-button"
+              >
+                <RefreshCw className={`w-3 h-3 ${isRetrying ? 'animate-spin' : ''}`} />
+                <span className="sr-only">Retry connection</span>
+              </Button>
+            )}
+          </div>
         </TooltipTrigger>
         <TooltipContent>
           <p>{tooltip}</p>
