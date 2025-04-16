@@ -40,28 +40,28 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
           icon: <Wifi className="w-4 h-4" data-testid="icon-wifi" />,
           color: onlineColor,
           label: 'Online',
-          tooltip: 'Connected',
+          tooltip: 'Active',
         };
       case 'offline':
         return {
           icon: <WifiOff className="w-4 h-4" data-testid="icon-wifioff" />,
           color: offlineColor,
           label: 'Offline',
-          tooltip: 'No connection',
+          tooltip: 'Disconnected',
         };
       case 'error':
         return {
           icon: <AlertCircle className="w-4 h-4" data-testid="icon-alertcircle" />,
           color: errorColor,
           label: 'Connection Error',
-          tooltip: 'Network issue',
+          tooltip: 'Problems',
         };
       default:
         return {
           icon: <WifiOff className="w-4 h-4" data-testid="icon-wifioff" />,
           color: offlineColor,
           label: 'Offline',
-          tooltip: 'No connection',
+          tooltip: 'Disconnected',
         };
     }
   };

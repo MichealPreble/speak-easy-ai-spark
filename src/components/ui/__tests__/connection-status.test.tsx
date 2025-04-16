@@ -88,12 +88,12 @@ describe('ConnectionStatusIndicator', () => {
 
     fireEvent.mouseEnter(badge);
     await waitFor(() => {
-      expect(screen.getByText('Connected')).toBeInTheDocument();
+      expect(screen.getByText('Active')).toBeInTheDocument();
     });
 
     fireEvent.mouseLeave(badge);
     await waitFor(() => {
-      expect(screen.queryByText('Connected')).not.toBeInTheDocument();
+      expect(screen.queryByText('Active')).not.toBeInTheDocument();
     }, { timeout: 1000 });
   });
 
