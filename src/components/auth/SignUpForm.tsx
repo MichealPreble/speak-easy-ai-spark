@@ -10,7 +10,7 @@ import { Form } from '@/components/ui/form';
 import PasswordField from './PasswordField';
 import EmailField from './EmailField';
 import NameField from './NameField';
-import TermsCheckbox from './TermsCheckbox';
+import { TermsCheckbox } from './TermsCheckbox';
 import { useToast } from '@/hooks/use-toast';
 
 const signupSchema = z.object({
@@ -92,7 +92,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchTab }) => {
           disabled={isLoading}
         />
         
-        <TermsCheckbox control={form.control} disabled={isLoading} />
+        <TermsCheckbox register={form.register} errors={form.formState.errors} disabled={isLoading} />
         
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading ? (

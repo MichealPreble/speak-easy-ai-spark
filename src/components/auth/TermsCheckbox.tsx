@@ -23,7 +23,6 @@ export const TermsCheckbox: React.FC<TermsCheckboxProps> = ({
           required: 'You must agree to the terms'
         })}
         disabled={disabled}
-        checked={!!register('acceptTerms').value}
       />
       <div className="grid gap-1.5 leading-none">
         <Label
