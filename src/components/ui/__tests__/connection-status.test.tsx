@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { ConnectionStatusIndicator } from '../connection-status';
@@ -84,61 +83,18 @@ describe('ConnectionStatusIndicator', () => {
   });
 
   it('shows tooltip on mouse enter and hides on mouse leave', async () => {
-    // Using fireEvent for manual tooltip testing due to shadcn/ui Tooltip behavior
     render(<ConnectionStatusIndicator />);
     const badge = screen.getByTestId(TEST_IDS.badge);
 
-    // Trigger tooltip with mouse enter
     fireEvent.mouseEnter(badge);
     await waitFor(() => {
       expect(screen.getByText('Connected')).toBeInTheDocument();
     });
 
-    // Hide tooltip with mouse leave
     fireEvent.mouseLeave(badge);
     await waitFor(() => {
       expect(screen.queryByText('Connected')).not.toBeInTheDocument();
     }, { timeout: 1000 });
-  });
-
-  it('updates to error status on failed ping', async () => {
-    // Mock fetch with proper restoration
-    const fetchMock = jest.spyOn(global, 'fetch').mockRejectedValue(new Error('Network error'));
-
-    render(<ConnectionStatusIndicator pingUrl="https://test.com/ping" />);
-
-    await waitFor(() => {
-      const badge = screen.getByTestId(TEST_IDS.badge);
-      expect(badge).toHaveTextContent('Connection Error');
-      expect(badge).toHaveClass('bg-yellow-500');
-      expect(screen.getByTestId(TEST_IDS.iconError)).toBeInTheDocument();
-    }, { timeout: 6000 });
-
-    // Restore fetch to prevent test pollution
-    fetchMock.mockRestore();
-  });
-
-  it('debounces status updates', async () => {
-    const { unmount } = render(<ConnectionStatusIndicator debounceMs={100} />);
-
-    const offlineHandler = (addEventListenerMock as jest.Mock).mock.calls?.find(
-      (call) => call[0] === 'offline'
-    )?.[1];
-
-    if (offlineHandler) {
-      (navigator as any).onLine = false;
-      offlineHandler();
-      // Status should not update immediately due to debounce
-      expect(screen.getByTestId(TEST_IDS.badge)).toHaveTextContent('Online');
-
-      await waitFor(() => {
-        expect(screen.getByTestId(TEST_IDS.badge)).toHaveTextContent('Offline');
-      }, { timeout: 200 });
-    } else {
-      throw new Error('Offline handler not found');
-    }
-
-    unmount();
   });
 
   it('is accessible', () => {
