@@ -6,7 +6,7 @@ interface SignUpProps {
   setActiveTab: (tab: string) => void;
 }
 
-export const SignUp = ({ setActiveTab }: SignUpProps) => {
+export const SignUp: React.FC<SignUpProps> = ({ setActiveTab }) => {
   const handleSwitchTab = () => {
     setActiveTab("signin");
   };

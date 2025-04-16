@@ -6,11 +6,12 @@ import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormField } from '@/components/ui/form';
+import { Form } from '@/components/ui/form';
 import PasswordField from './PasswordField';
 import EmailField from './EmailField';
 import NameField from './NameField';
 import TermsCheckbox from './TermsCheckbox';
+import { useToast } from '@/hooks/use-toast';
 
 const signupSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -32,6 +33,7 @@ interface SignUpFormProps {
 export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchTab }) => {
   const { signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
   
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -48,15 +50,18 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchTab }) => {
     setIsLoading(true);
     
     try {
-      await signUp({
-        name: values.name,
-        email: values.email,
-        password: values.password
+      await signUp(values.email, values.password, values.name);
+      toast({
+        title: "Account created",
+        description: "Your account has been created successfully.",
       });
-      // Success can be handled here if needed
     } catch (error) {
       console.error('Signup error:', error);
-      // Handle specific errors here if needed
+      toast({
+        title: "Sign up failed",
+        description: error instanceof Error ? error.message : "Something went wrong",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }

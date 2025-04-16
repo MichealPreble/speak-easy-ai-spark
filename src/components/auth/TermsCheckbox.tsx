@@ -3,6 +3,7 @@ import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   FormField,
+  FormItem,
   FormMessage,
 } from "@/components/ui/form";
 import { Control } from "react-hook-form";
