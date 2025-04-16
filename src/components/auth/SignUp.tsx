@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -69,25 +68,19 @@ const SignUp = ({ setActiveTab }: SignUpProps) => {
 
   const watchPassword = form.watch("password");
 
-  // Calculate password strength
   const calculatePasswordStrength = (password: string) => {
     if (!password) return 0;
     
     let strength = 0;
     
-    // Length
     if (password.length >= 8) strength += 20;
     
-    // Uppercase
     if (/[A-Z]/.test(password)) strength += 20;
     
-    // Lowercase
     if (/[a-z]/.test(password)) strength += 20;
     
-    // Numbers
     if (/[0-9]/.test(password)) strength += 20;
     
-    // Special characters
     if (/[^A-Za-z0-9]/.test(password)) strength += 20;
     
     return strength;
@@ -105,14 +98,13 @@ const SignUp = ({ setActiveTab }: SignUpProps) => {
     return "Strong";
   };
 
-  // Update password strength when password changes
-  useState(() => {
+  useEffect(() => {
     if (watchPassword) {
       setPasswordStrength(calculatePasswordStrength(watchPassword));
     } else {
       setPasswordStrength(0);
     }
-  });
+  }, [watchPassword]);
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true);
