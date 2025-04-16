@@ -8,6 +8,7 @@ import HeroPreview from "./HeroPreview";
 import { Bot, MessageSquare, Sun, Moon } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
 import { useThemeMode } from "@/hooks/useThemeMode";
+import HeroTestimonials from "./HeroTestimonials";
 
 const Hero = () => {
   const fullText = "Practice speeches, receive balanced feedback, and craft compelling narratives with personalized AI coaching.";
@@ -63,12 +64,17 @@ const Hero = () => {
         <HeroDescription fullText={fullText} />
         <HeroButtons />
         <HeroFeatures />
-        <HeroPreview 
-          botMessages={botMessages}
-          userMessages={userMessages}
-          ctaText="Try it yourself"
-          ctaLink="/chat"
-        />
+        
+        <div className="w-full max-w-4xl mx-auto mt-16 mb-20">
+          <HeroPreview 
+            botMessages={botMessages}
+            userMessages={userMessages}
+            ctaText="Try it yourself"
+            ctaLink="/chat"
+          />
+        </div>
+        
+        <HeroTestimonials />
       </div>
 
       <style>
