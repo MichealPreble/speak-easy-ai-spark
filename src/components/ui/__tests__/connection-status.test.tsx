@@ -83,24 +83,28 @@ describe('ConnectionStatusIndicator', () => {
     
     // Change to offline
     mockOnline = false;
-    const offlineHandler = window.addEventListener.mock.calls.find(
+    
+    // Get and call the offline handler
+    const offlineListener = (window.addEventListener as jest.Mock).mock.calls.find(
       call => call[0] === 'offline'
-    )[1];
+    )?.[1];
     
-    act(() => {
-      offlineHandler();
-    });
+    if (offlineListener) {
+      act(() => {
+        offlineListener();
+      });
     
-    // Status should still be online before debounce time
-    expect(screen.getByTestId('connection-status-online')).toBeInTheDocument();
+      // Status should still be online before debounce time
+      expect(screen.getByTestId('connection-status-online')).toBeInTheDocument();
     
-    // Advance timer past debounce period
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(1001);
-    });
+      // Advance timer past debounce period
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1001);
+      });
     
-    // Now status should be offline
-    expect(screen.getByTestId('connection-status-offline')).toBeInTheDocument();
+      // Now status should be offline
+      expect(screen.getByTestId('connection-status-offline')).toBeInTheDocument();
+    }
   });
 
   test('registers event listeners for online/offline events', () => {
