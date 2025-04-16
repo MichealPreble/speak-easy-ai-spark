@@ -21,10 +21,6 @@ const Auth = () => {
     }
   }, [user, navigate]);
 
-  const handleSwitchTab = () => {
-    setActiveTab(activeTab === "signin" ? "signup" : "signin");
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-light/10 to-white dark:from-primary-dark/10 dark:to-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md glass-panel">
@@ -53,7 +49,7 @@ const Auth = () => {
               <SignIn setActiveTab={setActiveTab} />
             </TabsContent>
             <TabsContent value="signup" forceMount={true}>
-              <SignUp onSwitchTab={handleSwitchTab} />
+              <SignUp setActiveTab={setActiveTab} />
             </TabsContent>
           </Tabs>
         </CardContent>
