@@ -5,9 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/AuthContext';
 import { z } from 'zod';
-import PasswordField from './PasswordField';
-import TermsCheckbox from './TermsCheckbox';
-import { Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 interface PasswordStrengthProps {
   password: string;
@@ -81,6 +79,10 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchTab }) => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Password visibility states
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validate = () => {
     try {
@@ -161,7 +163,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchTab }) => {
         <div className="relative">
           <Input
             id="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Create a password"
@@ -171,16 +173,11 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchTab }) => {
           <button
             type="button"
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            onClick={() => {
-              const input = document.getElementById('password') as HTMLInputElement;
-              if (input) {
-                input.type = input.type === 'password' ? 'text' : 'password';
-              }
-            }}
+            onClick={() => setShowPassword(!showPassword)}
             tabIndex={-1}
             aria-label="Show password"
           >
-            {/* Eye icon will be rendered here */}
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
         {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
@@ -192,7 +189,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchTab }) => {
         <div className="relative">
           <Input
             id="confirmPassword"
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Confirm your password"
@@ -202,16 +199,11 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchTab }) => {
           <button
             type="button"
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            onClick={() => {
-              const input = document.getElementById('confirmPassword') as HTMLInputElement;
-              if (input) {
-                input.type = input.type === 'password' ? 'text' : 'password';
-              }
-            }}
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             tabIndex={-1}
             aria-label="Show confirm password"
           >
-            {/* Eye icon will be rendered here */}
+            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
         {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
