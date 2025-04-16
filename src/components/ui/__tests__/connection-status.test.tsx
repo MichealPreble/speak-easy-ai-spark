@@ -1,124 +1,139 @@
 
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
-import { vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ConnectionStatusIndicator } from '../connection-status';
+import { Wifi, WifiOff, AlertCircle } from 'lucide-react';
+
+// Mock navigator.onLine
+Object.defineProperty(window, 'navigator', {
+  value: { onLine: true },
+  writable: true,
+});
+
+// Mock window.addEventListener and removeEventListener
+const addEventListenerMock = jest.fn();
+const removeEventListenerMock = jest.fn();
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  window.addEventListener = addEventListenerMock;
+  window.removeEventListener = removeEventListenerMock;
+  (navigator as any).onLine = true;
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 describe('ConnectionStatusIndicator', () => {
-  const originalNavigator = { ...navigator };
-  let mockOnline = true;
-
-  beforeEach(() => {
-    // Mock navigator.onLine
-    Object.defineProperty(navigator, 'onLine', {
-      configurable: true,
-      get: () => mockOnline,
-    });
-
-    // Mock fetch
-    global.fetch = vi.fn().mockImplementation(() => 
-      Promise.resolve({ ok: true })
-    );
-
-    // Mock window event listeners
-    window.addEventListener = vi.fn();
-    window.removeEventListener = vi.fn();
-
-    // Mock setTimeout and clearTimeout
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    // Restore original navigator
-    Object.defineProperty(navigator, 'onLine', {
-      get: () => originalNavigator.onLine,
-    });
-
-    vi.clearAllMocks();
-    vi.useRealTimers();
-  });
-
-  test('renders online status when connected', () => {
-    mockOnline = true;
-    
+  it('renders online status initially when navigator.onLine is true', () => {
     render(<ConnectionStatusIndicator />);
-    
-    expect(screen.getByTestId('connection-status-online')).toBeInTheDocument();
     expect(screen.getByText('Online')).toBeInTheDocument();
+    expect(screen.getByLabelText('Connection status: Online')).toHaveClass('bg-green-500');
+    expect(screen.getByTestId('Wifi')).toBeInTheDocument();
   });
 
-  test('renders offline status when disconnected', () => {
-    mockOnline = false;
-    
+  it('renders offline status when navigator.onLine is false', () => {
+    (navigator as any).onLine = false;
     render(<ConnectionStatusIndicator />);
-    
-    expect(screen.getByTestId('connection-status-offline')).toBeInTheDocument();
     expect(screen.getByText('Offline')).toBeInTheDocument();
+    expect(screen.getByLabelText('Connection status: Offline')).toHaveClass('bg-red-500');
+    expect(screen.getByTestId('WifiOff')).toBeInTheDocument();
   });
 
-  test('shows error status when fetch fails', async () => {
-    mockOnline = true;
+  it('adds and removes online/offline event listeners', async () => {
+    const { unmount } = render(<ConnectionStatusIndicator />);
     
-    // Mock failing fetch
-    global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+    // Verify event listeners were added
+    expect(addEventListenerMock).toHaveBeenCalledWith('online', expect.any(Function));
+    expect(addEventListenerMock).toHaveBeenCalledWith('offline', expect.any(Function));
     
-    render(<ConnectionStatusIndicator pingUrl="/api/ping" />);
-    
-    // Wait for the async operation to complete
-    await act(async () => {
-      await vi.runAllTimersAsync();
-    });
-    
-    expect(screen.getByTestId('connection-status-error')).toBeInTheDocument();
-    expect(screen.getByText('Connection Error')).toBeInTheDocument();
-  });
-
-  test('debounces status changes', async () => {
-    mockOnline = true;
-    
-    render(<ConnectionStatusIndicator debounceMs={1000} />);
-    
-    // Initially online
-    expect(screen.getByTestId('connection-status-online')).toBeInTheDocument();
-    
-    // Change to offline
-    mockOnline = false;
-    
-    // Get and call the offline handler
-    const offlineListener = (window.addEventListener as jest.Mock).mock.calls.find(
+    // Store the event handler functions
+    const onlineHandler = (addEventListenerMock as jest.Mock).mock.calls?.find(
+      call => call[0] === 'online'
+    )?.[1];
+    const offlineHandler = (addEventListenerMock as jest.Mock).mock.calls?.find(
       call => call[0] === 'offline'
     )?.[1];
-    
-    if (offlineListener) {
-      act(() => {
-        offlineListener();
+
+    // Simulate offline event
+    if (offlineHandler) {
+      (navigator as any).onLine = false;
+      offlineHandler();
+      await waitFor(() => {
+        expect(screen.getByText('Offline')).toBeInTheDocument();
       });
-    
-      // Status should still be online before debounce time
-      expect(screen.getByTestId('connection-status-online')).toBeInTheDocument();
-    
-      // Advance timer past debounce period
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(1001);
-      });
-    
-      // Now status should be offline
-      expect(screen.getByTestId('connection-status-offline')).toBeInTheDocument();
     }
-  });
 
-  test('registers event listeners for online/offline events', () => {
-    render(<ConnectionStatusIndicator />);
-    
-    expect(window.addEventListener).toHaveBeenCalledWith('online', expect.any(Function));
-    expect(window.addEventListener).toHaveBeenCalledWith('offline', expect.any(Function));
-  });
-
-  test('removes event listeners on unmount', () => {
-    const { unmount } = render(<ConnectionStatusIndicator />);
+    // Unmount and verify listeners were removed
     unmount();
+    expect(removeEventListenerMock).toHaveBeenCalledWith('online', onlineHandler);
+    expect(removeEventListenerMock).toHaveBeenCalledWith('offline', offlineHandler);
+  });
+
+  it('shows tooltip on hover', async () => {
+    render(<ConnectionStatusIndicator />);
+    const badge = screen.getByLabelText('Connection status: Online');
     
-    expect(window.removeEventListener).toHaveBeenCalledWith('online', expect.any(Function));
-    expect(window.removeEventListener).toHaveBeenCalledWith('offline', expect.any(Function));
+    await userEvent.hover(badge);
+    await waitFor(() => {
+      expect(screen.getByText('You are connected to the internet')).toBeInTheDocument();
+    });
+
+    await userEvent.unhover(badge);
+    await waitFor(() => {
+      expect(screen.queryByText('You are connected to the internet')).not.toBeInTheDocument();
+    });
+  });
+
+  it('updates to error status on failed ping', async () => {
+    // Mock fetch to simulate failed ping
+    jest.spyOn(global, 'fetch').mockRejectedValue(new Error('Network error'));
+    
+    render(<ConnectionStatusIndicator pingUrl="https://test.com/ping" />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Connection Error')).toBeInTheDocument();
+      expect(screen.getByLabelText('Connection status: Connection Error')).toHaveClass('bg-yellow-500');
+      expect(screen.getByTestId('AlertCircle')).toBeInTheDocument();
+    });
+
+    global.fetch.mockRestore();
+  });
+
+  it('debounces status updates', async () => {
+    const { unmount } = render(<ConnectionStatusIndicator debounceMs={100} />);
+    
+    const offlineHandler = (addEventListenerMock as jest.Mock).mock.calls?.find(
+      call => call[0] === 'offline'
+    )?.[1];
+
+    if (offlineHandler) {
+      (navigator as any).onLine = false;
+      offlineHandler();
+      // Status should not update immediately due to debounce
+      expect(screen.getByText('Online')).toBeInTheDocument();
+      
+      await waitFor(() => {
+        expect(screen.getByText('Offline')).toBeInTheDocument();
+      }, { timeout: 200 });
+    }
+
+    unmount();
+  });
+
+  it('is accessible', () => {
+    render(<ConnectionStatusIndicator />);
+    const badge = screen.getByRole('status');
+    expect(badge).toHaveAttribute('aria-live', 'polite');
+    expect(badge).toHaveAttribute('aria-label', 'Connection status: Online');
   });
 });
+
+// Add data-testid to Lucide icons for testing
+jest.mock('lucide-react', () => ({
+  Wifi: (props: any) => <svg data-testid="Wifi" {...props} />,
+  WifiOff: (props: any) => <svg data-testid="WifiOff" {...props} />,
+  AlertCircle: (props: any) => <svg data-testid="AlertCircle" {...props} />,
+}));

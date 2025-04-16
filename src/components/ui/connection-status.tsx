@@ -50,6 +50,8 @@ const ConnectionStatusBadge = ({ status }: { status: ConnectionStatus }) => {
       className={`inline-flex items-center gap-1 ${className}`}
       data-testid={`connection-status-${status}`}
       aria-label={`Connection status: ${label}`}
+      role="status"
+      aria-live="polite"
     >
       <Icon className="h-3 w-3" />
       <span className="text-xs">{label}</span>
@@ -128,7 +130,7 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
   const getTooltipContent = () => {
     switch (status) {
       case "online": 
-        return "You're connected to the internet";
+        return "You are connected to the internet";
       case "offline": 
         return "You're currently offline";
       case "error": 
