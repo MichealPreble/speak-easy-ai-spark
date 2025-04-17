@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
@@ -54,15 +53,14 @@ const OccasionDetails: React.FC<OccasionDetailsProps> = ({
           .limit(2);
         setBlogPreviews(data || []);
       }
-      if (occasion.templateId) {
-        const { data } = await supabase
-          .from('templates')
-          .select('id, title, content')
-          .eq('occasion_name', occasion.name);
-        setTemplates(data || []);
-        if (data && data.length > 0) {
-          trackEvent('view_template', 'SpeechPractice', occasion.name);
-        }
+      
+      const { data } = await supabase
+        .from('templates')
+        .select('id, title, content')
+        .eq('occasion_name', occasion.name);
+      setTemplates(data || []);
+      if (data && data.length > 0) {
+        trackEvent('view_template', 'SpeechPractice', occasion.name);
       }
     };
     fetchData();

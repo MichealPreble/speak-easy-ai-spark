@@ -8,6 +8,7 @@ export interface SpeechOccasion {
   frequency: 'Rare' | 'Regular';
   task: string;
   blogTag?: string;
+  templateId?: string;
 }
 
 export interface SpeechCategory {

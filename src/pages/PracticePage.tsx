@@ -1,7 +1,11 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { supabase } from '@/lib/supabase';
 import { usePracticeData } from '@/hooks/usePracticeData';
 import { useOccasionHandlers } from '@/hooks/useOccasionHandlers';
+import { SpeechOccasion } from '@/types/speechOccasions';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { SPEECH_OCCASIONS } from '@/data/speechOccasions';
 import PracticePageHeader from '@/components/speech/PracticePageHeader';
 import SpeechOccasionSelector from '@/components/speech/SpeechOccasionSelector';
 import FavoriteOccasions from '@/components/speech/FavoriteOccasions';
@@ -61,4 +65,3 @@ const PracticePage: React.FC = () => {
 };
 
 export default PracticePage;
-
