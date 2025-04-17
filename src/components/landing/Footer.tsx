@@ -1,5 +1,5 @@
 
-import { Bot, MessageSquare } from "lucide-react";
+import { Bot, MessageSquare, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -18,17 +18,32 @@ const Footer = () => {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-6 items-center">
-            <Link to="/chat">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center gap-2 bg-primary/15 hover:bg-primary/30 text-primary border border-primary/20 backdrop-blur-sm"
-              >
-                <MessageSquare className="h-4 w-4" />
-                Try Chat
-              </Button>
-            </Link>
+            <div className="flex gap-4">
+              <Link to="/chat">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-2 bg-primary/15 hover:bg-primary/30 text-primary border border-primary/20 backdrop-blur-sm"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Try Chat
+                </Button>
+              </Link>
+              <Link to="/blog">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-2 hover:bg-secondary/20 border border-secondary/20 backdrop-blur-sm"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  Blog
+                </Button>
+              </Link>
+            </div>
             <div className="flex gap-6">
+              <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors">
+                Blog
+              </Link>
               <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
                 Terms
               </Link>

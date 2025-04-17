@@ -16,6 +16,8 @@ import ForgotPassword from "@/components/auth/ForgotPassword";
 import UpdatePassword from "@/components/auth/UpdatePassword";
 import EmailVerification from "@/components/auth/EmailVerification";
 import ProfilePage from "./pages/ProfilePage";
+import BlogPage from "./pages/BlogPage";
+import BlogPostPage from "./pages/BlogPostPage";
 
 // Lazy load pages to improve initial load performance
 const ChatPage = lazy(() => import("./pages/ChatPage"));
@@ -88,6 +90,8 @@ const AppRoutes = () => {
       <Route path="/auth/update-password" element={<UpdatePassword />} />
       <Route path="/auth/verify" element={<EmailVerification />} />
       <Route path="/auth/confirm" element={<EmailVerification />} />
+      <Route path="/blog" element={<BlogPage />} />
+      <Route path="/blog/:slug" element={<BlogPostPage />} />
       <Route 
         path="/profile" 
         element={
