@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/lib/supabase';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -7,6 +7,7 @@ import FavoriteOccasions from '@/components/speech/FavoriteOccasions';
 import RecentOccasions from '@/components/speech/RecentOccasions';
 import PracticeHistory from '@/components/speech/PracticeHistory';
 import OccasionDetails from '@/components/speech/OccasionDetails';
+import ProgressTracker from '@/components/progress/ProgressTracker';
 import { SpeechOccasion } from '@/types/speechOccasions';
 
 interface BlogPostPreview {
@@ -22,13 +23,49 @@ interface PracticeSession {
   notes?: string;
 }
 
+interface ProgressStats {
+  totalSessions: number;
+  totalOccasions: number;
+  totalDuration: number;
+  totalNotes: number;
+}
+
 const PracticePage: React.FC = () => {
   const [selectedOccasion, setSelectedOccasion] = useState<SpeechOccasion | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [blogPreviews, setBlogPreviews] = useState<BlogPostPreview[]>([]);
+  const [progressStats, setProgressStats] = useState<ProgressStats>({
+    totalSessions: 0,
+    totalOccasions: 0,
+    totalDuration: 0,
+    totalNotes: 0
+  });
   const { trackEvent } = useAnalytics();
 
-  // Fetch favorites on component mount
+  useEffect(() => {
+    const fetchProgressStats = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: sessions } = await supabase
+          .from('practice_sessions')
+          .select('occasion_name, duration, notes')
+          .eq('user_id', user.id);
+
+        if (sessions) {
+          const uniqueOccasions = new Set(sessions.map(s => s.occasion_name));
+          setProgressStats({
+            totalSessions: sessions.length,
+            totalOccasions: uniqueOccasions.size,
+            totalDuration: sessions.reduce((sum, s) => sum + (s.duration || 0), 0),
+            totalNotes: sessions.filter(s => s.notes).length
+          });
+          trackEvent('view_progress_stats', 'Practice', 'Progress Stats Loaded');
+        }
+      }
+    };
+    fetchProgressStats();
+  }, [trackEvent]);
+
   useEffect(() => {
     const fetchFavorites = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -53,7 +90,6 @@ const PracticePage: React.FC = () => {
     fetchFavorites();
   }, [trackEvent]);
 
-  // Restore selected occasion from session storage
   useEffect(() => {
     const savedOccasion = sessionStorage.getItem('selectedOccasion');
     if (savedOccasion) {
@@ -84,6 +120,7 @@ const PracticePage: React.FC = () => {
       </Helmet>
 
       <h1 className="text-3xl font-bold mb-4">Practice Your Speech</h1>
+      <ProgressTracker {...progressStats} />
       <SpeechOccasionSelector onSelectOccasion={handleSelect} />
       <FavoriteOccasions 
         favorites={favorites} 
