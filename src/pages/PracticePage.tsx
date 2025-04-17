@@ -41,20 +41,18 @@ const PracticePage: React.FC = () => {
   const [blogPreviews, setBlogPreviews] = useState<BlogPostPreview[]>([]);
   const [totalSessions, setTotalSessions] = useState(0);
   const [uniqueOccasions, setUniqueOccasions] = useState(0);
-  const [totalMinutes, setTotalMinutes] = useState(0); // Changed to minutes
+  const [totalMinutes, setTotalMinutes] = useState(0);
   const [notesAdded, setNotesAdded] = useState(0);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const { trackEvent } = useAnalytics();
-  const shareUrl = 'https://speakeasyai.com'; // Adjust to your platform URL
+  const shareUrl = 'https://speakeasyai.com';
 
-  // Fetch user ID, favorites, and progress stats on mount
   useEffect(() => {
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
-        // Fetch favorites
         const { data: favoritesData, error: favoritesError } = await supabase
           .from('favorites')
           .select('occasion_name')
@@ -68,7 +66,6 @@ const PracticePage: React.FC = () => {
           trackEvent('view_favorites', 'SpeechPractice', 'Favorites Loaded');
         }
 
-        // Fetch progress stats
         const { data: sessionsData, error: sessionsError } = await supabase
           .from('practice_sessions')
           .select('occasion_name, notes')
@@ -81,7 +78,6 @@ const PracticePage: React.FC = () => {
           const totalSessions = sessionsData.length;
           const uniqueOccasions = new Set(sessionsData.map((s) => s.occasion_name)).size;
           const notesAdded = sessionsData.filter((s) => s.notes).length;
-          // Assume 30 minutes per session for simplicity
           const totalMinutes = totalSessions * 30;
 
           setTotalSessions(totalSessions);
@@ -89,7 +85,6 @@ const PracticePage: React.FC = () => {
           setTotalMinutes(totalMinutes);
           setNotesAdded(notesAdded);
 
-          // Calculate milestones
           const milestones: Milestone[] = [
             {
               id: 'sessions_10',
@@ -136,7 +131,6 @@ const PracticePage: React.FC = () => {
     fetchData();
   }, [trackEvent]);
 
-  // Restore selected occasion from session storage
   useEffect(() => {
     const storedOccasion = sessionStorage.getItem('selectedOccasion');
     if (storedOccasion) {
@@ -189,7 +183,6 @@ const PracticePage: React.FC = () => {
           totalHours: totalMinutes / 60,
           notesAdded
         }}
-        shareUrl={shareUrl}
       />
       <SpeechOccasionSelector onSelectOccasion={handleSelect} />
       <FavoriteOccasions
