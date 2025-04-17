@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/lib/supabase';
@@ -8,7 +9,7 @@ import FavoriteOccasions from '@/components/speech/FavoriteOccasions';
 import RecentOccasions from '@/components/speech/RecentOccasions';
 import PracticeHistory from '@/components/speech/PracticeHistory';
 import OccasionDetails from '@/components/speech/OccasionDetails';
-import ProgressTracker from '@/components/speech/ProgressTracker';
+import ProgressTracker from '@/components/progress/ProgressTracker';
 import { SpeechOccasion } from '@/types/speechOccasions';
 
 interface BlogPostPreview {
