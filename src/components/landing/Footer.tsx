@@ -1,5 +1,5 @@
 
-import { Bot, MessageSquare, BookOpen } from "lucide-react";
+import { Bot, MessageSquare, BookOpen, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -29,20 +29,23 @@ const Footer = () => {
                   Try Chat
                 </Button>
               </Link>
-              <Link to="/blog">
+              <Link to="/newsletter">
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="flex items-center gap-2 hover:bg-secondary/20 border border-secondary/20 backdrop-blur-sm"
+                  className="flex items-center gap-2 bg-secondary/15 hover:bg-secondary/30 border border-secondary/20 backdrop-blur-sm"
                 >
-                  <BookOpen className="h-4 w-4" />
-                  Blog
+                  <Mail className="h-4 w-4" />
+                  Newsletter
                 </Button>
               </Link>
             </div>
             <div className="flex gap-6">
               <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors">
                 Blog
+              </Link>
+              <Link to="/newsletter" className="text-muted-foreground hover:text-foreground transition-colors">
+                Newsletter
               </Link>
               <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
                 Terms

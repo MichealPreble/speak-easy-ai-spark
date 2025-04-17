@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +19,7 @@ import ProfilePage from "./pages/ProfilePage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import PracticePage from "./pages/PracticePage";
+import NewsletterPage from "./pages/NewsletterPage";
 
 const ChatPage = lazy(() => import("./pages/ChatPage"));
 const ProgressPage = lazy(() => import("./pages/ProgressPage"));
@@ -89,6 +91,7 @@ const AppRoutes = () => {
       <Route path="/blog" element={<BlogPage />} />
       <Route path="/blog/:slug" element={<BlogPostPage />} />
       <Route path="/practice" element={<PracticePage />} />
+      <Route path="/newsletter" element={<NewsletterPage />} />
       <Route 
         path="/profile" 
         element={
