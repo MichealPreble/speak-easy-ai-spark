@@ -1,10 +1,10 @@
-
 import { Calendar, Clock, User, ArrowLeft, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link, useParams, Navigate } from "react-router-dom";
 import { BlogPost as BlogPostType } from "./BlogCard";
 import { BLOG_POSTS } from "@/data/blogPosts";
+import ShareButtons from "./ShareButtons";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -16,6 +16,9 @@ const BlogPost = () => {
   if (!post) {
     return <Navigate to="/blog" replace />;
   }
+  
+  // Construct the full URL for sharing
+  const currentUrl = window.location.href;
   
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
@@ -114,7 +117,12 @@ const BlogPost = () => {
         </p>
       </div>
       
-      {/* Share and comments section */}
+      {/* Share buttons */}
+      <div className="border-t pt-6">
+        <ShareButtons title={post.title} url={currentUrl} />
+      </div>
+      
+      {/* Comments section */}
       <div className="border-t pt-8">
         <h3 className="text-xl font-semibold mb-4">Join the conversation</h3>
         <div className="flex gap-4 items-center">
