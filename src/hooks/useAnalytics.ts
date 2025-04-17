@@ -46,7 +46,9 @@ export function useAnalytics() {
   // New tracking function for the "Try it yourself" button in Hero
   const trackTryItYourself = () => trackEvent('try_it_yourself', 'Hero', 'Clicked Try It Yourself Button');
 
+  // Add trackEvent to the returned object
   return {
+    trackEvent,
     trackPageView,
     trackVoiceMessage,
     trackThemeToggle,
