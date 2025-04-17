@@ -3,6 +3,7 @@ import BlogPost from "@/components/blog/BlogPost";
 import { useParams } from "react-router-dom";
 import { BLOG_POSTS } from "@/data/blogPosts";
 import SEO from "@/components/SEO";
+import ShareButtons from "@/components/blog/ShareButtons";
 
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -21,6 +22,12 @@ const BlogPostPage = () => {
       <div className="bg-background min-h-screen">
         <div className="container mx-auto">
           <BlogPost />
+          {post && (
+            <ShareButtons 
+              title={post.title} 
+              url={currentUrl} 
+            />
+          )}
         </div>
       </div>
     </>
