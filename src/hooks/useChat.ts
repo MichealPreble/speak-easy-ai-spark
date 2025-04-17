@@ -1,209 +1,91 @@
 
-import { useState, useEffect, useCallback } from "react";
-import { Message } from "@/types/chat";
-import { useToast } from "@/hooks/use-toast";
-import { useVoiceRecognition, SpeechFeedback } from "@/hooks/useVoiceRecognition";
-import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
-import { useThemeMode } from "@/hooks/useThemeMode";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { useMessageStore } from "@/hooks/useMessageStore";
-import { useMessageSearch } from "@/hooks/useMessageSearch";
+import { useEffect } from "react";
+import { useChatState } from "@/hooks/chat/useChatState";
+import { useChatActions } from "@/hooks/chat/useChatActions";
+import { useChatVoice } from "@/hooks/chat/useChatVoice";
 import { useChatUI } from "@/hooks/useChatUI";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { useChatFeedback } from "@/hooks/useChatFeedback";
-import { useChatResponses } from "@/hooks/useChatResponses";
 
 interface UseChatProps {
   selectedScenario?: string | null;
 }
 
-export const useChat = ({ selectedScenario }: UseChatProps) => {
-  const { toast } = useToast();
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const { messages, setMessages, clearMessages, addMessage } = useMessageStore();
-  const { searchQuery, setSearchQuery, filteredMessages } = useMessageSearch(messages);
-  const { isDarkMode, toggleDarkMode } = useThemeMode();
-  const { speak } = useSpeechSynthesis();
-  const { 
+export const useChat = ({ selectedScenario }: UseChatProps = {}) => {
+  // State management
+  const {
+    input,
+    setInput,
+    isLoading,
+    setIsLoading,
+    messages,
+    addMessage,
+    clearMessages,
+    searchQuery,
+    setSearchQuery,
+    filteredMessages,
+    isDarkMode,
+    toggleDarkMode
+  } = useChatState();
+
+  // UI management
+  const {
     inputRef, 
     scrollAreaRef, 
     scrollToBottom, 
     showTyping,
     showTypingIndicator 
   } = useChatUI(messages);
-  const analytics = useAnalytics();
-  const { generateSpeechFeedback } = useChatFeedback();
-  const { getSimulatedResponse } = useChatResponses({ selectedScenario });
 
+  // Action handlers
+  const {
+    generateResponse,
+    handleSend,
+    summarize,
+    handleClearChat
+  } = useChatActions({
+    setInput,
+    setIsLoading,
+    addMessage,
+    clearMessages,
+    showTyping,
+    selectedScenario
+  });
+
+  // Voice recognition
   const {
     isVoiceActive,
-    toggleVoice: _toggleVoice,
+    toggleVoice,
     isBrowserSupported,
     recordingDuration,
     MAX_RECORDING_SECONDS
-  } = useVoiceRecognition((transcript, feedback) => {
-    if (transcript.trim()) {
-      addMessage({
-        text: transcript,
-        sender: 'user',
-      });
-      
-      generateResponse(transcript, feedback);
-    }
+  } = useChatVoice({
+    generateResponse
   });
 
-  const generateResponse = (transcript: string, speechFeedback?: SpeechFeedback) => {
-    setInput("");
-    setIsLoading(true);
-    
-    showTyping(1500);
-
-    setTimeout(() => {
-      const botResponse = getSimulatedResponse(transcript);
-      
-      addMessage({
-        text: botResponse,
-        sender: "bot",
-        read: false
-      });
-
-      if (speechFeedback && (transcript.length > 30 || speechFeedback.duration > 5)) {
-        const feedbackText = generateSpeechFeedback(speechFeedback);
-        
-        addMessage({
-          text: feedbackText,
-          sender: "bot",
-          isFeedback: true,
-          read: false
-        });
-      }
-      
-      setIsLoading(false);
-      
-      speak(botResponse);
-    }, 1500);
-  };
-
-  const toggleVoice = useCallback((timeLimit = false) => {
-    _toggleVoice(timeLimit);
-  }, [_toggleVoice]);
-
-  const handleSendVoice = (transcript: string, speechFeedback: SpeechFeedback) => {
-    if (!transcript.trim()) return;
-    
-    analytics.trackVoiceMessage();
-    
-    addMessage({
-      text: transcript,
-      sender: "user",
-      isVoiceMessage: true,
-      read: false
-    });
-
-    setInput("");
-    setIsLoading(true);
-    
-    showTyping(1500);
-
-    setTimeout(() => {
-      const botResponse = getSimulatedResponse(transcript);
-      
-      addMessage({
-        text: botResponse,
-        sender: "bot",
-        read: false
-      });
-
-      if (transcript.length > 30 || speechFeedback.duration > 5) {
-        const feedbackText = generateSpeechFeedback(speechFeedback);
-        
-        addMessage({
-          text: feedbackText,
-          sender: "bot",
-          isFeedback: true,
-          read: false
-        });
-      }
-      
-      setIsLoading(false);
-      
-      speak(botResponse);
-    }, 1500);
-  };
-
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
-
-    analytics.trackMessageSent();
-
-    addMessage({
-      text: input,
-      sender: "user",
-      read: false
-    });
-    
-    const userInput = input;
-    setInput("");
-    setIsLoading(true);
-    
-    showTyping(1500);
-
-    setTimeout(() => {
-      const botResponse = getSimulatedResponse(userInput);
-      
-      addMessage({
-        text: botResponse,
-        sender: "bot",
-        read: false
-      });
-      
-      setIsLoading(false);
-    }, 1500);
-  };
-
-  const summarize = () => {
-    analytics.trackSummarize();
-    addMessage({
-      text: "summarize",
-      sender: "user",
-      read: false
-    });
-    generateResponse("summarize");
-  };
-
-  const handleToggleDarkMode = () => {
-    const newTheme = !isDarkMode ? 'dark' : 'light';
-    analytics.trackThemeToggle(newTheme);
-    toggleDarkMode();
-  };
-
+  // Analytics
+  const analytics = useAnalytics();
+  
+  // Keyboard shortcuts
   useKeyboardShortcuts({
     onVoiceToggle: toggleVoice,
     onSummarize: summarize
   });
 
+  // Scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isLoading]);
+  }, [messages, isLoading, scrollToBottom]);
 
-  const handleClearChat = async () => {
-    analytics.trackClearChat();
-    clearMessages();
-    toast({
-      title: "Chat cleared",
-      description: "All previous messages have been removed.",
-    });
-  };
-
+  // Track search usage
   useEffect(() => {
     if (searchQuery.trim().length > 0) {
       analytics.trackSearchUsed();
     }
-  }, [searchQuery]);
+  }, [searchQuery, analytics]);
 
   return {
+    // State
     messages,
     filteredMessages,
     input,
@@ -212,17 +94,25 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
     searchQuery,
     setSearchQuery,
     isDarkMode,
-    toggleDarkMode: handleToggleDarkMode,
+    
+    // Voice
     isVoiceActive,
     isBrowserSupported,
+    recordingDuration,
+    MAX_RECORDING_SECONDS,
+    
+    // Refs
     inputRef,
     scrollAreaRef,
+    
+    // Actions
     handleSend,
     handleClearChat,
     toggleVoice,
+    toggleDarkMode,
     summarize,
-    showTypingIndicator,
-    recordingDuration,
-    MAX_RECORDING_SECONDS
+    
+    // UI
+    showTypingIndicator
   };
 };

@@ -13,18 +13,18 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface ClearFiltersDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onClearFilters: () => void;
 }
 
 export const ClearFiltersDialog = ({ 
-  isOpen, 
-  onClose,
+  open, 
+  onOpenChange,
   onClearFilters
 }: ClearFiltersDialogProps) => {
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Clear all filters?</AlertDialogTitle>
@@ -33,7 +33,7 @@ export const ClearFiltersDialog = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onClose}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => onOpenChange(false)}>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={onClearFilters}>
             Clear all
           </AlertDialogAction>

@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { SearchInput } from "./SearchInput";
 
 interface ChatSearchProps {
