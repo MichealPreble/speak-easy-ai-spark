@@ -21,8 +21,8 @@ const ShareButtons = ({ title, url }: ShareButtonsProps) => {
     email: `mailto:?subject=${encodedTitle}&body=Check out this article: ${url}`
   };
 
-  const trackShare = (platform: string) => {
-    trackEvent(`share_${platform.toLowerCase()}`, 'Blog', `Shared via ${platform}`);
+  const handleShare = (platform: string) => {
+    trackEvent('share_' + platform.toLowerCase(), 'Blog', `Shared via ${platform}`);
   };
 
   const handleCopyLink = () => {
@@ -32,7 +32,7 @@ const ShareButtons = ({ title, url }: ShareButtonsProps) => {
           title: "Link copied",
           description: "The article link has been copied to your clipboard."
         });
-        trackShare('CopyLink');
+        trackEvent('share_copylink', 'Blog', 'Shared via Copy Link');
       },
       (err) => {
         console.error("Could not copy text: ", err);
@@ -54,7 +54,7 @@ const ShareButtons = ({ title, url }: ShareButtonsProps) => {
           target="_blank" 
           rel="noopener noreferrer"
           aria-label="Share on Twitter"
-          onClick={() => trackShare('Twitter')}
+          onClick={() => handleShare('Twitter')}
         >
           <Button 
             variant="outline" 
@@ -70,7 +70,7 @@ const ShareButtons = ({ title, url }: ShareButtonsProps) => {
           target="_blank" 
           rel="noopener noreferrer"
           aria-label="Share on Facebook"
-          onClick={() => trackShare('Facebook')}
+          onClick={() => handleShare('Facebook')}
         >
           <Button 
             variant="outline" 
@@ -86,7 +86,7 @@ const ShareButtons = ({ title, url }: ShareButtonsProps) => {
           target="_blank" 
           rel="noopener noreferrer"
           aria-label="Share on LinkedIn"
-          onClick={() => trackShare('LinkedIn')}
+          onClick={() => handleShare('LinkedIn')}
         >
           <Button 
             variant="outline" 
@@ -100,7 +100,7 @@ const ShareButtons = ({ title, url }: ShareButtonsProps) => {
         <a 
           href={shareLinks.email}
           aria-label="Share via Email"
-          onClick={() => trackShare('Email')}
+          onClick={() => handleShare('Email')}
         >
           <Button 
             variant="outline" 
