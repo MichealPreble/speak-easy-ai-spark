@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/lib/supabase';
@@ -185,7 +186,12 @@ const PracticePage: React.FC = () => {
       </Helmet>
 
       <h1 className="text-3xl font-bold mb-4">Practice Your Speech</h1>
-      <ProgressTracker stats={progressStats} milestones={milestones} shareUrl={shareUrl} />
+      <ProgressTracker 
+        totalSessions={progressStats.totalSessions}
+        totalOccasions={progressStats.uniqueOccasions}
+        totalDuration={progressStats.totalHours * 60} // Convert hours to minutes
+        totalNotes={progressStats.notesAdded}
+      />
       <PracticeGoals userId={userId} stats={progressStats} />
       <SpeechOccasionSelector onSelectOccasion={handleSelect} />
       <FavoriteOccasions 
