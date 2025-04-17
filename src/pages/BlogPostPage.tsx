@@ -8,6 +8,9 @@ const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const post = BLOG_POSTS.find(post => post.slug === slug);
   
+  // Create the current URL for sharing
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+  
   return (
     <>
       <SEO 

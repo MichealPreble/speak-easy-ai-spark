@@ -2,6 +2,7 @@
 import { Facebook, Linkedin, Mail, Twitter, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 interface ShareButtonsProps {
   title: string;
@@ -9,6 +10,7 @@ interface ShareButtonsProps {
 }
 
 const ShareButtons = ({ title, url }: ShareButtonsProps) => {
+  const { trackEvent } = useAnalytics();
   const encodedTitle = encodeURIComponent(title);
   const encodedUrl = encodeURIComponent(url);
 
@@ -16,7 +18,11 @@ const ShareButtons = ({ title, url }: ShareButtonsProps) => {
     twitter: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}&hashtags=SpeakEasyAI,PublicSpeaking`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
     linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-    email: `mailto:?subject=${encodedTitle}&body=Check out this article: ${encodedUrl}`
+    email: `mailto:?subject=${encodedTitle}&body=Check out this article: ${url}`
+  };
+
+  const trackShare = (platform: string) => {
+    trackEvent(`share_${platform.toLowerCase()}`, 'Blog', `Shared via ${platform}`);
   };
 
   const handleCopyLink = () => {
@@ -26,6 +32,7 @@ const ShareButtons = ({ title, url }: ShareButtonsProps) => {
           title: "Link copied",
           description: "The article link has been copied to your clipboard."
         });
+        trackShare('CopyLink');
       },
       (err) => {
         console.error("Could not copy text: ", err);
@@ -47,11 +54,11 @@ const ShareButtons = ({ title, url }: ShareButtonsProps) => {
           target="_blank" 
           rel="noopener noreferrer"
           aria-label="Share on Twitter"
+          onClick={() => trackShare('Twitter')}
         >
           <Button 
             variant="outline" 
             size="sm" 
-            onClick={() => console.log('Twitter share clicked')}
             className="flex items-center gap-2"
           >
             <Twitter className="h-4 w-4" />
@@ -63,11 +70,11 @@ const ShareButtons = ({ title, url }: ShareButtonsProps) => {
           target="_blank" 
           rel="noopener noreferrer"
           aria-label="Share on Facebook"
+          onClick={() => trackShare('Facebook')}
         >
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => console.log('Facebook share clicked')}
             className="flex items-center gap-2"
           >
             <Facebook className="h-4 w-4" />
@@ -79,11 +86,11 @@ const ShareButtons = ({ title, url }: ShareButtonsProps) => {
           target="_blank" 
           rel="noopener noreferrer"
           aria-label="Share on LinkedIn"
+          onClick={() => trackShare('LinkedIn')}
         >
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => console.log('LinkedIn share clicked')}
             className="flex items-center gap-2"
           >
             <Linkedin className="h-4 w-4" />
@@ -93,11 +100,11 @@ const ShareButtons = ({ title, url }: ShareButtonsProps) => {
         <a 
           href={shareLinks.email}
           aria-label="Share via Email"
+          onClick={() => trackShare('Email')}
         >
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => console.log('Email share clicked')}
             className="flex items-center gap-2"
           >
             <Mail className="h-4 w-4" />
