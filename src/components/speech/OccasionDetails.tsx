@@ -8,6 +8,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { SpeechOccasion } from '@/types/speechOccasions';
 import RelatedBlogPosts from './RelatedBlogPosts';
+import PracticeFeedback from './PracticeFeedback';
+import TemplateList from './TemplateList';
 
 interface Template {
   id: string;
@@ -38,6 +40,9 @@ const OccasionDetails: React.FC<OccasionDetailsProps> = ({
 }) => {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [practiceNote, setPracticeNote] = useState('');
+  const [practiceFeedback, setPracticeFeedback] = useState<number | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const { trackEvent } = useAnalytics();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -92,36 +97,65 @@ const OccasionDetails: React.FC<OccasionDetailsProps> = ({
     trackEvent('view_occasion_details', 'SpeechPractice', occasion.name);
   }, [occasion, trackEvent]);
 
-  const handleStartPractice = () => {
-    const saveSession = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { error } = await supabase
-          .from('practice_sessions')
-          .insert({ user_id: user.id, occasion_name: occasion.name, notes: practiceNote || undefined });
-        if (error) {
-          toast({
-            title: 'Error',
-            description: 'Failed to save practice session.',
-            variant: 'destructive',
-          });
-          return;
-        }
-        if (practiceNote) {
-          trackEvent('add_practice_note', 'SpeechPractice', occasion.name);
-        }
-      }
-    };
-    saveSession();
+  const handleStartPractice = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please log in to start a practice session.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('practice_sessions')
+      .insert({ user_id: user.id, occasion_name: occasion.name, notes: practiceNote || undefined })
+      .select('id')
+      .single();
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save practice session.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (practiceNote) {
+      trackEvent('add_practice_note', 'SpeechPractice', occasion.name);
+    }
+    setSessionId(data.id);
+    setShowFeedback(true);
     trackEvent('start_practice', 'SpeechPractice', occasion.name);
+    trackEvent('view_practice_feedback', 'SpeechPractice', occasion.name);
     navigate('/chat', { state: { occasion } });
   };
 
-  const handleViewBlogPosts = () => {
-    if (occasion.blogTag) {
-      trackEvent('view_blog_posts', 'SpeechPractice', occasion.blogTag);
-      navigate(`/blog?tag=${occasion.blogTag}`);
+  const handleFeedbackSubmit = async () => {
+    if (!sessionId || practiceFeedback === null) return;
+
+    const { error } = await supabase
+      .from('practice_sessions')
+      .update({ practice_feedback: practiceFeedback })
+      .eq('id', sessionId);
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save feedback.',
+        variant: 'destructive',
+      });
+      return;
     }
+
+    toast({
+      title: 'Feedback Saved',
+      description: `You rated this session ${practiceFeedback} star${practiceFeedback > 1 ? 's' : ''}.`,
+    });
+    trackEvent('submit_practice_feedback', 'SpeechPractice', `${occasion.name}:${practiceFeedback}`);
+    setShowFeedback(false);
+    setPracticeFeedback(null);
+    setSessionId(null);
   };
 
   const handleToggleFavorite = async () => {
@@ -177,6 +211,13 @@ const OccasionDetails: React.FC<OccasionDetailsProps> = ({
     }
   };
 
+  const handleViewBlogPosts = () => {
+    if (occasion.blogTag) {
+      trackEvent('view_blog_posts', 'SpeechPractice', occasion.blogTag);
+      navigate(`/blog?tag=${occasion.blogTag}`);
+    }
+  };
+
   const handleSelectTemplate = (template: Template) => {
     trackEvent('select_template', 'SpeechPractice', `${occasion.name}:${template.title}`);
     navigate('/chat', { state: { occasion, template: template.content } });
@@ -224,31 +265,18 @@ const OccasionDetails: React.FC<OccasionDetailsProps> = ({
               {favorites.includes(occasion.name) ? 'Remove Favorite' : 'Add to Favorites'}
             </Button>
           </div>
+          {showFeedback && (
+            <PracticeFeedback
+              practiceFeedback={practiceFeedback}
+              setPracticeFeedback={setPracticeFeedback}
+              onSubmit={handleFeedbackSubmit}
+            />
+          )}
         </div>
-        {templates.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold mb-2">Suggested Templates</h3>
-            <div className="space-y-4">
-              {templates.map((template) => (
-                <Card key={template.id}>
-                  <CardHeader>
-                    <CardTitle className="text-md">{template.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-600">{template.content.substring(0, 100)}...</p>
-                    <Button
-                      variant="link"
-                      onClick={() => handleSelectTemplate(template)}
-                      aria-label={`Select template: ${template.title}`}
-                    >
-                      Use Template
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
+        <TemplateList 
+          templates={templates} 
+          onSelectTemplate={handleSelectTemplate} 
+        />
         <RelatedBlogPosts blogPreviews={blogPreviews} blogTag={occasion.blogTag || ''} />
       </CardContent>
     </Card>
