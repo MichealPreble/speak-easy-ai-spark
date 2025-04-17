@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useAnalytics } from '@/hooks/useAnalytics';
+import { SpeechOccasion } from '@/types/speechOccasions';
 
 interface FavoriteOccasionsProps {
   favorites: string[];
