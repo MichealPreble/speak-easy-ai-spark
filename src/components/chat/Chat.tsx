@@ -213,8 +213,8 @@ const Chat: React.FC<ChatProps> = ({ selectedScenario }) => {
       
       {/* Clear filters confirmation */}
       <ClearFiltersDialog
-        isOpen={showClearFilters}
-        onClose={() => setShowClearFilters(false)}
+        open={showClearFilters}
+        onOpenChange={setShowClearFilters}
         onClearFilters={clearFilters}
       />
     </div>

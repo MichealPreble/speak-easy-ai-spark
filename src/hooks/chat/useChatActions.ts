@@ -66,7 +66,10 @@ export function useChatActions({
   }, [addMessage, generateSpeechFeedback, getSimulatedResponse, setInput, setIsLoading, showTyping, speak]);
 
   const handleSend = useCallback(async () => {
-    const currentInput = document.querySelector('input[aria-label="Search messages"]')?.value || "";
+    // Fix for the Element value property issue
+    const inputElement = document.querySelector('input[aria-label="Search messages"]') as HTMLInputElement;
+    const currentInput = inputElement ? inputElement.value : "";
+    
     if (!currentInput.trim() || setIsLoading) return;
 
     analytics.trackMessageSent();
