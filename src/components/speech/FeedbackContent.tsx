@@ -1,13 +1,15 @@
 
 import React from "react";
 import { SpeechFeedback } from "@/hooks/useVoiceRecognition";
-import { SpeechMetrics, ClarityAnalysis } from "@/hooks/speech-feedback";
+import { SpeechMetrics, ClarityAnalysis, HesitationAnalysis, MetricHistoryPoint } from "@/hooks/speech-feedback";
 import SpeechMetricsDisplay from "./SpeechMetrics";
 import SpeechQualityScore from "./SpeechQualityScore";
 import SpeechTrends from "./SpeechTrends";
 import SpeechTips from "./SpeechTips";
 import SpeechClarityFeedback from "./SpeechClarityFeedback";
 import SpeechMetricsChart from "./SpeechMetricsChart";
+import ReadabilityInsights from "./ReadabilityInsights";
+import EnunciationFeedback from "./EnunciationFeedback";
 import { useSpeechTips } from "@/hooks/useSpeechTips";
 
 interface FeedbackContentProps {
@@ -56,6 +58,8 @@ const FeedbackContent: React.FC<FeedbackContentProps> = ({
         fillerWordsCount={metrics.fillerWordsCount}
         hesitationsCount={hesitationAnalysis?.count}
         hesitationsPercentage={hesitationAnalysis?.percentage}
+        volume={feedback?.volume}
+        enunciation={feedback?.enunciation}
       />
       
       <div className="p-3 border-t border-border/30">
@@ -65,6 +69,22 @@ const FeedbackContent: React.FC<FeedbackContentProps> = ({
           suggestions={clarityAnalysis.suggestions} 
         />
       </div>
+      
+      {feedback?.readabilityGrade && (
+        <div className="px-3 pb-3 pt-2 border-t border-border/30">
+          <ReadabilityInsights 
+            readabilityScore={feedback.readabilityScore}
+            readabilityGrade={feedback.readabilityGrade}
+            complexWords={feedback.complexWords || []}
+          />
+        </div>
+      )}
+      
+      {feedback?.enunciation !== undefined && (
+        <div className="px-3 pb-3 pt-2 border-t border-border/30">
+          <EnunciationFeedback score={feedback.enunciation} />
+        </div>
+      )}
       
       {hesitationAnalysis && hesitationAnalysis.patterns.length > 0 && (
         <div className="px-3 pb-3 pt-2 border-t border-border/30">

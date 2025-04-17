@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Clock, Activity, Volume2, Hash, PauseCircle } from "lucide-react";
+import { Clock, Activity, Volume2, Hash, PauseCircle, VolumeX, Mic } from "lucide-react";
 
 interface SpeechMetricsProps {
   duration: number;
@@ -9,6 +9,8 @@ interface SpeechMetricsProps {
   fillerWordsCount: number;
   hesitationsCount?: number;
   hesitationsPercentage?: number;
+  volume?: number;
+  enunciation?: number;
 }
 
 const SpeechMetrics: React.FC<SpeechMetricsProps> = ({
@@ -17,7 +19,9 @@ const SpeechMetrics: React.FC<SpeechMetricsProps> = ({
   wordCount,
   fillerWordsCount,
   hesitationsCount,
-  hesitationsPercentage
+  hesitationsPercentage,
+  volume,
+  enunciation
 }) => {
   return (
     <div className="grid grid-cols-2 gap-x-2 gap-y-2.5 p-3">
@@ -52,6 +56,32 @@ const SpeechMetrics: React.FC<SpeechMetricsProps> = ({
           <div className="text-sm">{fillerWordsCount}</div>
         </div>
       </div>
+      
+      {volume !== undefined && (
+        <div className="flex items-center">
+          <VolumeX className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
+          <div>
+            <div className="text-xs font-medium">Volume</div>
+            <div className="text-sm flex flex-wrap items-center">
+              <span>{Math.round(volume)}</span>
+              <span className="text-xs text-muted-foreground ml-1">/100</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {enunciation !== undefined && (
+        <div className="flex items-center">
+          <Mic className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
+          <div>
+            <div className="text-xs font-medium">Enunciation</div>
+            <div className="text-sm flex flex-wrap items-center">
+              <span>{enunciation}</span>
+              <span className="text-xs text-muted-foreground ml-1">/100</span>
+            </div>
+          </div>
+        </div>
+      )}
       
       {hesitationsCount !== undefined && (
         <div className="flex items-center col-span-2">

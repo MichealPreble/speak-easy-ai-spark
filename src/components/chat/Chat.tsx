@@ -9,6 +9,7 @@ import ChatSearch from "./ChatSearch";
 import LoadingIndicator from "./LoadingIndicator";
 import NoMessages from "./NoMessages";
 import RealTimeFeedback from "@/components/speech/RealTimeFeedback";
+import RecordingTimer from "@/components/speech/RecordingTimer";
 
 interface ChatProps {
   selectedScenario?: string | null;
@@ -31,7 +32,9 @@ const Chat = ({ selectedScenario }: ChatProps) => {
     handleClearChat,
     toggleVoice,
     summarize,
-    showTypingIndicator
+    showTypingIndicator,
+    recordingDuration,
+    maxRecordingDuration
   } = useChat({ selectedScenario });
   
   // Track transcript and duration for real-time feedback
@@ -70,7 +73,12 @@ const Chat = ({ selectedScenario }: ChatProps) => {
           fillerWords: [],
           wordCount: input.split(/\s+/).filter(Boolean).length,
           pitchVariation: 0,
-          volumeVariation: 0
+          volumeVariation: 0,
+          volume: 50, // Default values until we get real data
+          enunciation: 70,
+          readabilityScore: 75,
+          readabilityGrade: "8th Grade",
+          complexWords: []
         });
       }
     }
@@ -122,6 +130,14 @@ const Chat = ({ selectedScenario }: ChatProps) => {
         onSend={handleSend}
         isVoiceActive={isVoiceActive}
       />
+      
+      {/* Recording Timer (for 1-minute practice) */}
+      {isVoiceActive && maxRecordingDuration > 0 && (
+        <RecordingTimer 
+          currentSeconds={recordingDuration || 0} 
+          maxSeconds={maxRecordingDuration}
+        />
+      )}
       
       {/* Real-time Feedback */}
       <RealTimeFeedback 

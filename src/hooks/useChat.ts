@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Message } from "@/types/chat";
 import { useToast } from "@/hooks/use-toast";
 import { useVoiceRecognition, SpeechFeedback } from "@/hooks/useVoiceRecognition";
@@ -17,12 +16,11 @@ interface UseChatProps {
   selectedScenario?: string | null;
 }
 
-export const useChat = ({ selectedScenario }: UseChatProps = {}) => {
+export const useChat = ({ selectedScenario }: { selectedScenario?: string | null }) => {
   const { toast } = useToast();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
-  // Use our specialized hooks
   const { messages, setMessages, clearMessages, addMessage } = useMessageStore();
   const { searchQuery, setSearchQuery, filteredMessages } = useMessageSearch(messages);
   const { isDarkMode, toggleDarkMode } = useThemeMode();
@@ -38,11 +36,32 @@ export const useChat = ({ selectedScenario }: UseChatProps = {}) => {
   const { generateSpeechFeedback } = useChatFeedback();
   const { getSimulatedResponse } = useChatResponses({ selectedScenario });
 
-  // Handle voice message send
+  const {
+    isVoiceActive,
+    toggleVoice: _toggleVoice,
+    isBrowserSupported,
+    recordingDuration,
+    MAX_RECORDING_SECONDS
+  } = useVoiceRecognition((transcript, feedback) => {
+    if (transcript.trim()) {
+      setInput(transcript);
+      
+      const userMessage = addMessage({
+        role: 'user',
+        content: transcript,
+      });
+      
+      generateResponse(transcript, userMessage.id, feedback);
+    }
+  });
+
+  const toggleVoice = useCallback((timeLimit = false) => {
+    _toggleVoice(timeLimit);
+  }, [_toggleVoice]);
+
   const handleSendVoice = (transcript: string, speechFeedback: SpeechFeedback) => {
     if (!transcript.trim()) return;
     
-    // Track voice message event
     analytics.trackVoiceMessage();
     
     addMessage({
@@ -55,10 +74,8 @@ export const useChat = ({ selectedScenario }: UseChatProps = {}) => {
     setInput("");
     setIsLoading(true);
     
-    // Show typing indicator before AI responds
     showTyping(1500);
 
-    // Simulate bot response (will be replaced with actual API call later)
     setTimeout(() => {
       const botResponse = getSimulatedResponse(transcript);
       
@@ -68,7 +85,6 @@ export const useChat = ({ selectedScenario }: UseChatProps = {}) => {
         read: false
       });
 
-      // Only add feedback for longer messages that are actually speech practice
       if (transcript.length > 30 || speechFeedback.duration > 5) {
         const feedbackText = generateSpeechFeedback(speechFeedback);
         
@@ -82,19 +98,15 @@ export const useChat = ({ selectedScenario }: UseChatProps = {}) => {
       
       setIsLoading(false);
       
-      // Speak the response
       speak(botResponse);
     }, 1500);
   };
 
-  // Handle text message send
   const handleSendMessage = (text = input) => {
     if (!text.trim() || isLoading) return;
 
-    // Track text message event
     analytics.trackMessageSent();
 
-    // Add user message
     addMessage({
       text: text,
       sender: "user",
@@ -104,10 +116,8 @@ export const useChat = ({ selectedScenario }: UseChatProps = {}) => {
     setInput("");
     setIsLoading(true);
     
-    // Show typing indicator before AI responds
     showTyping(1500);
 
-    // Simulate bot response (will be replaced with actual API call later)
     setTimeout(() => {
       const botResponse = getSimulatedResponse(text);
       
@@ -121,29 +131,22 @@ export const useChat = ({ selectedScenario }: UseChatProps = {}) => {
     }, 1500);
   };
 
-  // Set up voice recognition
-  const { isVoiceActive, toggleVoice, isBrowserSupported } = useVoiceRecognition(handleSendVoice);
-
-  // Summarize the conversation
   const summarize = () => {
     analytics.trackSummarize();
     handleSendMessage("summarize");
   };
 
-  // Handle theme toggling with analytics
   const handleToggleDarkMode = () => {
     const newTheme = !isDarkMode ? 'dark' : 'light';
     analytics.trackThemeToggle(newTheme);
     toggleDarkMode();
   };
 
-  // Set up keyboard shortcuts
   useKeyboardShortcuts({
     onVoiceToggle: toggleVoice,
     onSummarize: summarize
   });
 
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoading]);
@@ -157,7 +160,6 @@ export const useChat = ({ selectedScenario }: UseChatProps = {}) => {
     });
   };
 
-  // Track search usage
   useEffect(() => {
     if (searchQuery.trim().length > 0) {
       analytics.trackSearchUsed();
@@ -182,6 +184,8 @@ export const useChat = ({ selectedScenario }: UseChatProps = {}) => {
     handleClearChat,
     toggleVoice,
     summarize,
-    showTypingIndicator
+    showTypingIndicator,
+    recordingDuration,
+    maxRecordingDuration: MAX_RECORDING_SECONDS
   };
 };

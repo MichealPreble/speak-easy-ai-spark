@@ -1,70 +1,147 @@
 
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Bot, Moon, Sun, Trash2, Mic, MicOff, BookOpen } from "lucide-react";
+import { 
+  Mic, 
+  MicOff, 
+  Sun, 
+  Moon, 
+  Trash2, 
+  FilePlus, 
+  Timer
+} from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ChatHeaderProps {
   isDarkMode: boolean;
+  isVoiceActive: boolean;
   onToggleDarkMode: () => void;
   onClearChat: () => void;
-  onToggleVoice: () => void;
-  isVoiceActive: boolean;
+  onToggleVoice: (timeLimit?: boolean) => void;
   onSummarize: () => void;
 }
 
-const ChatHeader = ({ 
-  isDarkMode, 
-  onToggleDarkMode, 
-  onClearChat, 
-  onToggleVoice, 
+const ChatHeader: React.FC<ChatHeaderProps> = ({
+  isDarkMode,
   isVoiceActive,
-  onSummarize
-}: ChatHeaderProps) => {
+  onToggleDarkMode,
+  onClearChat,
+  onToggleVoice,
+  onSummarize,
+}) => {
   return (
-    <div className="p-4 border-b border-secondary-light/30 dark:border-secondary-dark/30 backdrop-blur-sm flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <Bot className="h-6 w-6 text-primary mr-2" />
-        <span className="text-lg font-bold">SpeakEasyAI</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={onToggleVoice}
-          aria-label={isVoiceActive ? "Disable voice input" : "Enable voice input"}
-          title="Toggle voice input (Ctrl+V)"
-          className="hover:bg-primary/10 text-primary"
-        >
-          {isVoiceActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={onSummarize}
-          aria-label="Summarize conversation"
-          title="Summarize conversation (Ctrl+S)"
-          className="hover:bg-primary/10 text-primary"
-        >
-          <BookOpen className="h-4 w-4" />
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={onToggleDarkMode}
-          aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-          className="hover:bg-primary/10 text-primary"
-        >
-          {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={onClearChat}
-          aria-label="Clear chat history"
-          className="border-secondary-light/30 dark:border-secondary-dark/30 bg-white/10 dark:bg-black/10 backdrop-blur-sm hover:bg-secondary/10"
-        >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Clear Chat
-        </Button>
+    <div className="p-3 bg-white/50 dark:bg-black/20 backdrop-blur-sm border-b border-secondary-light/30 dark:border-secondary-dark/30 flex items-center justify-between">
+      <div className="text-lg font-semibold">SpeakEasyAI</div>
+      <div className="flex items-center space-x-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+                onClick={() => onToggleVoice(true)}
+                aria-label="Practice 1-Minute Speech"
+              >
+                <Timer className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Practice 1-Minute Speech</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={isVoiceActive ? "default" : "outline"}
+                size="icon"
+                className={`h-8 w-8 rounded-full ${
+                  isVoiceActive ? "bg-primary text-primary-foreground" : ""
+                }`}
+                onClick={() => onToggleVoice(false)}
+                aria-label={isVoiceActive ? "Stop recording" : "Start recording"}
+              >
+                {isVoiceActive ? (
+                  <MicOff className="h-4 w-4" />
+                ) : (
+                  <Mic className="h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{isVoiceActive ? "Stop recording" : "Start recording"}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+                onClick={onSummarize}
+                aria-label="Summarize chat"
+              >
+                <FilePlus className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Summarize chat</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+                onClick={onClearChat}
+                aria-label="Clear chat"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Clear chat</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+                onClick={onToggleDarkMode}
+                aria-label={isDarkMode ? "Light mode" : "Dark mode"}
+              >
+                {isDarkMode ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{isDarkMode ? "Light mode" : "Dark mode"}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   );
