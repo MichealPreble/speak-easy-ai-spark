@@ -2,14 +2,25 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { SpeechOccasion } from '@/types/speechOccasions';
+import { SPEECH_OCCASIONS } from '@/data/speechOccasions';
 
 interface FavoriteOccasionsProps {
   favorites: string[];
-  onSelectFavorite: (name: string) => void;
+  onSelectFavorite: (occasion: SpeechOccasion) => void;
 }
 
 const FavoriteOccasions = ({ favorites, onSelectFavorite }: FavoriteOccasionsProps) => {
   if (!favorites.length) return null;
+
+  const handleSelect = (name: string) => {
+    const occasion = SPEECH_OCCASIONS
+      .flatMap(cat => cat.occasions)
+      .find(occ => occ.name === name);
+      
+    if (occasion) {
+      onSelectFavorite(occasion);
+    }
+  };
 
   return (
     <div className="mt-6">
@@ -19,7 +30,7 @@ const FavoriteOccasions = ({ favorites, onSelectFavorite }: FavoriteOccasionsPro
           <Button
             key={name}
             variant="outline"
-            onClick={() => onSelectFavorite(name)}
+            onClick={() => handleSelect(name)}
             aria-label={`Select favorite occasion ${name}`}
           >
             {name}
