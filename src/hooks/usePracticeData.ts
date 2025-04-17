@@ -23,6 +23,12 @@ export interface Milestone {
   tip: string;
 }
 
+export interface BlogPostPreview {
+  id: string;
+  title: string;
+  excerpt: string;
+}
+
 export const usePracticeData = () => {
   const [selectedOccasion, setSelectedOccasion] = useState<SpeechOccasion | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -34,6 +40,7 @@ export const usePracticeData = () => {
   });
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
+  const [blogPreviews, setBlogPreviews] = useState<BlogPostPreview[]>([]);
   const { trackEvent } = useAnalytics();
 
   useEffect(() => {
@@ -113,7 +120,9 @@ export const usePracticeData = () => {
     setFavorites,
     progressStats,
     milestones,
-    userId
+    userId,
+    blogPreviews,
+    setBlogPreviews
   };
 };
 
