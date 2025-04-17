@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -7,18 +6,32 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Activity, Clock, BookOpen, FileText, Trophy, Target, Star, Medal } from 'lucide-react';
 import { useAnalytics } from '@/hooks/useAnalytics';
 
+interface Milestone {
+  id: string;
+  title: string;
+  description: string;
+  achieved: boolean;
+  progress: number;
+  target: number;
+  tip: string;
+}
+
 interface ProgressTrackerProps {
   totalSessions: number;
-  totalOccasions: number;
+  uniqueOccasions: number;
   totalDuration: number;
-  totalNotes: number;
+  notesAdded: number;
+  milestones: Milestone[];
+  shareUrl: string;
 }
 
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   totalSessions,
-  totalOccasions,
+  uniqueOccasions,
   totalDuration,
-  totalNotes
+  notesAdded,
+  milestones,
+  shareUrl
 }) => {
   const { trackEvent } = useAnalytics();
 
@@ -27,45 +40,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   }, [trackEvent]);
 
   const getMilestones = () => {
-    const milestones = [];
-    
-    if (totalSessions >= 10) {
-      milestones.push({
-        icon: <Trophy className="h-4 w-4" />,
-        title: "Practice Champion",
-        description: "Completed 10 practice sessions",
-        color: "bg-amber-500"
-      });
-    }
-    
-    if (totalOccasions >= 5) {
-      milestones.push({
-        icon: <Target className="h-4 w-4" />,
-        title: "Versatile Speaker",
-        description: "Practiced 5 different occasions",
-        color: "bg-purple-500"
-      });
-    }
-    
-    if (totalDuration >= 300) { // 5 hours
-      milestones.push({
-        icon: <Star className="h-4 w-4" />,
-        title: "Dedicated Learner",
-        description: "Practiced for 5+ hours",
-        color: "bg-blue-500"
-      });
-    }
-    
-    if (totalNotes >= 5) {
-      milestones.push({
-        icon: <Medal className="h-4 w-4" />,
-        title: "Reflective Speaker",
-        description: "Added 5 practice notes",
-        color: "bg-green-500"
-      });
-    }
-
-    return milestones;
+    return milestones.filter(milestone => milestone.achieved);
   };
 
   const handleMilestoneClick = (title: string) => {
@@ -91,7 +66,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
               <BookOpen className="h-5 w-5 text-primary" />
               <div>
                 <p className="text-sm font-medium">Occasions</p>
-                <p className="text-2xl font-bold">{totalOccasions}</p>
+                <p className="text-2xl font-bold">{uniqueOccasions}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -105,7 +80,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
               <FileText className="h-5 w-5 text-primary" />
               <div>
                 <p className="text-sm font-medium">Notes Added</p>
-                <p className="text-2xl font-bold">{totalNotes}</p>
+                <p className="text-2xl font-bold">{notesAdded}</p>
               </div>
             </div>
           </div>
@@ -116,14 +91,13 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
               <div className="flex flex-wrap gap-2">
                 <TooltipProvider>
                   {getMilestones().map((milestone) => (
-                    <Tooltip key={milestone.title}>
+                    <Tooltip key={milestone.id}>
                       <TooltipTrigger asChild>
                         <Badge 
-                          className={`${milestone.color} text-white cursor-pointer transition-transform hover:scale-105`}
+                          className="bg-green-500 text-white cursor-pointer transition-transform hover:scale-105"
                           onClick={() => handleMilestoneClick(milestone.title)}
                         >
-                          {milestone.icon}
-                          <span className="ml-1">{milestone.title}</span>
+                          {milestone.title}
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent>
