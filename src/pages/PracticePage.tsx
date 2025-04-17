@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/lib/supabase';
@@ -10,6 +9,7 @@ import RecentOccasions from '@/components/speech/RecentOccasions';
 import PracticeHistory from '@/components/speech/PracticeHistory';
 import OccasionDetails from '@/components/speech/OccasionDetails';
 import ProgressTracker from '@/components/progress/ProgressTracker';
+import PracticeGoals from '@/components/speech/PracticeGoals';
 import { SpeechOccasion } from '@/types/speechOccasions';
 
 interface BlogPostPreview {
@@ -27,9 +27,19 @@ interface PracticeSession {
 
 interface ProgressStats {
   totalSessions: number;
-  totalOccasions: number;
-  totalDuration: number;
-  totalNotes: number;
+  uniqueOccasions: number;
+  totalHours: number;
+  notesAdded: number;
+}
+
+interface Milestone {
+  id: string;
+  title: string;
+  description: string;
+  achieved: boolean;
+  progress: number;
+  target: number;
+  tip: string;
 }
 
 const PracticePage: React.FC = () => {
@@ -38,77 +48,130 @@ const PracticePage: React.FC = () => {
   const [blogPreviews, setBlogPreviews] = useState<BlogPostPreview[]>([]);
   const [progressStats, setProgressStats] = useState<ProgressStats>({
     totalSessions: 0,
-    totalOccasions: 0,
-    totalDuration: 0,
-    totalNotes: 0
+    uniqueOccasions: 0,
+    totalHours: 0,
+    notesAdded: 0,
   });
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
   const { trackEvent } = useAnalytics();
+  const shareUrl = 'https://speakeasyai.com'; // Adjust to your platform URL
 
+  // Fetch user ID, favorites, and progress stats on mount
   useEffect(() => {
-    const fetchProgressStats = async () => {
+    const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data: sessions } = await supabase
-          .from('practice_sessions')
-          .select('occasion_name, duration, notes')
-          .eq('user_id', user.id);
-
-        if (sessions) {
-          const uniqueOccasions = new Set(sessions.map(s => s.occasion_name));
-          setProgressStats({
-            totalSessions: sessions.length,
-            totalOccasions: uniqueOccasions.size,
-            totalDuration: sessions.reduce((sum, s) => sum + (s.duration || 0), 0),
-            totalNotes: sessions.filter(s => s.notes).length
-          });
-          trackEvent('view_progress_stats', 'Practice', 'Progress Stats Loaded');
-        }
-      }
-    };
-    fetchProgressStats();
-  }, [trackEvent]);
-
-  useEffect(() => {
-    const fetchFavorites = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data, error } = await supabase
+        setUserId(user.id);
+        // Fetch favorites
+        const { data: favoritesData, error: favoritesError } = await supabase
           .from('favorites')
           .select('occasion_name')
           .eq('user_id', user.id);
+        if (favoritesError) {
+          console.error('Error fetching favorites:', favoritesError);
+          return;
+        }
+        if (favoritesData) {
+          setFavorites(favoritesData.map((item) => item.occasion_name));
+          trackEvent('view_favorites', 'SpeechPractice', 'Favorites Loaded');
+        }
 
-        if (error) {
-          console.error('Error fetching favorites:', error);
+        // Fetch progress stats
+        const { data: sessionsData, error: sessionsError } = await supabase
+          .from('practice_sessions')
+          .select('occasion_name, notes, duration')
+          .eq('user_id', user.id);
+
+        if (sessionsError) {
+          console.error('Error fetching practice sessions:', sessionsError);
           return;
         }
 
-        if (data) {
-          setFavorites(data.map(item => item.occasion_name));
-          trackEvent('view_favorites', 'Practice', 'Favorites Loaded');
+        if (sessionsData) {
+          const totalSessions = sessionsData.length;
+          const uniqueOccasions = new Set(sessionsData.map((s) => s.occasion_name)).size;
+          const notesAdded = sessionsData.filter((s) => s.notes).length;
+          const totalHours = Math.round(sessionsData.reduce((sum, s) => sum + (s.duration || 0), 0) / 60 / 60 * 10) / 10;
+
+          setProgressStats({
+            totalSessions,
+            uniqueOccasions,
+            totalHours,
+            notesAdded,
+          });
+
+          // Calculate milestones
+          const milestones: Milestone[] = [
+            {
+              id: 'sessions_10',
+              title: '10 Sessions',
+              description: 'Completed 10 practice sessions',
+              achieved: totalSessions >= 10,
+              progress: totalSessions,
+              target: 10,
+              tip: 'Keep practicing regularly to improve your skills!',
+            },
+            {
+              id: 'occasions_5',
+              title: '5 Occasions',
+              description: 'Practiced 5 unique occasions',
+              achieved: uniqueOccasions >= 5,
+              progress: uniqueOccasions,
+              target: 5,
+              tip: 'Try practicing different occasions to broaden your experience.',
+            },
+            {
+              id: 'hours_5',
+              title: '5 Hours',
+              description: 'Practiced for 5 total hours',
+              achieved: totalHours >= 5,
+              progress: totalHours,
+              target: 5,
+              tip: 'Dedicate more time to refine your delivery and confidence.',
+            },
+            {
+              id: 'notes_5',
+              title: '5 Notes',
+              description: 'Added notes to 5 practice sessions',
+              achieved: notesAdded >= 5,
+              progress: notesAdded,
+              target: 5,
+              tip: 'Use notes to track your progress and key takeaways.',
+            },
+          ];
+          setMilestones(milestones);
+          trackEvent('view_progress_stats', 'SpeechPractice', 'Progress Stats Loaded');
         }
       }
     };
-
-    fetchFavorites();
+    fetchData();
   }, [trackEvent]);
 
+  // Restore selected occasion from session storage
   useEffect(() => {
-    const savedOccasion = sessionStorage.getItem('selectedOccasion');
-    if (savedOccasion) {
-      setSelectedOccasion(JSON.parse(savedOccasion));
+    const storedOccasion = sessionStorage.getItem('selectedOccasion');
+    if (storedOccasion) {
+      const occasion = SPEECH_OCCASIONS.flatMap((cat) => cat.occasions).find(
+        (occ) => occ.name === storedOccasion
+      );
+      if (occasion) {
+        setSelectedOccasion(occasion);
+        trackEvent('restore_occasion', 'SpeechPractice', occasion.name);
+      }
     }
-  }, []);
+  }, [trackEvent]);
 
   const handleSelect = (occasion: SpeechOccasion) => {
     setSelectedOccasion(occasion);
-    sessionStorage.setItem('selectedOccasion', JSON.stringify(occasion));
-    trackEvent('select_occasion', 'Practice', occasion.name);
+    sessionStorage.setItem('selectedOccasion', occasion.name);
+    trackEvent('select_occasion', 'SpeechPractice', occasion.name);
   };
 
   const handleSelectSession = (occasion: SpeechOccasion, session: PracticeSession) => {
     setSelectedOccasion(occasion);
-    sessionStorage.setItem('selectedOccasion', JSON.stringify(occasion));
-    trackEvent('select_practice_session', 'Practice', `${occasion.name} - ${session.session_date}`);
+    sessionStorage.setItem('selectedOccasion', occasion.name);
+    trackEvent('select_practice_session', 'SpeechPractice', occasion.name);
   };
 
   return (
@@ -122,7 +185,8 @@ const PracticePage: React.FC = () => {
       </Helmet>
 
       <h1 className="text-3xl font-bold mb-4">Practice Your Speech</h1>
-      <ProgressTracker {...progressStats} />
+      <ProgressTracker stats={progressStats} milestones={milestones} shareUrl={shareUrl} />
+      <PracticeGoals userId={userId} stats={progressStats} />
       <SpeechOccasionSelector onSelectOccasion={handleSelect} />
       <FavoriteOccasions 
         favorites={favorites} 
