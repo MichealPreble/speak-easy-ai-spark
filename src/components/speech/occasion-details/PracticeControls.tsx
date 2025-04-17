@@ -2,10 +2,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
-import { useAnalytics } from '@/hooks/useAnalytics';
-import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 interface PracticeControlsProps {
   occasionName: string;
@@ -22,42 +20,12 @@ const PracticeControls: React.FC<PracticeControlsProps> = ({
   isFavorite,
   practiceNote,
   onPracticeNoteChange,
-  onFavoriteToggle,
+  onFavoriteToggle
 }) => {
-  const { trackEvent } = useAnalytics();
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const { trackEvent } = useAnalytics();
 
-  const handleStartPractice = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: 'Authentication Required',
-        description: 'Please log in to start a practice session.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from('practice_sessions')
-      .insert({ user_id: user.id, occasion_name: occasionName, notes: practiceNote || undefined })
-      .select('id')
-      .single();
-
-    if (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to save practice session.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (practiceNote) {
-      trackEvent('add_practice_note', 'SpeechPractice', occasionName);
-    }
-    
+  const handleStartPractice = () => {
     trackEvent('start_practice', 'SpeechPractice', occasionName);
     navigate('/chat', { state: { occasion: { name: occasionName } } });
   };
@@ -78,7 +46,7 @@ const PracticeControls: React.FC<PracticeControlsProps> = ({
         className="mb-4"
         aria-label="Practice session note"
       />
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         <Button
           onClick={handleStartPractice}
           aria-label={`Start practicing for ${occasionName}`}

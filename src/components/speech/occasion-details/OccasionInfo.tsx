@@ -9,12 +9,12 @@ interface OccasionInfoProps {
 
 const OccasionInfo: React.FC<OccasionInfoProps> = ({ occasion }) => {
   return (
-    <CardContent>
+    <div className="mb-4">
       <p className="text-sm text-gray-600"><strong>Occasion:</strong> {occasion.occasion}</p>
       <p className="text-sm text-gray-600"><strong>Examples:</strong> {occasion.examples}</p>
       <p className="text-sm text-gray-600"><strong>Audience Size:</strong> {occasion.audienceSize}</p>
       <p className="text-sm text-gray-600"><strong>Task:</strong> {occasion.task}</p>
-    </CardContent>
+    </div>
   );
 };
 
