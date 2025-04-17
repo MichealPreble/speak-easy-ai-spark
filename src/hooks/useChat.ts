@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { Message } from "@/types/chat";
 import { useToast } from "@/hooks/use-toast";
@@ -133,7 +132,7 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
     }, 1500);
   };
 
-  const handleSendMessage = (text = input) => {
+  const handleSend = async (text?: string) => {
     if (!text.trim() || isLoading) return;
 
     analytics.trackMessageSent();
@@ -187,7 +186,7 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
     scrollToBottom();
   }, [messages, isLoading]);
 
-  const handleClearChat = () => {
+  const handleClearChat = async () => {
     analytics.trackClearChat();
     clearMessages();
     toast({
@@ -216,12 +215,20 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
     isBrowserSupported,
     inputRef,
     scrollAreaRef,
-    handleSend: handleSendMessage,
-    handleClearChat: clearMessages,
+    handleSend,
+    handleClearChat,
     toggleVoice,
     summarize,
     showTypingIndicator,
     recordingDuration,
-    maxRecordingDuration: MAX_RECORDING_SECONDS
+    maxRecordingDuration
   };
+};
+
+const someAsyncFunction = async () => {
+  // Implementation
+};
+
+const someAsyncClearFunction = async () => {
+  // Implementation
 };

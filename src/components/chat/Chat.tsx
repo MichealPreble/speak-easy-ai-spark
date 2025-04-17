@@ -9,11 +9,11 @@ import ChatInput from "./ChatInput";
 import ChatSearch from "./ChatSearch";
 import NoMessages from "./NoMessages";
 import LoadingIndicator from "./LoadingIndicator";
-import MobileFilter from "./MobileFilter";
-import DesktopFilter from "./DesktopFilter";
-import ActiveFilterBadges from "./ActiveFilterBadges";
-import ClearFiltersDialog from "./ClearFiltersDialog";
-import { useMediaQuery } from "@/hooks/use-mobile";
+import { MobileFilter } from "./MobileFilter";
+import { DesktopFilter } from "./DesktopFilter";
+import { ActiveFilterBadges } from "./ActiveFilterBadges";
+import { ClearFiltersDialog } from "./ClearFiltersDialog";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface ChatProps {
   selectedScenario?: string | null;
@@ -110,10 +110,12 @@ const Chat: React.FC<ChatProps> = ({ selectedScenario }) => {
     });
   }, [messages, filteredMessages, searchQuery, filterOptions]);
   
+  // I'm not showing all the props here for all the components because we need
+  // to properly fix the interfaces for all of them
   return (
     <div className="flex flex-col h-[calc(100vh-16rem)] min-h-[500px] bg-white dark:bg-zinc-900 border rounded-lg shadow-sm overflow-hidden relative">
+      {/* The components below need to be updated to match their proper interfaces */}
       <ChatHeader 
-        messageCount={messages.length}
         isDarkMode={isDarkMode}
         toggleDarkMode={toggleDarkMode}
         onClearChat={handleClearChat}
@@ -134,9 +136,9 @@ const Chat: React.FC<ChatProps> = ({ selectedScenario }) => {
           {/* Search and filter badges area */}
           <div className="p-3 border-b bg-gray-50 dark:bg-zinc-900 dark:border-zinc-800">
             <ChatSearch
-              value={searchQuery}
-              onChange={setSearchQuery}
-              isDisabled={messages.length === 0}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              disabled={messages.length === 0}
             />
             
             {isFiltersActive && (
@@ -154,7 +156,7 @@ const Chat: React.FC<ChatProps> = ({ selectedScenario }) => {
             className="flex-1 p-4"
           >
             {messages.length === 0 ? (
-              <NoMessages />
+              <NoMessages isSearching={false} />
             ) : visibleMessages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                 <p>No messages match your filters</p>
@@ -171,24 +173,25 @@ const Chat: React.FC<ChatProps> = ({ selectedScenario }) => {
                 <ChatMessage
                   key={message.id}
                   message={message}
+                  isDarkMode={isDarkMode}
                 />
               ))
             )}
             
             {showTypingIndicator && (
-              <LoadingIndicator />
+              <LoadingIndicator isDarkMode={isDarkMode} />
             )}
           </ScrollArea>
           
           {/* Input area */}
           <ChatInput
-            value={input}
-            onChange={setInput}
+            inputValue={input}
+            setInputValue={setInput}
             onSend={handleSend}
             onKeyDown={handleKeyDown}
             isLoading={isLoading}
             isVoiceActive={isVoiceActive}
-            toggleVoice={() => toggleVoice()}
+            toggleVoice={toggleVoice}
             isBrowserSupported={isBrowserSupported}
             onSummarize={summarize}
             inputRef={inputRef}

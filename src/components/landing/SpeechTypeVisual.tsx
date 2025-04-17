@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { GraduationCap, Heart, Gift, Award, Users, Presentation, MicrophoneStage } from 'lucide-react';
+import { GraduationCap, Heart, Gift, Award, Users, Presentation, Mic } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 const SpeechTypeVisual: React.FC = () => {
@@ -43,7 +43,7 @@ const SpeechTypeVisual: React.FC = () => {
     {
       title: 'Keynote Speeches',
       description: 'Captivate audiences with powerful industry insights',
-      icon: <MicrophoneStage className="h-12 w-12 text-red-500 mb-4" />,
+      icon: <Mic className="h-12 w-12 text-red-500 mb-4" />,
       color: 'bg-red-50 dark:bg-red-900/20',
       borderColor: 'border-red-200 dark:border-red-800/30'
     },
