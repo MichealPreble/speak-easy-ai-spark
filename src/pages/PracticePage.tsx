@@ -1,13 +1,13 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/lib/supabase';
-import { useAnalytics } from '@/hooks/useAnalytics';
-import { SpeechOccasion } from '@/types/speechOccasions';
 import SpeechOccasionSelector from '@/components/speech/SpeechOccasionSelector';
 import FavoriteOccasions from '@/components/speech/FavoriteOccasions';
 import RecentOccasions from '@/components/speech/RecentOccasions';
 import OccasionDetails from '@/components/speech/OccasionDetails';
+import { SpeechOccasion } from '@/types/speechOccasions';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 interface BlogPostPreview {
   id: string;
@@ -15,14 +15,14 @@ interface BlogPostPreview {
   excerpt: string;
 }
 
-const PracticePage = () => {
+const PracticePage: React.FC = () => {
   const [selectedOccasion, setSelectedOccasion] = useState<SpeechOccasion | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [blogPreviews, setBlogPreviews] = useState<BlogPostPreview[]>([]);
   const { trackEvent } = useAnalytics();
 
   useEffect(() => {
-    const fetchInitialData = async () => {
+    const fetchFavorites = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data, error } = await supabase
@@ -37,22 +37,30 @@ const PracticePage = () => {
 
         if (data) {
           setFavorites(data.map(item => item.occasion_name));
-          trackEvent('view_favorites', 'Practice', 'Favorites Loaded');
+          trackEvent({
+            eventName: 'load_favorites',
+            category: 'SpeechPractice',
+            label: 'Favorites Loaded'
+          });
         }
       }
     };
 
-    fetchInitialData();
+    fetchFavorites();
   }, [trackEvent]);
 
-  useEffect(() => {
+  const handleSelect = (occasion: SpeechOccasion) => {
+    setSelectedOccasion(occasion);
+    
+    // Fetch blog previews for the selected occasion
     const fetchBlogPreviews = async () => {
-      if (selectedOccasion?.blogTag) {
+      if (occasion.blogTag) {
         const { data } = await supabase
           .from('blog_posts')
           .select('id, title, excerpt')
-          .eq('tag', selectedOccasion.blogTag)
+          .eq('tag', occasion.blogTag)
           .limit(2);
+        
         setBlogPreviews(data || []);
       } else {
         setBlogPreviews([]);
@@ -60,11 +68,6 @@ const PracticePage = () => {
     };
 
     fetchBlogPreviews();
-  }, [selectedOccasion]);
-
-  const handleSelect = (occasion: SpeechOccasion) => {
-    setSelectedOccasion(occasion);
-    trackEvent('select_occasion', 'Practice', occasion.name);
   };
 
   return (
@@ -78,11 +81,12 @@ const PracticePage = () => {
       </Helmet>
 
       <h1 className="text-3xl font-bold mb-4">Practice Your Speech</h1>
-      
       <SpeechOccasionSelector onSelectOccasion={handleSelect} />
-      <FavoriteOccasions onSelectFavorite={handleSelect} />
+      <FavoriteOccasions 
+        favorites={favorites} 
+        onSelectFavorite={handleSelect} 
+      />
       <RecentOccasions onSelectRecent={handleSelect} />
-      
       {selectedOccasion && (
         <div className="mt-6">
           <OccasionDetails
