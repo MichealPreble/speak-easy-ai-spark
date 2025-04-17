@@ -20,7 +20,7 @@ const HeroDescription = memo(({
   startDelay = 0,
   cursor = "|",
   cursorClassName = "animate-blink",
-  height = "h-24",
+  height = "h-32", // Increased height to accommodate the speech types section
   withMountAnimation = false,
   speechTypes
 }: HeroDescriptionProps) => {
@@ -52,7 +52,7 @@ const HeroDescription = memo(({
       const typingTimer = setTimeout(() => {
         setTypedText(processedText.substring(0, textIndex + 1));
         setTextIndex(textIndex + 1);
-      }, initialDelay + typingSpeed); // Adjustable typing speed with initial delay
+      }, initialDelay + typingSpeed);
       
       return () => clearTimeout(typingTimer);
     }
@@ -81,8 +81,8 @@ const HeroDescription = memo(({
       </p>
       
       {speechTypes && speechTypes.length > 0 && (
-        <div className="mt-6 flex flex-col items-center">
-          <p className="text-lg font-medium mb-2">Perfect for:</p>
+        <div className="mt-4 flex flex-col items-center">
+          <p className="text-base font-medium text-muted-foreground mb-2">Perfect for:</p>
           <div className="relative h-8 overflow-hidden w-full max-w-xs text-center">
             {speechTypes.map((type, index) => (
               <div 
@@ -93,7 +93,7 @@ const HeroDescription = memo(({
                   transform: `translateY(${currentTypeIndex === index ? 0 : '20px'})`,
                 }}
               >
-                <span className="text-primary font-bold">{type}</span>
+                <span className="text-primary font-bold text-lg">{type}</span>
               </div>
             ))}
           </div>
