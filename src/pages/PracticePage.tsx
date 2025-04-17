@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/lib/supabase';
@@ -37,11 +36,11 @@ const PracticePage: React.FC = () => {
 
         if (data) {
           setFavorites(data.map(item => item.occasion_name));
-          trackEvent({
-            eventName: 'load_favorites',
-            category: 'SpeechPractice',
-            label: 'Favorites Loaded'
-          });
+          trackEvent(
+            'load_favorites', 
+            'SpeechPractice', 
+            'Favorites Loaded'
+          );
         }
       }
     };
@@ -52,7 +51,6 @@ const PracticePage: React.FC = () => {
   const handleSelect = (occasion: SpeechOccasion) => {
     setSelectedOccasion(occasion);
     
-    // Fetch blog previews for the selected occasion
     const fetchBlogPreviews = async () => {
       if (occasion.blogTag) {
         const { data } = await supabase
@@ -68,6 +66,12 @@ const PracticePage: React.FC = () => {
     };
 
     fetchBlogPreviews();
+
+    trackEvent(
+      'select_occasion', 
+      'Practice', 
+      occasion.name
+    );
   };
 
   return (
