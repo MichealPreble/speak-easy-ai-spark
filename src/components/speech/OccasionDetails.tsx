@@ -1,15 +1,15 @@
+
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { useToast } from '@/components/ui/use-toast';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { supabase } from '@/lib/supabase';
 import { SpeechOccasion } from '@/types/speechOccasions';
+import OccasionInfo from './occasion-details/OccasionInfo';
+import PracticeControls from './occasion-details/PracticeControls';
+import PracticeFeedback from './occasion-details/PracticeFeedback';
+import TemplateSection from './occasion-details/TemplateSection';
 import RelatedBlogPosts from './RelatedBlogPosts';
-import PracticeFeedback from './PracticeFeedback';
-import TemplateList from './TemplateList';
 
 interface Template {
   id: string;
@@ -31,12 +31,12 @@ interface OccasionDetailsProps {
   setBlogPreviews: React.Dispatch<React.SetStateAction<BlogPostPreview[]>>;
 }
 
-const OccasionDetails: React.FC<OccasionDetailsProps> = ({ 
-  occasion, 
-  favorites, 
-  setFavorites, 
-  blogPreviews, 
-  setBlogPreviews 
+const OccasionDetails: React.FC<OccasionDetailsProps> = ({
+  occasion,
+  favorites,
+  setFavorites,
+  blogPreviews,
+  setBlogPreviews,
 }) => {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [practiceNote, setPracticeNote] = useState('');
@@ -45,9 +45,7 @@ const OccasionDetails: React.FC<OccasionDetailsProps> = ({
   const [sessionId, setSessionId] = useState<string | null>(null);
   const { trackEvent } = useAnalytics();
   const { toast } = useToast();
-  const navigate = useNavigate();
 
-  // Fetch blog previews and templates
   useEffect(() => {
     const fetchData = async () => {
       if (occasion.blogTag) {
@@ -71,7 +69,6 @@ const OccasionDetails: React.FC<OccasionDetailsProps> = ({
     fetchData();
   }, [occasion, setBlogPreviews, trackEvent]);
 
-  // Save to recent occasions
   useEffect(() => {
     const saveRecent = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -96,41 +93,6 @@ const OccasionDetails: React.FC<OccasionDetailsProps> = ({
     saveRecent();
     trackEvent('view_occasion_details', 'SpeechPractice', occasion.name);
   }, [occasion, trackEvent]);
-
-  const handleStartPractice = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: 'Authentication Required',
-        description: 'Please log in to start a practice session.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from('practice_sessions')
-      .insert({ user_id: user.id, occasion_name: occasion.name, notes: practiceNote || undefined })
-      .select('id')
-      .single();
-    if (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to save practice session.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (practiceNote) {
-      trackEvent('add_practice_note', 'SpeechPractice', occasion.name);
-    }
-    setSessionId(data.id);
-    setShowFeedback(true);
-    trackEvent('start_practice', 'SpeechPractice', occasion.name);
-    trackEvent('view_practice_feedback', 'SpeechPractice', occasion.name);
-    navigate('/chat', { state: { occasion } });
-  };
 
   const handleFeedbackSubmit = async () => {
     if (!sessionId || practiceFeedback === null) return;
@@ -211,73 +173,36 @@ const OccasionDetails: React.FC<OccasionDetailsProps> = ({
     }
   };
 
-  const handleViewBlogPosts = () => {
-    if (occasion.blogTag) {
-      trackEvent('view_blog_posts', 'SpeechPractice', occasion.blogTag);
-      navigate(`/blog?tag=${occasion.blogTag}`);
-    }
-  };
-
-  const handleSelectTemplate = (template: Template) => {
-    trackEvent('select_template', 'SpeechPractice', `${occasion.name}:${template.title}`);
-    navigate('/chat', { state: { occasion, template: template.content } });
-  };
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Selected: {occasion.name}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-gray-600"><strong>Occasion:</strong> {occasion.occasion}</p>
-        <p className="text-sm text-gray-600"><strong>Examples:</strong> {occasion.examples}</p>
-        <p className="text-sm text-gray-600"><strong>Audience Size:</strong> {occasion.audienceSize}</p>
-        <p className="text-sm text-gray-600"><strong>Task:</strong> {occasion.task}</p>
-        <div className="mt-4">
-          <Input
-            placeholder="Add a note for this practice session (e.g., key points, feedback)"
-            value={practiceNote}
-            onChange={(e) => setPracticeNote(e.target.value)}
-            className="mb-4"
-            aria-label="Practice session note"
-          />
-          <div className="flex gap-4">
-            <Button
-              onClick={handleStartPractice}
-              aria-label={`Start practicing for ${occasion.name}`}
-            >
-              Start Practicing
-            </Button>
-            {occasion.blogTag && (
-              <Button
-                variant="outline"
-                onClick={handleViewBlogPosts}
-                aria-label={`View blog posts for ${occasion.name}`}
-              >
-                View Related Blog Posts
-              </Button>
-            )}
-            <Button
-              variant={favorites.includes(occasion.name) ? 'destructive' : 'secondary'}
-              onClick={handleToggleFavorite}
-              aria-label={favorites.includes(occasion.name) ? `Remove ${occasion.name} from favorites` : `Add ${occasion.name} to favorites`}
-            >
-              {favorites.includes(occasion.name) ? 'Remove Favorite' : 'Add to Favorites'}
-            </Button>
-          </div>
-          {showFeedback && (
-            <PracticeFeedback
-              practiceFeedback={practiceFeedback}
-              setPracticeFeedback={setPracticeFeedback}
-              onSubmit={handleFeedbackSubmit}
-            />
-          )}
-        </div>
-        <TemplateList 
-          templates={templates} 
-          onSelectTemplate={handleSelectTemplate} 
+        <OccasionInfo occasion={occasion} />
+        <PracticeControls
+          occasionName={occasion.name}
+          blogTag={occasion.blogTag}
+          isFavorite={favorites.includes(occasion.name)}
+          practiceNote={practiceNote}
+          onPracticeNoteChange={setPracticeNote}
+          onFavoriteToggle={handleToggleFavorite}
         />
-        <RelatedBlogPosts blogPreviews={blogPreviews} blogTag={occasion.blogTag || ''} />
+        {showFeedback && (
+          <PracticeFeedback
+            practiceFeedback={practiceFeedback}
+            onFeedbackChange={setPracticeFeedback}
+            onSubmit={handleFeedbackSubmit}
+          />
+        )}
+        <TemplateSection
+          templates={templates}
+          occasionName={occasion.name}
+        />
+        <RelatedBlogPosts
+          blogPreviews={blogPreviews}
+          blogTag={occasion.blogTag || ''}
+        />
       </CardContent>
     </Card>
   );

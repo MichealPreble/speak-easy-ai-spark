@@ -1,6 +1,23 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Progress } from '@/components/ui/progress';
+import { Plus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { supabase } from '@/lib/supabase';
 import { PracticeGoalsProps } from './PracticeGoalsProps';
+
+interface PracticeGoal {
+  id: string;
+  goal_type: 'sessions' | 'occasions' | 'hours' | 'notes';
+  target: number;
+  deadline: string;
+  progress: number;
+}
 
 const PracticeGoals: React.FC<PracticeGoalsProps> = ({ userId, stats }) => {
   const [goals, setGoals] = useState<PracticeGoal[]>([]);
