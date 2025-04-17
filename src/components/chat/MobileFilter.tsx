@@ -1,63 +1,84 @@
 
-import { Filter } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { FilterOptions } from "./FilterOptions";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface MobileFilterProps {
-  filterOptions: { id: string; label: string }[];
-  activeFilters: string[];
-  toggleFilter: (filterId: string) => void;
-  clearFilters: () => void;
-  isDrawerOpen: boolean;
-  setIsDrawerOpen: (isOpen: boolean) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  filterOptions: Record<string, boolean>;
+  handleFilterChange: (field: string) => void;
 }
 
 export const MobileFilter = ({
+  isOpen,
+  onClose,
   filterOptions,
-  activeFilters,
-  toggleFilter,
-  clearFilters,
-  isDrawerOpen,
-  setIsDrawerOpen
+  handleFilterChange
 }: MobileFilterProps) => {
   return (
-    <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-      <DrawerTrigger asChild>
-        <Button variant="outline" size="icon" className="relative">
-          <Filter className="h-4 w-4" />
-          {activeFilters.length > 0 && (
-            <Badge 
-              className="absolute -top-1 -right-1 h-4 min-w-4 text-[10px] flex items-center justify-center p-0" 
-              variant="secondary"
-            >
-              {activeFilters.length}
-            </Badge>
-          )}
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent className="max-h-[85vh] px-0">
-        <div className="py-1 px-4 border-b flex items-center justify-between">
-          <h3 className="font-medium">Message Filters</h3>
-          {activeFilters.length > 0 && (
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={clearFilters}
-              className="text-xs h-7 px-2"
-            >
-              Clear all
-            </Button>
-          )}
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Filter Messages</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div>
+            <h4 className="text-sm font-medium mb-2">Show</h4>
+            <div className="space-y-2">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={filterOptions.showUserMessages} 
+                  onChange={() => handleFilterChange('showUserMessages')}
+                  className="rounded"
+                />
+                <span className="text-sm">User Messages</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={filterOptions.showBotMessages} 
+                  onChange={() => handleFilterChange('showBotMessages')}
+                  className="rounded"
+                />
+                <span className="text-sm">Bot Responses</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={filterOptions.showFeedback} 
+                  onChange={() => handleFilterChange('showFeedback')}
+                  className="rounded"
+                />
+                <span className="text-sm">Feedback Messages</span>
+              </label>
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="text-sm font-medium mb-2">Only Show</h4>
+            <div className="space-y-2">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={filterOptions.onlyVoiceMessages} 
+                  onChange={() => handleFilterChange('onlyVoiceMessages')}
+                  className="rounded"
+                />
+                <span className="text-sm">Voice Messages</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={filterOptions.onlyUnread} 
+                  onChange={() => handleFilterChange('onlyUnread')}
+                  className="rounded"
+                />
+                <span className="text-sm">Unread</span>
+              </label>
+            </div>
+          </div>
         </div>
-        <FilterOptions
-          options={filterOptions}
-          activeFilters={activeFilters}
-          toggleFilter={toggleFilter}
-          clearFilters={clearFilters}
-        />
-      </DrawerContent>
-    </Drawer>
+      </DialogContent>
+    </Dialog>
   );
 };

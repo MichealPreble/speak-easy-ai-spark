@@ -1,46 +1,76 @@
 
-import { Filter } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { FilterOptions } from "./FilterOptions";
+import React from "react";
 
 interface DesktopFilterProps {
-  filterOptions: { id: string; label: string }[];
-  activeFilters: string[];
-  toggleFilter: (filterId: string) => void;
-  clearFilters: () => void;
+  filterOptions: Record<string, boolean>;
+  handleFilterChange: (field: string) => void;
 }
 
-export const DesktopFilter = ({
-  filterOptions,
-  activeFilters,
-  toggleFilter,
-  clearFilters
-}: DesktopFilterProps) => {
+export const DesktopFilter: React.FC<DesktopFilterProps> = ({ 
+  filterOptions, 
+  handleFilterChange 
+}) => {
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" size="icon" className="relative">
-          <Filter className="h-4 w-4" />
-          {activeFilters.length > 0 && (
-            <Badge 
-              className="absolute -top-1 -right-1 h-4 min-w-4 text-[10px] flex items-center justify-center p-0" 
-              variant="secondary"
-            >
-              {activeFilters.length}
-            </Badge>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-72" align="end">
-        <FilterOptions
-          options={filterOptions}
-          activeFilters={activeFilters}
-          toggleFilter={toggleFilter}
-          clearFilters={clearFilters}
-        />
-      </PopoverContent>
-    </Popover>
+    <div className="w-56 border-r p-4 hidden md:block">
+      <h3 className="font-medium mb-3">Filter Messages</h3>
+      <div className="space-y-2">
+        <div>
+          <h4 className="text-sm font-medium mb-2">Show</h4>
+          <div className="space-y-1">
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={filterOptions.showUserMessages} 
+                onChange={() => handleFilterChange('showUserMessages')}
+                className="rounded"
+              />
+              <span className="text-sm">User Messages</span>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={filterOptions.showBotMessages} 
+                onChange={() => handleFilterChange('showBotMessages')}
+                className="rounded"
+              />
+              <span className="text-sm">Bot Responses</span>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={filterOptions.showFeedback} 
+                onChange={() => handleFilterChange('showFeedback')}
+                className="rounded"
+              />
+              <span className="text-sm">Feedback Messages</span>
+            </label>
+          </div>
+        </div>
+        
+        <div>
+          <h4 className="text-sm font-medium mb-2">Only Show</h4>
+          <div className="space-y-1">
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={filterOptions.onlyVoiceMessages} 
+                onChange={() => handleFilterChange('onlyVoiceMessages')}
+                className="rounded"
+              />
+              <span className="text-sm">Voice Messages</span>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={filterOptions.onlyUnread} 
+                onChange={() => handleFilterChange('onlyUnread')}
+                className="rounded"
+              />
+              <span className="text-sm">Unread</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };

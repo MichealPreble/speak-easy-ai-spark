@@ -6,14 +6,32 @@ import { FormEvent, forwardRef } from "react";
 
 interface ChatInputProps {
   input: string;
+  setInputValue: (value: string) => void;
+  onSend: () => void;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
   isLoading: boolean;
   isVoiceActive?: boolean;
-  onInputChange: (value: string) => void;
-  onSend: () => void;
+  toggleVoice?: () => void;
+  isBrowserSupported?: boolean;
+  onSummarize?: () => void;
+  recordingDuration?: number;
+  maxRecordingDuration?: number;
 }
 
 const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
-  ({ input, isLoading, isVoiceActive, onInputChange, onSend }, ref) => {
+  ({ 
+    input, 
+    setInputValue, 
+    onSend, 
+    onKeyDown, 
+    isLoading, 
+    isVoiceActive, 
+    toggleVoice, 
+    isBrowserSupported,
+    onSummarize,
+    recordingDuration,
+    maxRecordingDuration
+  }, ref) => {
     const handleSubmit = (e: FormEvent) => {
       e.preventDefault();
       onSend();
@@ -29,10 +47,11 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
           <Input
             ref={ref}
             value={input}
-            onChange={(e) => onInputChange(e.target.value)}
+            onChange={(e) => setInputValue(e.target.value)}
             placeholder={isVoiceActive ? "Listening..." : "Type your message... (supports markdown)"}
             className={`flex-1 bg-white/20 dark:bg-black/20 backdrop-blur-sm border-secondary-light/30 dark:border-secondary-dark/30 ${isVoiceActive ? "animate-pulse border-primary" : ""}`}
             disabled={isLoading}
+            onKeyDown={onKeyDown}
             aria-label="Message input"
           />
           <Button 
@@ -47,7 +66,7 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(
         </form>
         {isVoiceActive && (
           <div className="text-xs text-muted-foreground mt-2 text-center">
-            <Mic className="h-3 w-3 inline-block mr-1" /> Listening... Speak now
+            <Mic className="h-3 w-3 inline-block mr-1" /> Listening... {recordingDuration && maxRecordingDuration && `(${recordingDuration}s / ${maxRecordingDuration}s)`}
           </div>
         )}
       </div>

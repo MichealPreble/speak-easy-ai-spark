@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { useChat } from "@/hooks/useChat";
@@ -40,7 +40,7 @@ const Chat: React.FC<ChatProps> = ({ selectedScenario }) => {
     summarize,
     showTypingIndicator,
     recordingDuration,
-    maxRecordingDuration
+    MAX_RECORDING_SECONDS
   } = useChat({ selectedScenario });
   
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -54,10 +54,10 @@ const Chat: React.FC<ChatProps> = ({ selectedScenario }) => {
   });
   const [showClearFilters, setShowClearFilters] = React.useState(false);
   
-  const handleFilterChange = (field: keyof typeof filterOptions) => {
+  const handleFilterChange = (field: string) => {
     setFilterOptions((prev) => ({
       ...prev,
-      [field]: !prev[field],
+      [field]: !prev[field as keyof typeof prev],
     }));
   };
   
@@ -110,16 +110,16 @@ const Chat: React.FC<ChatProps> = ({ selectedScenario }) => {
     });
   }, [messages, filteredMessages, searchQuery, filterOptions]);
   
-  // I'm not showing all the props here for all the components because we need
-  // to properly fix the interfaces for all of them
   return (
     <div className="flex flex-col h-[calc(100vh-16rem)] min-h-[500px] bg-white dark:bg-zinc-900 border rounded-lg shadow-sm overflow-hidden relative">
-      {/* The components below need to be updated to match their proper interfaces */}
       <ChatHeader 
         isDarkMode={isDarkMode}
-        toggleDarkMode={toggleDarkMode}
+        onToggleDarkMode={toggleDarkMode}
         onClearChat={handleClearChat}
         onShowFilter={() => setIsFilterOpen(true)}
+        isVoiceActive={isVoiceActive}
+        onToggleVoice={toggleVoice}
+        onSummarize={summarize}
       />
       
       <div className="flex flex-1 overflow-hidden">
@@ -185,7 +185,7 @@ const Chat: React.FC<ChatProps> = ({ selectedScenario }) => {
           
           {/* Input area */}
           <ChatInput
-            inputValue={input}
+            input={input}
             setInputValue={setInput}
             onSend={handleSend}
             onKeyDown={handleKeyDown}
@@ -194,9 +194,9 @@ const Chat: React.FC<ChatProps> = ({ selectedScenario }) => {
             toggleVoice={toggleVoice}
             isBrowserSupported={isBrowserSupported}
             onSummarize={summarize}
-            inputRef={inputRef}
+            ref={inputRef}
             recordingDuration={recordingDuration}
-            maxRecordingDuration={maxRecordingDuration}
+            maxRecordingDuration={MAX_RECORDING_SECONDS}
           />
         </div>
       </div>

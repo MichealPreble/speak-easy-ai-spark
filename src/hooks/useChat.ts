@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { Message } from "@/types/chat";
 import { useToast } from "@/hooks/use-toast";
@@ -44,16 +45,16 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
     MAX_RECORDING_SECONDS
   } = useVoiceRecognition((transcript, feedback) => {
     if (transcript.trim()) {
-      const userMessage = addMessage({
+      addMessage({
         text: transcript,
         sender: 'user',
       });
       
-      generateResponse(transcript, userMessage, feedback);
+      generateResponse(transcript, feedback);
     }
   });
 
-  const generateResponse = (transcript: string, userMessage: Message, speechFeedback?: SpeechFeedback) => {
+  const generateResponse = (transcript: string, speechFeedback?: SpeechFeedback) => {
     setInput("");
     setIsLoading(true);
     
@@ -94,7 +95,7 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
     
     analytics.trackVoiceMessage();
     
-    const userMessage = addMessage({
+    addMessage({
       text: transcript,
       sender: "user",
       isVoiceMessage: true,
@@ -132,24 +133,25 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
     }, 1500);
   };
 
-  const handleSend = async (text?: string) => {
-    if (!text.trim() || isLoading) return;
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
 
     analytics.trackMessageSent();
 
-    const userMessage = addMessage({
-      text: text,
+    addMessage({
+      text: input,
       sender: "user",
       read: false
     });
     
+    const userInput = input;
     setInput("");
     setIsLoading(true);
     
     showTyping(1500);
 
     setTimeout(() => {
-      const botResponse = getSimulatedResponse(text);
+      const botResponse = getSimulatedResponse(userInput);
       
       addMessage({
         text: botResponse,
@@ -163,12 +165,12 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
 
   const summarize = () => {
     analytics.trackSummarize();
-    const userMessage = addMessage({
+    addMessage({
       text: "summarize",
       sender: "user",
       read: false
     });
-    generateResponse("summarize", userMessage);
+    generateResponse("summarize");
   };
 
   const handleToggleDarkMode = () => {
@@ -221,14 +223,6 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
     summarize,
     showTypingIndicator,
     recordingDuration,
-    maxRecordingDuration
+    MAX_RECORDING_SECONDS
   };
-};
-
-const someAsyncFunction = async () => {
-  // Implementation
-};
-
-const someAsyncClearFunction = async () => {
-  // Implementation
 };
