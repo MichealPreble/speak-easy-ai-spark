@@ -1,6 +1,8 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import ShareButtons from '@/components/blog/ShareButtons';
 
 interface BlogPostPreview {
@@ -13,7 +15,9 @@ interface RelatedBlogPostsProps {
   posts: BlogPostPreview[];
 }
 
-const RelatedBlogPosts = ({ posts }: RelatedBlogPostsProps) => {
+const RelatedBlogPosts: React.FC<RelatedBlogPostsProps> = ({ posts }) => {
+  const navigate = useNavigate();
+
   if (!posts.length) return null;
 
   return (
@@ -27,7 +31,16 @@ const RelatedBlogPosts = ({ posts }: RelatedBlogPostsProps) => {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600">{post.excerpt}</p>
-              <ShareButtons title={post.title} url={`/blog/${post.id}`} />
+              <div className="mt-2 flex gap-2">
+                <Button
+                  variant="link"
+                  onClick={() => navigate(`/blog/${post.id}`)}
+                  aria-label={`Read full post: ${post.title}`}
+                >
+                  Read More
+                </Button>
+                <ShareButtons title={post.title} url={`/blog/${post.id}`} />
+              </div>
             </CardContent>
           </Card>
         ))}
