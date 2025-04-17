@@ -1,4 +1,3 @@
-
 -- Initial schema for SpeakEasyAI
 -- Run this in your Supabase SQL editor
 
@@ -71,3 +70,26 @@ CREATE POLICY "Users can access their own speech metrics"
   TO authenticated 
   USING (user_id = auth.uid())
   WITH CHECK (user_id = auth.uid());
+
+-- Favorites table to store user's favorite speech occasions
+CREATE TABLE favorites (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  occasion_name TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, occasion_name)
+);
+
+-- Enable Row Level Security
+ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
+
+-- Create policy to allow users to access only their own favorites
+CREATE POLICY "Users can access their own favorites" 
+  ON favorites 
+  FOR ALL 
+  TO authenticated 
+  USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
+
+-- Add index for common queries
+CREATE INDEX idx_favorites_user_id ON favorites (user_id);
