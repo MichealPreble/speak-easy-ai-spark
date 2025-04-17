@@ -32,7 +32,7 @@ const PracticePageContent: React.FC = () => {
       <ProgressTracker
         totalSessions={totalSessions}
         uniqueOccasions={uniqueOccasions}
-        totalMinutes={totalMinutes}
+        totalDuration={totalMinutes}
         notesAdded={notesAdded}
         milestones={milestones}
         shareUrl={shareUrl}
