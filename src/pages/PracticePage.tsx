@@ -1,8 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { usePracticeData } from '@/hooks/usePracticeData';
-import { SpeechOccasion } from '@/types/speechOccasions';
-import { useAnalytics } from '@/hooks/useAnalytics';
+import { useOccasionHandlers } from '@/hooks/useOccasionHandlers';
 import PracticePageHeader from '@/components/speech/PracticePageHeader';
 import SpeechOccasionSelector from '@/components/speech/SpeechOccasionSelector';
 import FavoriteOccasions from '@/components/speech/FavoriteOccasions';
@@ -12,42 +11,19 @@ import OccasionDetails from '@/components/speech/OccasionDetails';
 import ProgressTracker from '@/components/progress/ProgressTracker';
 import PracticeGoals from '@/components/speech/PracticeGoals';
 
-interface BlogPostPreview {
-  id: string;
-  title: string;
-  excerpt: string;
-}
-
-interface PracticeSession {
-  id: string;
-  occasion_name: string;
-  session_date: string;
-  notes?: string;
-}
-
 const PracticePage: React.FC = () => {
-  const [blogPreviews, setBlogPreviews] = useState<BlogPostPreview[]>([]);
-  const { trackEvent } = useAnalytics();
   const {
     selectedOccasion,
     setSelectedOccasion,
     favorites,
     setFavorites,
     progressStats,
-    userId
+    userId,
+    blogPreviews,
+    setBlogPreviews,
   } = usePracticeData();
 
-  const handleSelect = (occasion: SpeechOccasion) => {
-    setSelectedOccasion(occasion);
-    sessionStorage.setItem('selectedOccasion', occasion.name);
-    trackEvent('select_occasion', 'SpeechPractice', occasion.name);
-  };
-
-  const handleSelectSession = (occasion: SpeechOccasion, session: PracticeSession) => {
-    setSelectedOccasion(occasion);
-    sessionStorage.setItem('selectedOccasion', occasion.name);
-    trackEvent('select_practice_session', 'SpeechPractice', occasion.name);
-  };
+  const { handleSelect, handleSelectSession } = useOccasionHandlers(setSelectedOccasion);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -85,3 +61,4 @@ const PracticePage: React.FC = () => {
 };
 
 export default PracticePage;
+
