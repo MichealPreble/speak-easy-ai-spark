@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/lib/supabase';
 import SpeechOccasionSelector from '@/components/speech/SpeechOccasionSelector';
 import FavoriteOccasions from '@/components/speech/FavoriteOccasions';
 import RecentOccasions from '@/components/speech/RecentOccasions';
+import PracticeHistory from '@/components/speech/PracticeHistory';
 import OccasionDetails from '@/components/speech/OccasionDetails';
 import { SpeechOccasion } from '@/types/speechOccasions';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -14,12 +16,20 @@ interface BlogPostPreview {
   excerpt: string;
 }
 
+interface PracticeSession {
+  id: string;
+  occasion_name: string;
+  session_date: string;
+  notes?: string;
+}
+
 const PracticePage: React.FC = () => {
   const [selectedOccasion, setSelectedOccasion] = useState<SpeechOccasion | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [blogPreviews, setBlogPreviews] = useState<BlogPostPreview[]>([]);
   const { trackEvent } = useAnalytics();
 
+  // Fetch favorites on component mount
   useEffect(() => {
     const fetchFavorites = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -36,11 +46,7 @@ const PracticePage: React.FC = () => {
 
         if (data) {
           setFavorites(data.map(item => item.occasion_name));
-          trackEvent(
-            'load_favorites', 
-            'SpeechPractice', 
-            'Favorites Loaded'
-          );
+          trackEvent('load_favorites', 'Practice', 'Favorites Loaded');
         }
       }
     };
@@ -48,9 +54,21 @@ const PracticePage: React.FC = () => {
     fetchFavorites();
   }, [trackEvent]);
 
+  // Restore selected occasion from session storage
+  useEffect(() => {
+    const savedOccasion = sessionStorage.getItem('selectedOccasion');
+    if (savedOccasion) {
+      setSelectedOccasion(JSON.parse(savedOccasion));
+    }
+  }, []);
+
   const handleSelect = (occasion: SpeechOccasion) => {
     setSelectedOccasion(occasion);
+    sessionStorage.setItem('selectedOccasion', JSON.stringify(occasion));
     
+    trackEvent('select_occasion', 'Practice', occasion.name);
+
+    // Fetch blog previews for selected occasion
     const fetchBlogPreviews = async () => {
       if (occasion.blogTag) {
         const { data } = await supabase
@@ -66,12 +84,12 @@ const PracticePage: React.FC = () => {
     };
 
     fetchBlogPreviews();
+  };
 
-    trackEvent(
-      'select_occasion', 
-      'Practice', 
-      occasion.name
-    );
+  const handleSelectSession = (occasion: SpeechOccasion, session: PracticeSession) => {
+    setSelectedOccasion(occasion);
+    sessionStorage.setItem('selectedOccasion', JSON.stringify(occasion));
+    trackEvent('select_practice_session', 'Practice', `${session.occasion_name} - ${session.session_date}`);
   };
 
   return (
@@ -91,6 +109,7 @@ const PracticePage: React.FC = () => {
         onSelectFavorite={handleSelect} 
       />
       <RecentOccasions onSelectRecent={handleSelect} />
+      <PracticeHistory onSelectSession={handleSelectSession} />
       {selectedOccasion && (
         <div className="mt-6">
           <OccasionDetails
@@ -98,6 +117,7 @@ const PracticePage: React.FC = () => {
             favorites={favorites}
             setFavorites={setFavorites}
             blogPreviews={blogPreviews}
+            setBlogPreviews={setBlogPreviews}
           />
         </div>
       )}
