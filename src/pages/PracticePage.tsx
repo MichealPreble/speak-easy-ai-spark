@@ -1,14 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/lib/supabase';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import SpeechOccasionSelector from '@/components/speech/SpeechOccasionSelector';
 import FavoriteOccasions from '@/components/speech/FavoriteOccasions';
 import RecentOccasions from '@/components/speech/RecentOccasions';
 import PracticeHistory from '@/components/speech/PracticeHistory';
 import OccasionDetails from '@/components/speech/OccasionDetails';
 import { SpeechOccasion } from '@/types/speechOccasions';
-import { useAnalytics } from '@/hooks/useAnalytics';
 
 interface BlogPostPreview {
   id: string;
@@ -46,7 +45,7 @@ const PracticePage: React.FC = () => {
 
         if (data) {
           setFavorites(data.map(item => item.occasion_name));
-          trackEvent('load_favorites', 'Practice', 'Favorites Loaded');
+          trackEvent('view_favorites', 'Practice', 'Favorites Loaded');
         }
       }
     };
@@ -65,31 +64,13 @@ const PracticePage: React.FC = () => {
   const handleSelect = (occasion: SpeechOccasion) => {
     setSelectedOccasion(occasion);
     sessionStorage.setItem('selectedOccasion', JSON.stringify(occasion));
-    
     trackEvent('select_occasion', 'Practice', occasion.name);
-
-    // Fetch blog previews for selected occasion
-    const fetchBlogPreviews = async () => {
-      if (occasion.blogTag) {
-        const { data } = await supabase
-          .from('blog_posts')
-          .select('id, title, excerpt')
-          .eq('tag', occasion.blogTag)
-          .limit(2);
-        
-        setBlogPreviews(data || []);
-      } else {
-        setBlogPreviews([]);
-      }
-    };
-
-    fetchBlogPreviews();
   };
 
   const handleSelectSession = (occasion: SpeechOccasion, session: PracticeSession) => {
     setSelectedOccasion(occasion);
     sessionStorage.setItem('selectedOccasion', JSON.stringify(occasion));
-    trackEvent('select_practice_session', 'Practice', `${session.occasion_name} - ${session.session_date}`);
+    trackEvent('select_practice_session', 'Practice', `${occasion.name} - ${session.session_date}`);
   };
 
   return (
