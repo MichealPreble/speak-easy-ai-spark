@@ -42,9 +42,15 @@ export function useAnalytics() {
   const trackSummarize = () => trackEvent('summarize', 'Chat', 'Conversation Summarized');
   const trackClearChat = () => trackEvent('clear_chat', 'Chat', 'Chat Cleared');
   const trackSearchUsed = () => trackEvent('search', 'Chat', 'Search Messages');
-  
-  // New tracking function for the "Try it yourself" button in Hero
   const trackTryItYourself = () => trackEvent('try_it_yourself', 'Hero', 'Clicked Try It Yourself Button');
+  
+  // Speech practice related events
+  const trackSpeechPracticeStarted = (occasion: string) => 
+    trackEvent('speech_practice_started', 'Practice', `Started practice for ${occasion}`);
+  const trackSpeechOccasionSelected = (occasion: string) => 
+    trackEvent('speech_occasion_selected', 'Practice', `Selected ${occasion}`);
+  const trackSpeechFeedbackViewed = (occasion: string) => 
+    trackEvent('speech_feedback_viewed', 'Practice', `Viewed feedback for ${occasion}`);
 
   // Add trackEvent to the returned object
   return {
@@ -56,6 +62,9 @@ export function useAnalytics() {
     trackSummarize,
     trackClearChat,
     trackSearchUsed,
-    trackTryItYourself
+    trackTryItYourself,
+    trackSpeechPracticeStarted,
+    trackSpeechOccasionSelected,
+    trackSpeechFeedbackViewed
   };
 }

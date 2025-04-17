@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,12 +17,11 @@ import EmailVerification from "@/components/auth/EmailVerification";
 import ProfilePage from "./pages/ProfilePage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
+import PracticePage from "./pages/PracticePage";
 
-// Lazy load pages to improve initial load performance
 const ChatPage = lazy(() => import("./pages/ChatPage"));
 const ProgressPage = lazy(() => import("./pages/ProgressPage"));
 
-// Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
@@ -47,13 +45,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Google Analytics tracking component
 const Analytics = () => {
   const location = useLocation();
   const navigationType = useNavigationType();
   
   useEffect(() => {
-    // Only track page views on push navigation (not on replace or pop)
     if (navigationType === 'PUSH' && typeof window.gtag === 'function') {
       window.gtag('config', 'GA_MEASUREMENT_ID', {
         page_path: location.pathname + location.search
@@ -92,6 +88,7 @@ const AppRoutes = () => {
       <Route path="/auth/confirm" element={<EmailVerification />} />
       <Route path="/blog" element={<BlogPage />} />
       <Route path="/blog/:slug" element={<BlogPostPage />} />
+      <Route path="/practice" element={<PracticePage />} />
       <Route 
         path="/profile" 
         element={
@@ -140,7 +137,6 @@ const AppRoutes = () => {
       />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
-      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
@@ -162,7 +158,6 @@ const App = () => (
   </QueryClientProvider>
 );
 
-// Add GoogleAnalytics type definition for TypeScript
 declare global {
   interface Window {
     gtag?: (
