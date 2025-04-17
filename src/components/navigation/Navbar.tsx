@@ -6,9 +6,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { User, LogIn, LogOut } from 'lucide-react';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useAuth } from '@/context/AuthContext';
+import MobileNav from './MobileNav';
 
 const Navbar: React.FC = () => {
-  const { user, loading, signIn, signOut } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const { trackEvent } = useAnalytics();
   const navigate = useNavigate();
 
@@ -17,17 +18,20 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-white/80 dark:bg-background/80 backdrop-blur-md shadow-lg p-4" aria-label="Main navigation">
+    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md shadow-lg p-4" aria-label="Main navigation">
       <div className="container mx-auto flex justify-between items-center">
-        <Link
-          to="/"
-          className="text-2xl font-bold text-foreground"
-          onClick={() => handleNavClick('click_nav_home', 'Home')}
-          aria-label="SpeakEasyAI Home"
-        >
-          SpeakEasyAI
-        </Link>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-2">
+          <MobileNav />
+          <Link
+            to="/"
+            className="text-2xl font-bold text-foreground"
+            onClick={() => handleNavClick('click_nav_home', 'Home')}
+            aria-label="SpeakEasyAI Home"
+          >
+            SpeakEasyAI
+          </Link>
+        </div>
+        <div className="hidden md:flex items-center space-x-4">
           <Link
             to="/practice"
             onClick={() => handleNavClick('click_nav_practice', 'Practice')}
