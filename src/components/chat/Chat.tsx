@@ -1,22 +1,27 @@
 
-import { memo, useState, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import { useChat } from "@/hooks/useChat";
 import ChatHeader from "./ChatHeader";
-import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
+import ChatInput from "./ChatInput";
 import ChatSearch from "./ChatSearch";
-import LoadingIndicator from "./LoadingIndicator";
 import NoMessages from "./NoMessages";
-import RealTimeFeedback from "@/components/speech/RealTimeFeedback";
-import RecordingTimer from "@/components/speech/RecordingTimer";
+import LoadingIndicator from "./LoadingIndicator";
+import MobileFilter from "./MobileFilter";
+import DesktopFilter from "./DesktopFilter";
+import ActiveFilterBadges from "./ActiveFilterBadges";
+import ClearFiltersDialog from "./ClearFiltersDialog";
+import { useMediaQuery } from "@/hooks/use-mobile";
 
 interface ChatProps {
   selectedScenario?: string | null;
 }
 
-const Chat = ({ selectedScenario }: ChatProps) => {
+const Chat: React.FC<ChatProps> = ({ selectedScenario }) => {
   const {
+    messages,
     filteredMessages,
     input,
     setInput,
@@ -26,6 +31,7 @@ const Chat = ({ selectedScenario }: ChatProps) => {
     isDarkMode,
     toggleDarkMode,
     isVoiceActive,
+    isBrowserSupported,
     inputRef,
     scrollAreaRef,
     handleSend,
@@ -37,118 +43,179 @@ const Chat = ({ selectedScenario }: ChatProps) => {
     maxRecordingDuration
   } = useChat({ selectedScenario });
   
-  // Track transcript and duration for real-time feedback
-  const [currentTranscript, setCurrentTranscript] = useState("");
-  const [currentDuration, setCurrentDuration] = useState(0);
-  const [speechFeedback, setSpeechFeedback] = useState<any>(null);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
+  const [filterOptions, setFilterOptions] = React.useState({
+    showUserMessages: true,
+    showBotMessages: true,
+    showFeedback: true,
+    onlyVoiceMessages: false,
+    onlyUnread: false,
+  });
+  const [showClearFilters, setShowClearFilters] = React.useState(false);
   
-  // Update from voice recognition data
-  useEffect(() => {
-    if (isVoiceActive) {
-      const interval = setInterval(() => {
-        // Increment duration counter while voice is active
-        setCurrentDuration(prev => prev + 0.5);
-      }, 500);
-      
-      return () => clearInterval(interval);
-    } else {
-      // Reset when voice is stopped
-      setCurrentDuration(0);
-      setCurrentTranscript("");
-      setSpeechFeedback(null);
-    }
-  }, [isVoiceActive]);
+  const handleFilterChange = (field: keyof typeof filterOptions) => {
+    setFilterOptions((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
   
-  // Listen for input changes to update transcript
-  useEffect(() => {
-    if (isVoiceActive && input) {
-      setCurrentTranscript(input);
-      
-      // If the input is getting longer, assume we have ongoing speech
-      // and generate preliminary feedback
-      if (input.length > 20 && !speechFeedback) {
-        setSpeechFeedback({
-          speed: Math.round((input.split(/\s+/).filter(Boolean).length / currentDuration) * 60) || 0,
-          duration: Math.round(currentDuration),
-          fillerWords: [],
-          wordCount: input.split(/\s+/).filter(Boolean).length,
-          pitchVariation: 0,
-          volumeVariation: 0,
-          volume: 50, // Default values until we get real data
-          enunciation: 70,
-          readabilityScore: 75,
-          readabilityGrade: "8th Grade",
-          complexWords: []
-        });
-      }
+  const clearFilters = () => {
+    setFilterOptions({
+      showUserMessages: true,
+      showBotMessages: true,
+      showFeedback: true,
+      onlyVoiceMessages: false,
+      onlyUnread: false,
+    });
+    setSearchQuery("");
+    setShowClearFilters(false);
+  };
+  
+  // Check if any filters are active
+  const isFiltersActive = React.useMemo(() => {
+    return (
+      !filterOptions.showUserMessages ||
+      !filterOptions.showBotMessages ||
+      !filterOptions.showFeedback ||
+      filterOptions.onlyVoiceMessages ||
+      filterOptions.onlyUnread ||
+      searchQuery.trim().length > 0
+    );
+  }, [filterOptions, searchQuery]);
+  
+  // Show clear filters dialog when filters are active
+  React.useEffect(() => {
+    setShowClearFilters(isFiltersActive);
+  }, [isFiltersActive]);
+  
+  // Handle Enter key in input
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
     }
-  }, [input, isVoiceActive, currentDuration, speechFeedback]);
-
+  };
+  
+  // Apply filters to messages
+  const visibleMessages = React.useMemo(() => {
+    return (searchQuery.trim().length > 0 ? filteredMessages : messages).filter((message) => {
+      if (!filterOptions.showUserMessages && message.sender === "user") return false;
+      if (!filterOptions.showBotMessages && message.sender === "bot" && !message.isFeedback) return false;
+      if (!filterOptions.showFeedback && message.isFeedback) return false;
+      if (filterOptions.onlyVoiceMessages && !message.isVoiceMessage) return false;
+      if (filterOptions.onlyUnread && message.read) return false;
+      return true;
+    });
+  }, [messages, filteredMessages, searchQuery, filterOptions]);
+  
   return (
-    <div className="flex flex-col h-[500px] sm:h-[600px] w-full border border-secondary-light/30 dark:border-secondary-dark/30 rounded-lg shadow-glass backdrop-blur-md bg-white/85 dark:bg-black/85">
-      {/* Chat Header */}
+    <div className="flex flex-col h-[calc(100vh-16rem)] min-h-[500px] bg-white dark:bg-zinc-900 border rounded-lg shadow-sm overflow-hidden relative">
       <ChatHeader 
-        isDarkMode={isDarkMode} 
-        onToggleDarkMode={toggleDarkMode} 
+        messageCount={messages.length}
+        isDarkMode={isDarkMode}
+        toggleDarkMode={toggleDarkMode}
         onClearChat={handleClearChat}
-        onToggleVoice={toggleVoice}
-        isVoiceActive={isVoiceActive}
-        onSummarize={summarize}
-      />
-
-      {/* Search Bar */}
-      <ChatSearch 
-        searchQuery={searchQuery} 
-        setSearchQuery={setSearchQuery} 
-      />
-
-      {/* Message List */}
-      <ScrollArea className="flex-1 p-4" aria-live="polite" ref={scrollAreaRef}>
-        <div className="space-y-4">
-          {filteredMessages.length > 0 ? (
-            filteredMessages.map((msg) => (
-              <ChatMessage 
-                key={msg.id} 
-                message={msg} 
-                isDarkMode={isDarkMode} 
-              />
-            ))
-          ) : (
-            <NoMessages isSearching={searchQuery.trim().length > 0} />
-          )}
-          
-          {(isLoading || showTypingIndicator) && <LoadingIndicator isDarkMode={isDarkMode} />}
-        </div>
-      </ScrollArea>
-
-      {/* Input Area */}
-      <ChatInput
-        ref={inputRef}
-        input={input}
-        isLoading={isLoading}
-        onInputChange={setInput}
-        onSend={handleSend}
-        isVoiceActive={isVoiceActive}
+        onShowFilter={() => setIsFilterOpen(true)}
       />
       
-      {/* Recording Timer (for 1-minute practice) */}
-      {isVoiceActive && maxRecordingDuration > 0 && (
-        <RecordingTimer 
-          currentSeconds={recordingDuration || 0} 
-          maxSeconds={maxRecordingDuration}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Desktop sidebar filter */}
+        {!isMobile && (
+          <DesktopFilter
+            filterOptions={filterOptions}
+            handleFilterChange={handleFilterChange}
+          />
+        )}
+        
+        {/* Chat content */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Search and filter badges area */}
+          <div className="p-3 border-b bg-gray-50 dark:bg-zinc-900 dark:border-zinc-800">
+            <ChatSearch
+              value={searchQuery}
+              onChange={setSearchQuery}
+              isDisabled={messages.length === 0}
+            />
+            
+            {isFiltersActive && (
+              <ActiveFilterBadges
+                filterOptions={filterOptions}
+                searchQuery={searchQuery}
+                onClearAll={() => setShowClearFilters(true)}
+              />
+            )}
+          </div>
+          
+          {/* Message list */}
+          <ScrollArea 
+            ref={scrollAreaRef} 
+            className="flex-1 p-4"
+          >
+            {messages.length === 0 ? (
+              <NoMessages />
+            ) : visibleMessages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                <p>No messages match your filters</p>
+                <Button 
+                  variant="link" 
+                  onClick={clearFilters}
+                  className="mt-2"
+                >
+                  Clear all filters
+                </Button>
+              </div>
+            ) : (
+              visibleMessages.map((message) => (
+                <ChatMessage
+                  key={message.id}
+                  message={message}
+                />
+              ))
+            )}
+            
+            {showTypingIndicator && (
+              <LoadingIndicator />
+            )}
+          </ScrollArea>
+          
+          {/* Input area */}
+          <ChatInput
+            value={input}
+            onChange={setInput}
+            onSend={handleSend}
+            onKeyDown={handleKeyDown}
+            isLoading={isLoading}
+            isVoiceActive={isVoiceActive}
+            toggleVoice={() => toggleVoice()}
+            isBrowserSupported={isBrowserSupported}
+            onSummarize={summarize}
+            inputRef={inputRef}
+            recordingDuration={recordingDuration}
+            maxRecordingDuration={maxRecordingDuration}
+          />
+        </div>
+      </div>
+      
+      {/* Mobile filter dialog */}
+      {isMobile && (
+        <MobileFilter
+          isOpen={isFilterOpen}
+          onClose={() => setIsFilterOpen(false)}
+          filterOptions={filterOptions}
+          handleFilterChange={handleFilterChange}
         />
       )}
       
-      {/* Real-time Feedback */}
-      <RealTimeFeedback 
-        isActive={isVoiceActive}
-        transcript={currentTranscript}
-        duration={currentDuration}
-        feedback={speechFeedback}
+      {/* Clear filters confirmation */}
+      <ClearFiltersDialog
+        isOpen={showClearFilters}
+        onClose={() => setShowClearFilters(false)}
+        onClearFilters={clearFilters}
       />
     </div>
   );
 };
 
-// Memoize the Chat component to prevent unnecessary re-renders
-export default memo(Chat);
+export default Chat;

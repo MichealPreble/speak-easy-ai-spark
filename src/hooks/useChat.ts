@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { Message } from "@/types/chat";
 import { useToast } from "@/hooks/use-toast";
@@ -45,8 +46,8 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
   } = useVoiceRecognition((transcript, feedback) => {
     if (transcript.trim()) {
       const userMessage = addMessage({
+        text: transcript,
         sender: 'user',
-        content: transcript,
       });
       
       generateResponse(transcript, userMessage, feedback);
@@ -63,8 +64,8 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
       const botResponse = getSimulatedResponse(transcript);
       
       addMessage({
+        text: botResponse,
         sender: "bot",
-        content: botResponse,
         read: false
       });
 
@@ -72,8 +73,8 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
         const feedbackText = generateSpeechFeedback(speechFeedback);
         
         addMessage({
+          text: feedbackText,
           sender: "bot",
-          content: feedbackText,
           isFeedback: true,
           read: false
         });
@@ -94,7 +95,7 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
     
     analytics.trackVoiceMessage();
     
-    addMessage({
+    const userMessage = addMessage({
       text: transcript,
       sender: "user",
       isVoiceMessage: true,
@@ -137,7 +138,7 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
 
     analytics.trackMessageSent();
 
-    addMessage({
+    const userMessage = addMessage({
       text: text,
       sender: "user",
       read: false
@@ -163,7 +164,12 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
 
   const summarize = () => {
     analytics.trackSummarize();
-    handleSendMessage("summarize");
+    const userMessage = addMessage({
+      text: "summarize",
+      sender: "user",
+      read: false
+    });
+    generateResponse("summarize", userMessage);
   };
 
   const handleToggleDarkMode = () => {
@@ -210,10 +216,10 @@ export const useChat = ({ selectedScenario }: UseChatProps) => {
     isBrowserSupported,
     inputRef,
     scrollAreaRef,
-    handleSend: generateResponse,
+    handleSend: handleSendMessage,
     handleClearChat: clearMessages,
     toggleVoice,
-    summarize: () => generateResponse("summarize", {} as Message),
+    summarize,
     showTypingIndicator,
     recordingDuration,
     maxRecordingDuration: MAX_RECORDING_SECONDS

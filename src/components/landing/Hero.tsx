@@ -5,14 +5,27 @@ import HeroDescription from "./HeroDescription";
 import HeroButtons from "./HeroButtons";
 import HeroFeatures from "./HeroFeatures";
 import HeroPreview from "./HeroPreview";
+import HeroTestimonials from "./HeroTestimonials";
+import SpeechTypeVisual from "./SpeechTypeVisual";
 import { Bot, MessageSquare, Sun, Moon } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
 import { useThemeMode } from "@/hooks/useThemeMode";
-import HeroTestimonials from "./HeroTestimonials";
 
 const Hero = () => {
   const fullText = "Practice speeches, receive balanced feedback, and craft compelling narratives with personalized AI coaching.";
   const { isDarkMode, toggleDarkMode } = useThemeMode();
+  
+  // Speech types we support
+  const speechTypes = [
+    "Wedding Toasts",
+    "Graduation Speeches",
+    "Retirement Celebrations",
+    "Conference Presentations",
+    "Team Meetings",
+    "Promotion Announcements",
+    "Award Acceptance",
+    "Keynote Addresses"
+  ];
   
   // Example of custom conversation content
   const botMessages = [
@@ -61,11 +74,16 @@ const Hero = () => {
       
       <div className="flex flex-col items-center text-center relative z-10">
         <HeroHeader />
-        <HeroDescription fullText={fullText} />
+        <HeroDescription fullText={fullText} speechTypes={speechTypes} />
         <HeroButtons />
         <HeroFeatures />
         
-        <div className="w-full max-w-4xl mx-auto mt-16 mb-20">
+        {/* Add new speech type visual component */}
+        <div className="w-full max-w-4xl mx-auto mt-8 mb-12">
+          <SpeechTypeVisual />
+        </div>
+        
+        <div className="w-full max-w-4xl mx-auto mt-8 mb-20">
           <HeroPreview 
             botMessages={botMessages}
             userMessages={userMessages}

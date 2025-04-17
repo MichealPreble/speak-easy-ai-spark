@@ -10,6 +10,7 @@ type HeroDescriptionProps = {
   cursorClassName?: string;
   height?: string;
   withMountAnimation?: boolean;
+  speechTypes?: string[];
 }
 
 const HeroDescription = memo(({ 
@@ -20,16 +21,16 @@ const HeroDescription = memo(({
   cursor = "|",
   cursorClassName = "animate-blink",
   height = "h-24",
-  withMountAnimation = false
+  withMountAnimation = false,
+  speechTypes
 }: HeroDescriptionProps) => {
   const [typedText, setTypedText] = useState('');
   const [textIndex, setTextIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(!withMountAnimation);
+  const [currentTypeIndex, setCurrentTypeIndex] = useState(0);
   
   // Memoize any text processing operations
   const processedText = useMemo(() => {
-    // This would be where more complex processing could happen
-    // For example, formatting, cleaning, or optimizing the text
     return fullText.trim();
   }, [fullText]);
   
@@ -57,6 +58,17 @@ const HeroDescription = memo(({
     }
   }, [textIndex, processedText, typingSpeed, startDelay, isVisible]);
 
+  // Handle rotating through speech types if provided
+  useEffect(() => {
+    if (speechTypes && speechTypes.length > 0) {
+      const rotationInterval = setInterval(() => {
+        setCurrentTypeIndex((prevIndex) => (prevIndex + 1) % speechTypes.length);
+      }, 3000); // Change every 3 seconds
+      
+      return () => clearInterval(rotationInterval);
+    }
+  }, [speechTypes]);
+
   const containerClasses = useMemo(() => {
     return `${height} mb-10 ${withMountAnimation ? 'transition-opacity duration-500 ease-in-out' : ''} ${withMountAnimation && !isVisible ? 'opacity-0' : 'opacity-100'}`;
   }, [height, withMountAnimation, isVisible]);
@@ -67,6 +79,26 @@ const HeroDescription = memo(({
         {typedText}
         <span className={cursorClassName} aria-hidden="true">{cursor}</span>
       </p>
+      
+      {speechTypes && speechTypes.length > 0 && (
+        <div className="mt-6 flex flex-col items-center">
+          <p className="text-lg font-medium mb-2">Perfect for:</p>
+          <div className="relative h-8 overflow-hidden w-full max-w-xs text-center">
+            {speechTypes.map((type, index) => (
+              <div 
+                key={type}
+                className="absolute w-full transition-all duration-500 ease-in-out"
+                style={{
+                  opacity: currentTypeIndex === index ? 1 : 0,
+                  transform: `translateY(${currentTypeIndex === index ? 0 : '20px'})`,
+                }}
+              >
+                <span className="text-primary font-bold">{type}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 });
