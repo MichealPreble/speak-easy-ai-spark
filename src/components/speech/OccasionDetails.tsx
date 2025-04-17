@@ -20,13 +20,15 @@ interface OccasionDetailsProps {
   favorites: string[];
   setFavorites: React.Dispatch<React.SetStateAction<string[]>>;
   blogPreviews: BlogPostPreview[];
+  setBlogPreviews: React.Dispatch<React.SetStateAction<BlogPostPreview[]>>;
 }
 
 const OccasionDetails = ({
   occasion,
   favorites,
   setFavorites,
-  blogPreviews
+  blogPreviews,
+  setBlogPreviews
 }: OccasionDetailsProps) => {
   const { trackEvent } = useAnalytics();
   const { toast } = useToast();
