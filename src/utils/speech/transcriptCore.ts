@@ -1,5 +1,6 @@
 
 import { SpeechFeedback } from "@/hooks/useVoiceRecognition";
+import { analyzeTextReadability } from "./readabilityAnalysis";
 
 export function processTranscript(
   transcript: string, 
@@ -20,6 +21,9 @@ export function processTranscript(
   const matches = transcript.match(fillerWordRegex);
   const fillerWords: string[] = matches ? [...new Set(matches.map(word => word.toLowerCase()))] : [];
   
+  // Readability analysis
+  const readabilityAnalysis = analyzeTextReadability(transcript);
+  
   // Enhanced pitch and volume analysis 
   const enhancedPitchVariation = analysis.pitchVariation * (1 + (duration > 30 ? 0.2 : 0));
   const enhancedVolumeVariation = analysis.volumeVariation * (1 + (wordCount > 50 ? 0.15 : 0));
@@ -31,6 +35,11 @@ export function processTranscript(
     wordCount,
     pitchVariation: Math.round(enhancedPitchVariation),
     volumeVariation: Math.round(enhancedVolumeVariation),
+    volume: 50, // Default value, should be dynamically calculated
+    enunciation: 70, // Default value, should be dynamically calculated
+    readabilityScore: readabilityAnalysis.score,
+    readabilityGrade: readabilityAnalysis.gradeLevel,
+    complexWords: readabilityAnalysis.complexWords,
   };
 
   return {

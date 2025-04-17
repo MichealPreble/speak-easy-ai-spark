@@ -16,7 +16,7 @@ interface UseChatProps {
   selectedScenario?: string | null;
 }
 
-export const useChat = ({ selectedScenario }: { selectedScenario?: string | null }) => {
+export const useChat = ({ selectedScenario }: UseChatProps) => {
   const { toast } = useToast();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -44,16 +44,46 @@ export const useChat = ({ selectedScenario }: { selectedScenario?: string | null
     MAX_RECORDING_SECONDS
   } = useVoiceRecognition((transcript, feedback) => {
     if (transcript.trim()) {
-      setInput(transcript);
-      
       const userMessage = addMessage({
-        role: 'user',
+        sender: 'user',
         content: transcript,
       });
       
-      generateResponse(transcript, userMessage.id, feedback);
+      generateResponse(transcript, userMessage, feedback);
     }
   });
+
+  const generateResponse = (transcript: string, userMessage: Message, speechFeedback?: SpeechFeedback) => {
+    setInput("");
+    setIsLoading(true);
+    
+    showTyping(1500);
+
+    setTimeout(() => {
+      const botResponse = getSimulatedResponse(transcript);
+      
+      addMessage({
+        sender: "bot",
+        content: botResponse,
+        read: false
+      });
+
+      if (speechFeedback && (transcript.length > 30 || speechFeedback.duration > 5)) {
+        const feedbackText = generateSpeechFeedback(speechFeedback);
+        
+        addMessage({
+          sender: "bot",
+          content: feedbackText,
+          isFeedback: true,
+          read: false
+        });
+      }
+      
+      setIsLoading(false);
+      
+      speak(botResponse);
+    }, 1500);
+  };
 
   const toggleVoice = useCallback((timeLimit = false) => {
     _toggleVoice(timeLimit);
@@ -180,10 +210,10 @@ export const useChat = ({ selectedScenario }: { selectedScenario?: string | null
     isBrowserSupported,
     inputRef,
     scrollAreaRef,
-    handleSend: handleSendMessage,
-    handleClearChat,
+    handleSend: generateResponse,
+    handleClearChat: clearMessages,
     toggleVoice,
-    summarize,
+    summarize: () => generateResponse("summarize", {} as Message),
     showTypingIndicator,
     recordingDuration,
     maxRecordingDuration: MAX_RECORDING_SECONDS
