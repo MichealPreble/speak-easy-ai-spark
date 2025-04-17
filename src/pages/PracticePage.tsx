@@ -46,7 +46,8 @@ const PracticePage: React.FC = () => {
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const { trackEvent } = useAnalytics();
-  const shareUrl = 'https://speakeasyai.com';
+  const baseUrl = window.location.origin;
+  const shareUrl = `${baseUrl}/practice`;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -183,6 +184,7 @@ const PracticePage: React.FC = () => {
           totalHours: totalMinutes / 60,
           notesAdded
         }}
+        shareUrl={shareUrl}
       />
       <SpeechOccasionSelector onSelectOccasion={handleSelect} />
       <FavoriteOccasions

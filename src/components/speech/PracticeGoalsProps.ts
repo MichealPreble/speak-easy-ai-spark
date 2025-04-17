@@ -7,4 +7,5 @@ export interface PracticeGoalsProps {
     totalHours: number;
     notesAdded: number;
   };
+  shareUrl: string;
 }
