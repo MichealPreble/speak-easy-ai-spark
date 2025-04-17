@@ -1,15 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
-import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { supabase } from '@/lib/supabase';
-import { PracticeGoalsProps } from './PracticeGoalsProps';
+import GoalForm from './GoalForm';
+import GoalList from './GoalList';
 
 interface PracticeGoal {
   id: string;
@@ -19,7 +15,18 @@ interface PracticeGoal {
   progress: number;
 }
 
-const PracticeGoals: React.FC<PracticeGoalsProps> = ({ userId, stats }) => {
+interface PracticeGoalsProps {
+  userId: string | null;
+  stats: {
+    totalSessions: number;
+    uniqueOccasions: number;
+    totalHours: number;
+    notesAdded: number;
+  };
+  shareUrl: string;
+}
+
+const PracticeGoals: React.FC<PracticeGoalsProps> = ({ userId, stats, shareUrl }) => {
   const [goals, setGoals] = useState<PracticeGoal[]>([]);
   const [newGoalType, setNewGoalType] = useState<'sessions' | 'occasions' | 'hours' | 'notes'>('sessions');
   const [newGoalTarget, setNewGoalTarget] = useState('');
@@ -134,86 +141,26 @@ const PracticeGoals: React.FC<PracticeGoalsProps> = ({ userId, stats }) => {
     }
   };
 
-  const getProgressColor = (progress: number, target: number) => {
-    const percentage = (progress / target) * 100;
-    if (percentage >= 100) return 'bg-green-500';
-    if (percentage >= 75) return 'bg-blue-500';
-    if (percentage >= 50) return 'bg-yellow-500';
-    return 'bg-primary';
+  const handleShareGoal = (goal: PracticeGoal) => {
+    trackEvent('share_goal_achievement', 'Practice', goal.goal_type);
   };
 
   return (
     <Card className="mb-6">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          Practice Goals
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => document.getElementById('goal-form')?.focus()}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" /> Add Goal
-          </Button>
-        </CardTitle>
+        <CardTitle>Practice Goals</CardTitle>
       </CardHeader>
       <CardContent>
-        <div id="goal-form" className="mb-6 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Select value={newGoalType} onValueChange={(value) => setNewGoalType(value as any)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Goal Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="sessions">Practice Sessions</SelectItem>
-                <SelectItem value="occasions">Unique Occasions</SelectItem>
-                <SelectItem value="hours">Practice Hours</SelectItem>
-                <SelectItem value="notes">Session Notes</SelectItem>
-              </SelectContent>
-            </Select>
-            <Input
-              type="number"
-              placeholder="Target (e.g., 20)"
-              value={newGoalTarget}
-              onChange={(e) => setNewGoalTarget(e.target.value)}
-              min="1"
-            />
-            <Input
-              type="date"
-              value={newGoalDeadline}
-              onChange={(e) => setNewGoalDeadline(e.target.value)}
-              min={new Date().toISOString().split('T')[0]}
-            />
-          </div>
-          <Button onClick={handleAddGoal} className="w-full sm:w-auto">
-            Set New Goal
-          </Button>
-        </div>
-
-        {goals.length > 0 && (
-          <div className="space-y-6">
-            {goals.map((goal) => (
-              <div key={goal.id} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <p className="font-medium">
-                    {goal.target} {goal.goal_type} by {new Date(goal.deadline).toLocaleDateString()}
-                  </p>
-                  <span className="text-sm text-muted-foreground">
-                    {Math.round((goal.progress / goal.target) * 100)}%
-                  </span>
-                </div>
-                <Progress 
-                  value={(goal.progress / goal.target) * 100} 
-                  className="h-2"
-                  indicatorClassName={getProgressColor(goal.progress, goal.target)}
-                />
-                <p className="text-sm text-muted-foreground">
-                  {goal.progress} of {goal.target} completed
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+        <GoalForm
+          newGoalType={newGoalType}
+          setNewGoalType={setNewGoalType}
+          newGoalTarget={newGoalTarget}
+          setNewGoalTarget={setNewGoalTarget}
+          newGoalDeadline={newGoalDeadline}
+          setNewGoalDeadline={setNewGoalDeadline}
+          onAddGoal={handleAddGoal}
+        />
+        <GoalList goals={goals} shareUrl={shareUrl} onShareGoal={handleShareGoal} />
       </CardContent>
     </Card>
   );
