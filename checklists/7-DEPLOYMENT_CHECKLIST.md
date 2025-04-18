@@ -1,7 +1,7 @@
 
 # SpeakEasyAI Deployment Process Checklist
 
-This checklist covers the deployment process.
+This checklist covers the deployment process. For a comprehensive deployment guide, see [MASTER_DEPLOYMENT_CHECKLIST.md](./MASTER_DEPLOYMENT_CHECKLIST.md).
 
 ## Deployment Tasks
 

@@ -11,6 +11,10 @@ This directory contains deployment checklists for SpeakEasyAI, organized by cate
 6. [Infrastructure](./6-INFRASTRUCTURE_CHECKLIST.md) - Database and hosting
 7. [Deployment](./7-DEPLOYMENT_CHECKLIST.md) - Deployment process and rollback
 
+## Master Checklist
+
+For a comprehensive deployment workflow that consolidates all checklists, see [MASTER_DEPLOYMENT_CHECKLIST.md](./MASTER_DEPLOYMENT_CHECKLIST.md).
+
 ## Usage
 
 Follow these checklists in order during deployment. Mark items complete using GitHub-flavored Markdown:
