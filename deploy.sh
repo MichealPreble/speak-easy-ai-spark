@@ -15,7 +15,7 @@ log_task "Ensuring deploy.sh is executable (Checklist: 1. Pre-Deployment Prepara
 chmod +x deploy.sh
 
 # Check environment variables
-log_task "Checking environment variables (Checklist: 1. Pre-Deployment Preparation)"
+log_task "Checking environment variables (Checklist: 7. Environment Configuration)"
 if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
   echo "Error: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set in .env.production (Checklist: 7. Environment Configuration)"
   exit 1
@@ -33,8 +33,8 @@ fi
 
 # Verify production URL
 log_task "Verifying production URL (Checklist: 10. Deployment Process)"
-if grep -q "your-production-url.com" deploy.sh; then
-  echo "Error: Update production URL in deploy.sh to https://speakeasyai.com (Checklist: 10. Deployment Process)"
+if ! curl --output /dev/null --silent --head --fail https://speakeasyai.com; then
+  echo "Error: Production URL https://speakeasyai.com is not accessible"
   exit 1
 fi
 
@@ -95,6 +95,5 @@ curl -X POST -H 'Content-type: application/json' \
 
 # Update checklist
 log_task "Updating DEPLOYMENT_CHECKLIST.md (Checklist: 13. Progress Tracking)"
-# Manual update recommended: Create PR to mark deployment tasks complete
 echo "Deployment complete! Check https://speakeasyai.com"
 cat deployment.log
