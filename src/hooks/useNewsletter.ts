@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
-// Interfaces for the newsletter data
 export interface NewsletterIssue {
   id: string;
   title: string;
@@ -21,22 +20,13 @@ export function useNewsletter() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Mock data for development - this would be replaced with actual API calls
   useEffect(() => {
     const fetchNewsletterData = async () => {
       setIsLoading(true);
       
       try {
-        // This is where you would call the Beehiiv API
-        // const response = await fetch('https://api.beehiiv.com/v2/posts?publication_id=pub_459544e2-b4ac-473d-b735-38470ab16e0c', {
-        //   headers: {
-        //     'Authorization': `Bearer ${process.env.BEEHIIV_API_KEY}`,
-        //     'Content-Type': 'application/json'
-        //   }
-        // });
-        
-        // For now, let's use mock data
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+        // Mock data for development
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         const mockData = {
           issues: [
@@ -71,7 +61,7 @@ export function useNewsletter() {
         };
         
         setLatestIssue(mockData.issues[0]);
-        setArchiveIssues(mockData.issues);
+        setArchiveIssues(mockData.issues.slice(1));
         setError(null);
       } catch (err) {
         console.error('Failed to fetch newsletter data:', err);

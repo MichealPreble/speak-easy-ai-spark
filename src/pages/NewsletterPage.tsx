@@ -20,9 +20,8 @@ const NewsletterPage: React.FC = () => {
     trackEvent(`view_${value}_tab`, 'Newsletter', `${value.charAt(0).toUpperCase() + value.slice(1)} Tab`);
   };
 
-  const handleSubscribe = (email: string) => {
-    trackEvent('newsletter_subscribe', 'Newsletter', 'Subscription');
-    console.log('Newsletter subscription:', email);
+  const handleSubscribe = () => {
+    trackEvent('subscribe_newsletter', 'Newsletter', 'Subscribed');
   };
 
   return (
@@ -50,13 +49,13 @@ const NewsletterPage: React.FC = () => {
         </TabsList>
         
         <TabsContent value="latest">
-          <NewsletterLatestIssue issue={latestIssue} loading={isLoading} error={error} />
+          <NewsletterLatestIssue issue={latestIssue} isLoading={isLoading} error={error} />
         </TabsContent>
         
         <TabsContent value="archive">
           <NewsletterArchive
             issues={archiveIssues}
-            isLoading={isLoading}
+            isLoading={isLoading} 
             error={error}
           />
         </TabsContent>

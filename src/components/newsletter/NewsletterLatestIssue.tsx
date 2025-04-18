@@ -9,11 +9,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 interface NewsletterLatestIssueProps {
   issue: NewsletterIssue | null;
-  loading: boolean;
+  isLoading: boolean;
   error: string | null;
 }
 
-const NewsletterLatestIssue: React.FC<NewsletterLatestIssueProps> = ({ issue, loading, error }) => {
+const NewsletterLatestIssue: React.FC<NewsletterLatestIssueProps> = ({ issue, isLoading, error }) => {
   const { trackEvent } = useAnalytics();
   
   const handleViewFull = () => {
@@ -33,7 +33,6 @@ const NewsletterLatestIssue: React.FC<NewsletterLatestIssueProps> = ({ issue, lo
         url: `https://speakeasyai.beehiiv.com/${issue.slug}`,
       });
     } else {
-      // Fallback - copy to clipboard
       navigator.clipboard.writeText(`https://speakeasyai.beehiiv.com/${issue.slug}`);
       alert('Link copied to clipboard!');
     }
@@ -51,7 +50,7 @@ const NewsletterLatestIssue: React.FC<NewsletterLatestIssueProps> = ({ issue, lo
     );
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Card className="w-full overflow-hidden backdrop-blur-sm border border-primary/10 bg-background/80">
         <div className="w-full h-64 bg-gray-200 animate-pulse" />

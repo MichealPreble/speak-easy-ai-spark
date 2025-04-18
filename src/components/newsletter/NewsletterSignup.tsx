@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,18 +7,17 @@ import { useToast } from '@/hooks/use-toast';
 import { Mail, CheckCircle } from 'lucide-react';
 
 interface NewsletterSignupProps {
-  onSubscribe: (email: string) => void;
+  onSubscribe: () => void;
 }
 
 const NewsletterSignup: React.FC<NewsletterSignupProps> = ({ onSubscribe }) => {
-  const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [email, setEmail] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isSubscribed, setIsSubscribed] = React.useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!email.trim()) {
       toast({
         title: "Email Required",
@@ -38,26 +37,11 @@ const NewsletterSignup: React.FC<NewsletterSignupProps> = ({ onSubscribe }) => {
     }
 
     setIsSubmitting(true);
-    
     try {
-      // This would make an actual API call to Beehiiv
-      // const response = await fetch('https://api.beehiiv.com/v2/publications/pub_459544e2-b4ac-473d-b735-38470ab16e0c/subscribers', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Authorization': `Bearer ${process.env.BEEHIIV_API_KEY}`,
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify({ email })
-      // });
-      
-      // For now, simulate API call with a delay
+      // This is where you would make your API call to your newsletter service
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Call the onSubscribe callback
-      onSubscribe(email);
-      
-      // Show success state
       setIsSubscribed(true);
+      onSubscribe();
       setEmail('');
     } catch (error) {
       console.error('Subscription error:', error);
