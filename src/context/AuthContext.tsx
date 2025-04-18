@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 // Define the shape of the user object
@@ -9,6 +10,7 @@ interface User {
     name?: string;
     full_name?: string;
     avatar_url?: string;
+    is_admin?: boolean;
   };
 }
 
@@ -18,6 +20,7 @@ interface UpdateProfileData {
   email?: string;
   full_name?: string;
   avatar_url?: string;
+  is_admin?: boolean;
 }
 
 // Update the AuthContextType to include all required methods
@@ -163,6 +166,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             ...user.user_metadata,
             ...(data.name && { name: data.name, full_name: data.name }),
             ...(data.avatar_url && { avatar_url: data.avatar_url }),
+            ...(data.is_admin !== undefined && { is_admin: data.is_admin }),
           }
         });
       }
