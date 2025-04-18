@@ -1,3 +1,4 @@
+
 # SpeakEasyAI Deployment Checklist
 
 This checklist covers the deployment process for SpeakEasyAI.
@@ -61,6 +62,7 @@ This checklist covers the deployment process for SpeakEasyAI.
 - [ ] Configure CI/CD:
   - [ ] If using CI/CD (e.g., GitHub Actions), verify `CI=true` or `GITHUB_ACTIONS=true` in the environment
   - [ ] Configure log storage for `deployment.log` (e.g., GitHub Actions artifact upload)
+  - [ ] Verify the LOG_URL in deploy.sh points to a valid CI/CD log location
 
 ## Section 10: Deployment Process
 - [ ] Run pre-deployment checks:
@@ -72,12 +74,11 @@ This checklist covers the deployment process for SpeakEasyAI.
   - [ ] Verify build output
   - [ ] Deploy to Vercel
 - [ ] Verify deployment:
-  - [ ] Run `curl --retry 3 --retry-delay 5 -s -o /dev/null -w "%{http_code}" https://speakeasyai.com` to verify with 3 retries and 5-second delays, ensuring HTTP 200 status
+  - [ ] Run `curl --retry 3 --retry-delay 5 -s -o /dev/null -w "%{http_code}" https://speakeasyai.com` to verify with 3 retries and 5-second delays
   - [ ] Check Vercel deployment logs
   - [ ] Verify Slack notifications
 
 ## Section 11: Rollback Plan
-
 - [ ] Document rollback steps:
   - [ ] Identify previous stable version
   - [ ] Test rollback procedure
@@ -92,7 +93,8 @@ This checklist covers the deployment process for SpeakEasyAI.
   - [ ] Track load times
 - [ ] Monitor errors:
   - [ ] Review error logs
-  - [ ] Review `deployment.log` for errors, verify completion timestamp, commit hash, and branch name for traceability
+  - [ ] Review `deployment.log` for errors, verify completion timestamp, commit hash, branch name, and SpeakEasyAI version for traceability
   - [ ] Track user feedback
+  - [ ] Review total error count summary
 
 _Last updated: April 18, 2025_
