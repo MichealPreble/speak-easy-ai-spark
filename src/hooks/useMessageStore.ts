@@ -1,44 +1,31 @@
+
 import { useState, useEffect } from "react";
 import { Message } from "@/types/chat";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { 
+  fetchMessagesFromSupabase, 
+  saveWelcomeMessageToSupabase, 
+  saveMessageToSupabase,
+  clearMessagesFromSupabase,
+  markMessageAsReadInSupabase,
+  subscribeToMessages
+} from "@/services/messageService";
+import { 
+  loadMessagesFromLocalStorage, 
+  saveMessagesToLocalStorage 
+} from "@/services/localStorageService";
 
 export function useMessageStore() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>(() => {
-    try {
-      // Fall back to localStorage if no user is authenticated or Supabase is not configured
-      if (!user || !isSupabaseConfigured()) {
-        const saved = localStorage.getItem('chatMessages');
-        return saved
-          ? JSON.parse(saved, (key, value) =>
-              key === 'timestamp' ? new Date(value) : value
-            )
-          : [
-              {
-                id: 1,
-                text: "Welcome to SpeakEasyAI! I'm your public speaking assistant, ready to help you become a more confident and effective speaker.\n\nI can help you:\n- Structure your speeches\n- Integrate personal stories\n- Improve your delivery\n- Practice with voice recognition and get detailed feedback\n- Build confidence techniques\n\nTry the voice button to record a practice segment and receive analysis on your pace, filler words, and delivery. How would you like to enhance your speaking skills today?",
-                sender: "bot",
-                timestamp: new Date(),
-                read: true
-              },
-            ];
-      }
-      return [];
-    } catch (error) {
-      console.error("Error loading chat messages:", error);
-      return [
-        {
-          id: 1,
-          text: "Welcome to SpeakEasyAI! I'm your public speaking assistant. How can I help you improve your speaking skills today?",
-          sender: "bot",
-          timestamp: new Date(),
-          read: true
-        },
-      ];
+    // Fall back to localStorage if no user is authenticated or Supabase is not configured
+    if (!user || !isSupabaseConfigured()) {
+      return loadMessagesFromLocalStorage();
     }
+    return [];
   });
 
   // Fetch messages from Supabase when user logs in
@@ -48,28 +35,10 @@ export function useMessageStore() {
 
     const fetchMessages = async () => {
       try {
-        const { data, error } = await supabase
-          .from('messages')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('timestamp', { ascending: true });
-
-        if (error) {
-          throw error;
-        }
-
-        if (data && data.length > 0) {
-          // Transform Supabase data format to match our Message type
-          const formattedMessages: Message[] = data.map(msg => ({
-            id: msg.id,
-            text: msg.text,
-            sender: msg.sender,
-            timestamp: new Date(msg.timestamp),
-            isVoiceMessage: msg.is_voice_message,
-            isFeedback: msg.is_feedback,
-            read: msg.read
-          }));
-          setMessages(formattedMessages);
+        const messagesData = await fetchMessagesFromSupabase(user.id);
+        
+        if (messagesData && messagesData.length > 0) {
+          setMessages(messagesData);
         } else {
           // Set initial welcome message if no messages exist
           const welcomeMessage: Message = {
@@ -82,13 +51,7 @@ export function useMessageStore() {
           setMessages([welcomeMessage]);
           
           // Save welcome message to Supabase
-          await supabase.from('messages').insert({
-            user_id: user.id,
-            text: welcomeMessage.text,
-            sender: welcomeMessage.sender,
-            timestamp: welcomeMessage.timestamp,
-            read: welcomeMessage.read
-          });
+          await saveWelcomeMessageToSupabase(user.id, welcomeMessage);
         }
       } catch (error) {
         console.error("Error fetching messages:", error);
@@ -103,20 +66,7 @@ export function useMessageStore() {
     fetchMessages();
 
     // Set up real-time subscription if Supabase is configured
-    const subscription = supabase
-      .channel('messages_changes')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'messages', 
-          filter: `user_id=eq.${user.id}` 
-        }, 
-        () => {
-          fetchMessages();
-        }
-      )
-      .subscribe();
+    const subscription = subscribeToMessages(user.id, fetchMessages);
 
     return () => {
       subscription.unsubscribe();
@@ -126,15 +76,11 @@ export function useMessageStore() {
   // Save to localStorage if no user is authenticated or Supabase is not configured
   useEffect(() => {
     if (!user || !isSupabaseConfigured()) {
-      try {
-        localStorage.setItem('chatMessages', JSON.stringify(messages));
-      } catch (error) {
-        console.error("Error saving chat messages:", error);
-      }
+      saveMessagesToLocalStorage(messages);
     }
   }, [messages, user]);
 
-  // Add a message to Supabase or localStorage
+  // Add a message
   const addMessage = async (message: Omit<Message, 'id' | 'timestamp'>) => {
     const newMessage: Message = {
       ...message,
@@ -148,16 +94,8 @@ export function useMessageStore() {
     // If authenticated and Supabase is configured, save to Supabase
     if (user && isSupabaseConfigured()) {
       try {
-        await supabase.from('messages').insert({
-          user_id: user.id,
-          text: message.text,
-          sender: message.sender,
-          is_voice_message: message.isVoiceMessage || false,
-          is_feedback: message.isFeedback || false,
-          read: message.read || false,
-        });
+        await saveMessageToSupabase(user.id, message);
       } catch (error) {
-        console.error("Error saving message to Supabase:", error);
         toast({
           title: "Error saving message",
           description: "Your message couldn't be saved to the cloud.",
@@ -167,7 +105,7 @@ export function useMessageStore() {
     }
   };
 
-  // Clear messages from Supabase or localStorage
+  // Clear messages
   const clearMessages = async () => {
     const initialMessage: Message = {
       id: Date.now(),
@@ -184,21 +122,11 @@ export function useMessageStore() {
     if (user && isSupabaseConfigured()) {
       try {
         // Delete all existing messages
-        await supabase
-          .from('messages')
-          .delete()
-          .eq('user_id', user.id);
+        await clearMessagesFromSupabase(user.id);
         
         // Add welcome message
-        await supabase.from('messages').insert({
-          user_id: user.id,
-          text: initialMessage.text,
-          sender: initialMessage.sender,
-          timestamp: initialMessage.timestamp,
-          read: initialMessage.read
-        });
+        await saveWelcomeMessageToSupabase(user.id, initialMessage);
       } catch (error) {
-        console.error("Error clearing messages in Supabase:", error);
         toast({
           title: "Error clearing messages",
           description: "Your messages couldn't be cleared from the cloud.",
@@ -208,15 +136,12 @@ export function useMessageStore() {
     }
   };
 
-  // Mark a message as read in Supabase
+  // Mark a message as read
   const markMessageAsRead = async (messageId: number) => {
     if (!user || !isSupabaseConfigured()) return;
 
     try {
-      await supabase
-        .from('messages')
-        .update({ read: true })
-        .eq('id', messageId);
+      await markMessageAsReadInSupabase(messageId);
     } catch (error) {
       console.error("Error marking message as read:", error);
     }
