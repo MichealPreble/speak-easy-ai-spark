@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 // Define the shape of the user object
@@ -153,7 +152,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Placeholder implementation for updateProfile
+  // Update the updateProfile implementation to handle is_admin
   const updateProfile = async (data: UpdateProfileData) => {
     setLoading(true);
     try {
