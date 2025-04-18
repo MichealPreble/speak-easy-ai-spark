@@ -10,90 +10,133 @@ log_task() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> deployment.log
 }
 
+# Track errors for summary
+ERRORS=()
+
 # Make script executable
-log_task "Ensuring deploy.sh is executable (Checklist: Pre-Deployment Preparation)"
+log_task "Ensuring deploy.sh is executable (Checklist: Section 1)"
 chmod +x deploy.sh
 
-# Check environment variables
-log_task "Checking environment variables (Checklist: Pre-Deployment Preparation)"
-if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
-  echo "Error: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set in .env.production (Checklist: Pre-Deployment Preparation)"
+# Check Vercel CLI
+log_task "Verifying Vercel CLI installation (Checklist: Section 10)"
+if ! command -v vercel &> /dev/null; then
+  ERRORS+=("Vercel CLI not installed, run 'npm install -g vercel' (Checklist: Section 10)")
+  echo "${ERRORS[-1]}"
   exit 1
 fi
+
+# Check environment variables
+log_task "Verifying environment variables (Checklist: Section 1)"
+if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
+  ERRORS+=("VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set in .env.production (Checklist: Section 1)")
+  echo "${ERRORS[-1]}"
+  exit 1
+fi
+
 # Check Beehiiv API key (optional)
 if [ ! -z "$VITE_BEEHIIV_API_KEY" ]; then
-  log_task "Beehiiv API key detected (Checklist: Pre-Deployment Preparation)"
+  log_task "Verifying Beehiiv API key (Checklist: Section 1)"
 fi
 
 # Verify Beehiiv iframe src in NewsletterSignup.tsx
-log_task "Verifying Beehiiv iframe src (Checklist: Feature Verification)"
+log_task "Verifying Beehiiv iframe configuration (Checklist: Section 3)"
 if ! grep -q "https://embeds.beehiiv.com/459544e2-b4ac-473d-b735-38470ab16e0c" src/components/newsletter/NewsletterSignup.tsx; then
-  echo "Warning: Beehiiv iframe src not found in NewsletterSignup.tsx, verify configuration"
+  echo "Warning: Beehiiv iframe src not found in NewsletterSignup.tsx, verify configuration (Checklist: Section 3)"
 fi
 
-# Verify production URL
-log_task "Verifying production URL (Checklist: Deployment Day)"
-if ! curl --output /dev/null --silent --head --fail https://speakeasyai.com; then
-  echo "Error: Production URL https://speakeasyai.com is not accessible"
-  exit 1
+# Check Slack webhook URL
+log_task "Verifying Slack webhook configuration (Checklist: Section 10)"
+if grep -q "https://hooks.slack.com/services/your/slack/webhook" deploy.sh; then
+  echo "Warning: Slack webhook URL is still using placeholder. Replace with actual URL (e.g., https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX) (Checklist: Section 10)"
 fi
 
 # Verify repository state
-log_task "Checking repository state (Checklist: Pre-Deployment Preparation)"
+log_task "Verifying repository state (Checklist: Section 1)"
 git fetch origin
 if [ -n "$(git status --porcelain)" ]; then
-  echo "Error: Uncommitted changes detected (Checklist: Pre-Deployment Preparation)"
+  ERRORS+=("Uncommitted changes detected (Checklist: Section 1)")
+  echo "${ERRORS[-1]}"
   exit 1
 fi
 
 # Install dependencies
-log_task "Installing dependencies (Checklist: Pre-Deployment Preparation)"
+log_task "Installing dependencies (Checklist: Section 1)"
 npm install
 
 # Run linting
-log_task "Running linting (Checklist: Deployment Day)"
-npm run lint
+log_task "Running linting checks (Checklist: Section 10)"
+npm run lint || {
+  ERRORS+=("Linting failed (Checklist: Section 10)")
+  echo "${ERRORS[-1]}"
+  exit 1
+}
 
 # Run tests
-log_task "Running tests (Checklist: Deployment Day)"
-npm run test
+log_task "Executing test suite (Checklist: Section 10)"
+npm run test || {
+  ERRORS+=("Tests failed (Checklist: Section 10)")
+  echo "${ERRORS[-1]}"
+  exit 1
+}
 
 # Build for production
-log_task "Building for production (Checklist: Deployment Day)"
-npm run build
+log_task "Building production bundle (Checklist: Section 10)"
+npm run build || {
+  ERRORS+=("Build failed (Checklist: Section 10)")
+  echo "${ERRORS[-1]}"
+  exit 1
+}
 
 # Verify build
-log_task "Verifying build (Checklist: Deployment Day)"
+log_task "Verifying build output (Checklist: Section 10)"
 if [ ! -f "dist/index.html" ]; then
-  echo "Error: Build failed, dist/index.html not found (Checklist: Deployment Day)"
+  ERRORS+=("Build verification failed, dist/index.html not found (Checklist: Section 10)")
+  echo "${ERRORS[-1]}"
   exit 1
 fi
 
 # Run Lighthouse audit
-log_task "Running Lighthouse audit (Checklist: Performance and Security)"
-npm run lighthouse || echo "Warning: Lighthouse audit failed, review lighthouse-report.html"
+log_task "Running Lighthouse performance audit (Checklist: Section 4)"
+npm run lighthouse || echo "Warning: Lighthouse audit failed, review lighthouse-report.html (Checklist: Section 4)"
 
 # Deploy to production
-log_task "Deploying to production (Checklist: Deployment Day)"
-vercel --prod
-
-# Verify production
-log_task "Verifying production (Checklist: Deployment Day)"
-sleep 5 # Wait for deployment propagation
-curl -s -o /dev/null -w "%{http_code}" https://speakeasyai.com | grep 200 || {
-  echo "Error: Production verification failed, consider rollback (Checklist: Rollback Plan)"
+log_task "Deploying to production (Checklist: Section 10)"
+vercel --prod || {
+  ERRORS+=("Deployment failed, check Vercel dashboard (Checklist: Section 10)")
+  echo "${ERRORS[-1]}"
   exit 1
 }
 
+# Verify production with retries
+log_task "Verifying production deployment (Checklist: Section 10)"
+for i in {1..3}; do
+  echo "Attempt $i of 3 to verify production URL..."
+  if curl --max-time 10 -s -o /dev/null -w "%{http_code}" https://speakeasyai.com | grep -q "200"; then
+    break
+  fi
+  if [ $i -eq 3 ]; then
+    ERRORS+=("Production verification failed after 3 attempts. Check Vercel dashboard and https://speakeasyai.com (Checklist: Section 11)")
+    echo "${ERRORS[-1]}"
+    exit 1
+  fi
+  sleep 5
+done
+
 # Post-deployment notification
-log_task "Sending deployment notification (Checklist: Post-Deployment Monitoring)"
-# REPLACE with your Slack webhook URL before use
+log_task "Sending deployment notification (Checklist: Section 10)"
 SLACK_WEBHOOK="https://hooks.slack.com/services/your/slack/webhook"
 curl -X POST -H 'Content-type: application/json' \
-  --data '{"text":"SpeakEasyAI deployed successfully! Check https://speakeasyai.com"}' \
-  "$SLACK_WEBHOOK" || echo "Warning: Slack notification failed, verify webhook URL"
+  --data "{\"text\":\"SpeakEasyAI deployed successfully! Check https://speakeasyai.com (Deployment completed at $(date '+%Y-%m-%d %H:%M:%S'))\"}" \
+  "$SLACK_WEBHOOK" || echo "Warning: Slack notification failed, verify webhook URL (Checklist: Section 10)"
 
-# Update checklist
-log_task "Updating deployment progress (Checklist: Progress Tracking)"
-echo "Deployment complete! Check https://speakeasyai.com"
+# Log error summary if any
+if [ ${#ERRORS[@]} -gt 0 ]; then
+  echo "Error Summary:" >> deployment.log
+  for error in "${ERRORS[@]}"; do
+    echo "- $error" >> deployment.log
+  done
+fi
+
+echo "Deployment completed successfully at $(date '+%Y-%m-%d %H:%M:%S')! Check https://speakeasyai.com"
 cat deployment.log
+
