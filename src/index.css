@@ -122,4 +122,39 @@
   .glass-button {
     @apply bg-primary/10 hover:bg-primary/20 backdrop-blur-sm border border-primary/30 dark:border-primary-dark/30 shadow-sm transition-all;
   }
+
+  .btn-primary {
+    @apply relative overflow-hidden transition-all duration-200
+           hover:scale-[1.02] active:scale-[0.98]
+           focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2
+           disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-primary::after {
+    @apply content-[''] absolute inset-0 bg-white/10
+           transform scale-x-0 transition-transform duration-200
+           origin-left hover:scale-x-100;
+  }
+}
+
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 200ms, transform 200ms;
+}
+
+.page-transition-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 200ms, transform 200ms;
 }

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,6 +19,7 @@ import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import PracticePage from "./pages/PracticePage";
 import NewsletterPage from "./pages/NewsletterPage";
+import LoginSignupModal from "@/components/auth/LoginSignupModal";
 
 const ChatPage = lazy(() => import("./pages/ChatPage"));
 const ProgressPage = lazy(() => import("./pages/ProgressPage"));
@@ -154,6 +154,11 @@ const App = () => (
         <BrowserRouter>
           <ScrollToAnchor />
           <Analytics />
+          <LoginSignupModal 
+            isOpen={useLoginModal((state) => state.isOpen)}
+            onClose={useLoginModal((state) => state.close)}
+            defaultTab={useLoginModal((state) => state.defaultTab)}
+          />
           <AppRoutes />
         </BrowserRouter>
       </TooltipProvider>
