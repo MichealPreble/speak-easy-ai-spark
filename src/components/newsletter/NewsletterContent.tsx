@@ -14,7 +14,7 @@ const NewsletterContent: React.FC = () => {
   const { toast } = useToast();
   const { trackEvent } = useAnalytics();
   
-  const handleSubscribe = (email: string) => {
+  const handleSubscribe = () => {
     // This would be handled by the NewsletterSignup component
     trackEvent('newsletter_subscribe', 'Newsletter', 'Subscription');
     toast({

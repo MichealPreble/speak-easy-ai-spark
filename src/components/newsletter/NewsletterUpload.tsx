@@ -1,5 +1,5 @@
 
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,7 @@ interface NewsletterIssue {
 }
 
 const NewsletterUpload: React.FC = () => {
-  const { user } = useContext(useAuth);
+  const { user } = useAuth();
   const { trackEvent } = useAnalytics();
   const [formData, setFormData] = useState<NewsletterIssue>({
     title: '',
