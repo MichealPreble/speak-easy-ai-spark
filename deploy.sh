@@ -1,5 +1,5 @@
 #!/bin/bash
-# deploy.sh - v1.0
+# deploy.sh - v1.1
 
 # Exit on any error
 set -e
@@ -21,50 +21,51 @@ if [ "$CI" = "true" ] || [ "$GITHUB_ACTIONS" = "true" ]; then
   CI_ENV=" - CI: GitHub Actions"
 fi
 
-echo "SpeakEasyAI v$APP_VERSION Deployment Log - Started $(date '+%Y-%m-%d %H:%M:%S') - Script v1.0 - Commit $COMMIT_HASH - Branch $BRANCH_NAME$CI_ENV" > deployment.log
+echo "SpeakEasyAI v$APP_VERSION Deployment Log - Started $(date '+%Y-%m-%d %H:%M:%S') - Script v1.1 - Commit $COMMIT_HASH - Branch $BRANCH_NAME$CI_ENV" > deployment.log
 log_task "Initializing deployment process"
 
 # Make script executable
 log_task "Ensuring deploy.sh is executable (Checklist: Section 1)"
 chmod +x deploy.sh
 
-# Check Vercel CLI and version with retry
-log_task "Verifying Vercel CLI installation (Checklist: Section 10)"
-if ! command -v vercel &> /dev/null; then
-  ERRORS+=("[$(date '+%Y-%m-%d %H:%M:%S')] - Vercel CLI not installed, run 'npm install -g vercel@latest' (Checklist: Section 10)")
-  echo "${ERRORS[-1]}"
-  exit 1
-fi
-VERCEL_VERSION=""
-for attempt in 1 2; do
-  VERCEL_VERSION=$(vercel --version 2>/dev/null | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "0.0.0")
-  if [ "$VERCEL_VERSION" != "0.0.0" ]; then
-    break
+# Check environment variables with improved validation
+log_task "Verifying environment variables (Checklist: Section 7)"
+ENV_ERROR=0
+
+# Check for VITE_SUPABASE_URL
+if [ -z "${VITE_SUPABASE_URL}" ]; then
+  log_task "ERROR: VITE_SUPABASE_URL is not set"
+  ERRORS+=("[$(date '+%Y-%m-%d %H:%M:%S')] - VITE_SUPABASE_URL is not set (Checklist: Section 7)")
+  ENV_ERROR=1
+else
+  # Validate URL format
+  if ! echo "${VITE_SUPABASE_URL}" | grep -q "^https://.*\.supabase\.co$"; then
+    log_task "WARNING: VITE_SUPABASE_URL does not match expected format (https://example.supabase.co)"
+  else
+    log_task "VITE_SUPABASE_URL is valid"
   fi
-  if [ $attempt -eq 1 ]; then
-    log_task "Retrying Vercel CLI version check after 5 seconds (Checklist: Section 10)"
-    sleep 5
-  fi
-done
-if [ "$VERCEL_VERSION" = "0.0.0" ]; then
-  ERRORS+=("[$(date '+%Y-%m-%d %H:%M:%S')] - Failed to retrieve Vercel CLI version, check network and retry (Checklist: Section 10)")
-  echo "${ERRORS[-1]}"
-  exit 1
 fi
-if ! echo "$VERCEL_VERSION 28.0.0" | sort -V | tail -n 1 | grep -q "28.0.0"; then
-  ERRORS+=("[$(date '+%Y-%m-%d %H:%M:%S')] - Vercel CLI version $VERCEL_VERSION is outdated, requires >=28.0.0, run 'npm install -g vercel@latest' (Checklist: Section 10)")
-  echo "${ERRORS[-1]}"
+
+# Check for VITE_SUPABASE_ANON_KEY
+if [ -z "${VITE_SUPABASE_ANON_KEY}" ]; then
+  log_task "ERROR: VITE_SUPABASE_ANON_KEY is not set"
+  ERRORS+=("[$(date '+%Y-%m-%d %H:%M:%S')] - VITE_SUPABASE_ANON_KEY is not set (Checklist: Section 7)")
+  ENV_ERROR=1
+else
+  # Validate key format (basic check for eyJhbGciOi format)
+  if ! echo "${VITE_SUPABASE_ANON_KEY}" | grep -q "^eyJh"; then
+    log_task "WARNING: VITE_SUPABASE_ANON_KEY does not match expected format"
+  else
+    log_task "VITE_SUPABASE_ANON_KEY is valid"
+  fi
+fi
+
+if [ $ENV_ERROR -eq 1 ]; then
+  echo "ERROR: Missing or invalid environment variables. Check deployment.log for details. (Checklist: Section 7)"
   exit 1
 fi
 
-# Check environment variables
-log_task "Verifying environment variables (Checklist: Section 7)"
-if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
-  ERRORS+=("[$(date '+%Y-%m-%d %H:%M:%S')] - VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set in .env.production (Checklist: Section 7)")
-  echo "${ERRORS[-1]}"
-  exit 1
-fi
-# Check Beehiiv API key (optional)
+# Verify Beehiiv API key (optional)
 if [ ! -z "$VITE_BEEHIIV_API_KEY" ]; then
   log_task "Detecting Beehiiv API key (Checklist: Section 7)"
 fi
@@ -128,11 +129,40 @@ if [ ! -f "dist/index.html" ]; then
   ERRORS+=("[$(date '+%Y-%m-%d %H:%M:%S')] - Build failed, dist/index.html not found (Checklist: Section 10)")
   echo "${ERRORS[-1]}"
   exit 1
-fi
+}
 
 # Run Lighthouse audit
 log_task "Running Lighthouse audit (Checklist: Section 10)"
 npm run lighthouse || echo "Warning: Lighthouse audit failed, review lighthouse-report.html (Checklist: Section 4)"
+
+# Check Vercel CLI and version with retry
+log_task "Verifying Vercel CLI installation (Checklist: Section 10)"
+if ! command -v vercel &> /dev/null; then
+  ERRORS+=("[$(date '+%Y-%m-%d %H:%M:%S')] - Vercel CLI not installed, run 'npm install -g vercel@latest' (Checklist: Section 10)")
+  echo "${ERRORS[-1]}"
+  exit 1
+fi
+VERCEL_VERSION=""
+for attempt in 1 2; do
+  VERCEL_VERSION=$(vercel --version 2>/dev/null | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "0.0.0")
+  if [ "$VERCEL_VERSION" != "0.0.0" ]; then
+    break
+  fi
+  if [ $attempt -eq 1 ]; then
+    log_task "Retrying Vercel CLI version check after 5 seconds (Checklist: Section 10)"
+    sleep 5
+  fi
+done
+if [ "$VERCEL_VERSION" = "0.0.0" ]; then
+  ERRORS+=("[$(date '+%Y-%m-%d %H:%M:%S')] - Failed to retrieve Vercel CLI version, check network and retry (Checklist: Section 10)")
+  echo "${ERRORS[-1]}"
+  exit 1
+fi
+if ! echo "$VERCEL_VERSION 28.0.0" | sort -V | tail -n 1 | grep -q "28.0.0"; then
+  ERRORS+=("[$(date '+%Y-%m-%d %H:%M:%S')] - Vercel CLI version $VERCEL_VERSION is outdated, requires >=28.0.0, run 'npm install -g vercel@latest' (Checklist: Section 10)")
+  echo "${ERRORS[-1]}"
+  exit 1
+fi
 
 # Deploy to production
 log_task "Deploying to production (Checklist: Section 10)"
@@ -157,7 +187,7 @@ log_task "Sending deployment notification (Checklist: Section 12)"
 # Set LOG_URL to your CI/CD log URL (e.g., GitHub Actions artifact URL or Vercel log URL)
 SLACK_WEBHOOK="https://hooks.slack.com/services/your/slack/webhook"
 LOG_URL="[CI/CD Log URL]"
-if [ -n "$SLACK_WEBHOOK" ] && [ "$SLACK_WEBHOOK" != "https://hooks.slack.com/services/your/slack/webhook" ] && { [ "$CI" = "true" ] || [ "$GITHUB_ACTIONS" = "true" ]; }; then
+if [ -n "$SLACK_WEBHOOK" ] && [ "$SLACK_WEBHOOK" != "https://hooks.slack.com/services/your/slack/webhook" ] && { [ "$CI" = "true" ] || [ "$GITHUB_ACTIONS" = "true" ]; then
   curl -X POST -H 'Content-type: application/json' \
     --data "{\"text\":\"SpeakEasyAI v$APP_VERSION deployed successfully at $(date '+%Y-%m-%d %H:%M:%S')! Check https://speakeasyai.com. Log: $LOG_URL\"}" \
     "$SLACK_WEBHOOK" || {

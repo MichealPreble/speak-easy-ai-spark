@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { Message } from "@/types/chat";
-import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/context/AuthContext";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
 export function useMessageStore() {
@@ -10,8 +9,8 @@ export function useMessageStore() {
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>(() => {
     try {
-      // Fall back to localStorage if no user is authenticated
-      if (!user) {
+      // Fall back to localStorage if no user is authenticated or Supabase is not configured
+      if (!user || !isSupabaseConfigured()) {
         const saved = localStorage.getItem('chatMessages');
         return saved
           ? JSON.parse(saved, (key, value) =>
@@ -44,7 +43,8 @@ export function useMessageStore() {
 
   // Fetch messages from Supabase when user logs in
   useEffect(() => {
-    if (!user) return;
+    // Skip if no user or Supabase is not configured
+    if (!user || !isSupabaseConfigured()) return;
 
     const fetchMessages = async () => {
       try {
@@ -102,7 +102,7 @@ export function useMessageStore() {
 
     fetchMessages();
 
-    // Set up real-time subscription
+    // Set up real-time subscription if Supabase is configured
     const subscription = supabase
       .channel('messages_changes')
       .on('postgres_changes', 
@@ -123,9 +123,9 @@ export function useMessageStore() {
     };
   }, [user, toast]);
 
-  // Save to localStorage if no user is authenticated
+  // Save to localStorage if no user is authenticated or Supabase is not configured
   useEffect(() => {
-    if (!user) {
+    if (!user || !isSupabaseConfigured()) {
       try {
         localStorage.setItem('chatMessages', JSON.stringify(messages));
       } catch (error) {
@@ -145,8 +145,8 @@ export function useMessageStore() {
     // Add to state immediately for UI responsiveness
     setMessages(prev => [...prev, newMessage]);
 
-    // If authenticated, save to Supabase
-    if (user) {
+    // If authenticated and Supabase is configured, save to Supabase
+    if (user && isSupabaseConfigured()) {
       try {
         await supabase.from('messages').insert({
           user_id: user.id,
@@ -180,8 +180,8 @@ export function useMessageStore() {
     // Clear and set initial message in state
     setMessages([initialMessage]);
 
-    // If authenticated, clear from Supabase and add initial message
-    if (user) {
+    // If authenticated and Supabase is configured, clear from Supabase and add initial message
+    if (user && isSupabaseConfigured()) {
       try {
         // Delete all existing messages
         await supabase
@@ -210,7 +210,7 @@ export function useMessageStore() {
 
   // Mark a message as read in Supabase
   const markMessageAsRead = async (messageId: number) => {
-    if (!user) return;
+    if (!user || !isSupabaseConfigured()) return;
 
     try {
       await supabase
