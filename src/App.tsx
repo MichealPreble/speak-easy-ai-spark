@@ -20,6 +20,7 @@ import BlogPostPage from "./pages/BlogPostPage";
 import PracticePage from "./pages/PracticePage";
 import NewsletterPage from "./pages/NewsletterPage";
 import LoginSignupModal from "@/components/auth/LoginSignupModal";
+import { useLoginModal } from "@/hooks/useLoginModal";
 
 const ChatPage = lazy(() => import("./pages/ChatPage"));
 const ProgressPage = lazy(() => import("./pages/ProgressPage"));

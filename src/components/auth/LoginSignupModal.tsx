@@ -16,7 +16,7 @@ export const LoginSignupModal: React.FC<LoginSignupModalProps> = ({
   onClose,
   defaultTab = "signin"
 }) => {
-  const [activeTab, setActiveTab] = React.useState(defaultTab);
+  const [activeTab, setActiveTab] = React.useState<"signin" | "signup">(defaultTab);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -48,10 +48,10 @@ export const LoginSignupModal: React.FC<LoginSignupModalProps> = ({
           </TabsList>
           <div className="p-6">
             <TabsContent value="signin" className="mt-0">
-              <SignIn setActiveTab={setActiveTab} />
+              <SignIn setActiveTab={(tab) => setActiveTab(tab as "signin" | "signup")} />
             </TabsContent>
             <TabsContent value="signup" className="mt-0">
-              <SignUp setActiveTab={setActiveTab} />
+              <SignUp setActiveTab={(tab) => setActiveTab(tab as "signin" | "signup")} />
             </TabsContent>
           </div>
         </Tabs>
@@ -59,3 +59,5 @@ export const LoginSignupModal: React.FC<LoginSignupModalProps> = ({
     </Dialog>
   );
 };
+
+export default LoginSignupModal;
