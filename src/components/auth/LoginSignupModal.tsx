@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -60,4 +59,5 @@ export const LoginSignupModal: React.FC<LoginSignupModalProps> = ({
   );
 };
 
+// We'll keep the default export for compatibility with any code that may import it that way
 export default LoginSignupModal;

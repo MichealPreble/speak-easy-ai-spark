@@ -19,7 +19,7 @@ import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import PracticePage from "./pages/PracticePage";
 import NewsletterPage from "./pages/NewsletterPage";
-import LoginSignupModal from "@/components/auth/LoginSignupModal";
+import { LoginSignupModal } from "@/components/auth/LoginSignupModal";
 import { useLoginModal } from "@/hooks/useLoginModal";
 
 const ChatPage = lazy(() => import("./pages/ChatPage"));
@@ -146,26 +146,32 @@ const AppRoutes = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <ScrollToAnchor />
-          <Analytics />
-          <LoginSignupModal 
-            isOpen={useLoginModal((state) => state.isOpen)}
-            onClose={useLoginModal((state) => state.close)}
-            defaultTab={useLoginModal((state) => state.defaultTab)}
-          />
-          <AppRoutes />
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const isModalOpen = useLoginModal((state) => state.isOpen);
+  const closeModal = useLoginModal((state) => state.close);
+  const defaultModalTab = useLoginModal((state) => state.defaultTab);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <ScrollToAnchor />
+            <Analytics />
+            <LoginSignupModal 
+              isOpen={isModalOpen}
+              onClose={closeModal}
+              defaultTab={defaultModalTab}
+            />
+            <AppRoutes />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 declare global {
   interface Window {
