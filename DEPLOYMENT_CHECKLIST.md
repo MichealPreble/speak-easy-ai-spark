@@ -106,9 +106,7 @@
 - [ ] Update user guides
 - [ ] Document known limitations
 
----
-
-### Build & Deploy Script Reference
+## Build & Deploy Script Reference
 
 ```bash
 #!/bin/bash
