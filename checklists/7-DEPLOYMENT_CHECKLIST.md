@@ -1,4 +1,3 @@
-
 # SpeakEasyAI Deployment Checklist
 
 This checklist covers the deployment process for SpeakEasyAI.
@@ -47,16 +46,25 @@ This checklist covers the deployment process for SpeakEasyAI.
   - [ ] Execute Lighthouse audit
   - [ ] Check load times
   - [ ] Verify responsive design
+
 - [ ] Test browser compatibility:
   - [ ] Chrome
   - [ ] Firefox
   - [ ] Safari
   - [ ] Edge
 
-## Section 10: Deployment Process
+## Section 7: Environment Configuration
+- [ ] Set up `.env.production`:
+  - [ ] `VITE_SUPABASE_URL`
+  - [ ] `VITE_SUPABASE_ANON_KEY`
+  - [ ] `VITE_BEEHIIV_API_KEY` (optional)
+- [ ] Configure CI/CD:
+  - [ ] If using CI/CD (e.g., GitHub Actions), verify `CI=true` or `GITHUB_ACTIONS=true` in the environment
+  - [ ] Configure log storage for `deployment.log`
 
+## Section 10: Deployment Process
 - [ ] Run pre-deployment checks:
-  - [ ] Verify Vercel CLI installation (vercel --version; install with npm install -g vercel if missing)
+  - [ ] Verify Vercel CLI installation (`vercel --version`; install with `npm install -g vercel@latest` if missing)
   - [ ] Validate Slack webhook URL is not the placeholder
   - [ ] Run linting and tests
 - [ ] Execute deployment:
@@ -64,7 +72,7 @@ This checklist covers the deployment process for SpeakEasyAI.
   - [ ] Verify build output
   - [ ] Deploy to Vercel
 - [ ] Verify deployment:
-  - [ ] Run curl --retry 3 --retry-delay 5 -s -o /dev/null -w "%{http_code}" https://speakeasyai.com to verify with retries
+  - [ ] Run `curl --retry 3 --retry-delay 5 -s -o /dev/null -w "%{http_code}" https://speakeasyai.com` to verify with 3 retries and 5-second delays, ensuring HTTP 200 status
   - [ ] Check Vercel deployment logs
   - [ ] Verify Slack notifications
 
@@ -78,5 +86,13 @@ This checklist covers the deployment process for SpeakEasyAI.
   - [ ] Monitor performance
   - [ ] Track user feedback
 
-_Last updated: April 18, 2025_
+## Section 12: Post-Deployment Monitoring
+- [ ] Monitor performance:
+  - [ ] Check Lighthouse scores
+  - [ ] Track load times
+- [ ] Monitor errors:
+  - [ ] Review error logs
+  - [ ] Review `deployment.log` for errors, verify completion timestamp, and check Git commit hash for traceability
+  - [ ] Track user feedback
 
+_Last updated: April 18, 2025_
