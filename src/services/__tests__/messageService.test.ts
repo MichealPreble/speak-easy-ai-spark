@@ -19,7 +19,8 @@ jest.mock('@/lib/supabase', () => ({
       update: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
       order: jest.fn().mockReturnThis()
-    }))
+    })),
+    isSupabaseConfigured: jest.fn().mockReturnValue(true)
   }
 }));
 
@@ -33,16 +34,33 @@ describe('messageService', () => {
   describe('fetchMessagesFromSupabase', () => {
     it('fetches messages successfully', async () => {
       const mockSupabaseResponse = { data: mockMessages, error: null };
-      (supabase.from().select().eq().order as jest.Mock).mockResolvedValue(mockSupabaseResponse);
-
+      const mockSelect = jest.fn().mockReturnThis();
+      const mockEq = jest.fn().mockReturnThis();
+      const mockOrder = jest.fn().mockResolvedValue(mockSupabaseResponse);
+      
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: mockSelect,
+        eq: mockEq,
+        order: mockOrder
+      });
+      
       const result = await fetchMessagesFromSupabase(userId);
-      expect(result).toHaveLength(2);
+      
       expect(supabase.from).toHaveBeenCalledWith('messages');
+      expect(mockSelect).toHaveBeenCalled();
+      expect(mockEq).toHaveBeenCalledWith('user_id', userId);
+      expect(mockOrder).toHaveBeenCalledWith('timestamp', { ascending: true });
+      expect(result).toHaveLength(2);
     });
 
     it('handles empty response', async () => {
       const mockSupabaseResponse = { data: [], error: null };
-      (supabase.from().select().eq().order as jest.Mock).mockResolvedValue(mockSupabaseResponse);
+      
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        order: jest.fn().mockResolvedValue(mockSupabaseResponse)
+      });
 
       const result = await fetchMessagesFromSupabase(userId);
       expect(result).toBeNull();
@@ -50,7 +68,12 @@ describe('messageService', () => {
 
     it('throws error on Supabase error', async () => {
       const mockSupabaseResponse = { data: null, error: new Error('Database error') };
-      (supabase.from().select().eq().order as jest.Mock).mockResolvedValue(mockSupabaseResponse);
+      
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        order: jest.fn().mockResolvedValue(mockSupabaseResponse)
+      });
 
       await expect(fetchMessagesFromSupabase(userId)).rejects.toThrow('Database error');
     });
@@ -59,16 +82,23 @@ describe('messageService', () => {
   describe('saveWelcomeMessageToSupabase', () => {
     it('saves welcome message successfully', async () => {
       const mockSupabaseResponse = { error: null };
-      (supabase.from().insert as jest.Mock).mockResolvedValue(mockSupabaseResponse);
+      
+      (supabase.from as jest.Mock).mockReturnValue({
+        insert: jest.fn().mockResolvedValue(mockSupabaseResponse)
+      });
 
       await expect(saveWelcomeMessageToSupabase(userId, mockMessage))
         .resolves.not.toThrow();
+        
       expect(supabase.from).toHaveBeenCalledWith('messages');
     });
 
     it('throws error on Supabase error', async () => {
       const mockSupabaseResponse = { error: new Error('Insert failed') };
-      (supabase.from().insert as jest.Mock).mockResolvedValue(mockSupabaseResponse);
+      
+      (supabase.from as jest.Mock).mockReturnValue({
+        insert: jest.fn().mockResolvedValue(mockSupabaseResponse)
+      });
 
       await expect(saveWelcomeMessageToSupabase(userId, mockMessage))
         .rejects.toThrow('Insert failed');
@@ -78,33 +108,56 @@ describe('messageService', () => {
   describe('saveMessageToSupabase', () => {
     it('saves message successfully', async () => {
       const mockSupabaseResponse = { error: null };
-      (supabase.from().insert as jest.Mock).mockResolvedValue(mockSupabaseResponse);
+      
+      (supabase.from as jest.Mock).mockReturnValue({
+        insert: jest.fn().mockResolvedValue(mockSupabaseResponse)
+      });
 
       await expect(saveMessageToSupabase(userId, { 
         text: 'Test',
         sender: 'user',
         read: true
       })).resolves.not.toThrow();
+      
+      expect(supabase.from).toHaveBeenCalledWith('messages');
     });
   });
 
   describe('clearMessagesFromSupabase', () => {
     it('clears messages successfully', async () => {
       const mockSupabaseResponse = { error: null };
-      (supabase.from().delete().eq as jest.Mock).mockResolvedValue(mockSupabaseResponse);
+      const mockDelete = jest.fn().mockReturnThis();
+      const mockEq = jest.fn().mockResolvedValue(mockSupabaseResponse);
+      
+      (supabase.from as jest.Mock).mockReturnValue({
+        delete: mockDelete,
+        eq: mockEq
+      });
 
       await expect(clearMessagesFromSupabase(userId)).resolves.not.toThrow();
+      
       expect(supabase.from).toHaveBeenCalledWith('messages');
+      expect(mockDelete).toHaveBeenCalled();
+      expect(mockEq).toHaveBeenCalledWith('user_id', userId);
     });
   });
 
   describe('markMessageAsReadInSupabase', () => {
     it('marks message as read successfully', async () => {
       const mockSupabaseResponse = { error: null };
-      (supabase.from().update().eq as jest.Mock).mockResolvedValue(mockSupabaseResponse);
+      const mockUpdate = jest.fn().mockReturnThis();
+      const mockEq = jest.fn().mockResolvedValue(mockSupabaseResponse);
+      
+      (supabase.from as jest.Mock).mockReturnValue({
+        update: mockUpdate,
+        eq: mockEq
+      });
 
       await expect(markMessageAsReadInSupabase(1)).resolves.not.toThrow();
+      
       expect(supabase.from).toHaveBeenCalledWith('messages');
+      expect(mockUpdate).toHaveBeenCalledWith({ read: true });
+      expect(mockEq).toHaveBeenCalledWith('id', 1);
     });
   });
 });
