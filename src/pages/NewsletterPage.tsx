@@ -13,11 +13,16 @@ const NewsletterPage: React.FC = () => {
   const [blogTag, setBlogTag] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
   const limit = 10;
-  const { latestIssue, pastIssues, loading, error } = useNewsletter({ page, limit, blogTag, searchQuery });
+  const { latestIssue, archiveIssues, isLoading, error } = useNewsletter();
   const { trackEvent } = useAnalytics();
 
   const handleTabChange = (value: string) => {
     trackEvent(`view_${value}_tab`, 'Newsletter', `${value.charAt(0).toUpperCase() + value.slice(1)} Tab`);
+  };
+
+  const handleSubscribe = (email: string) => {
+    trackEvent('newsletter_subscribe', 'Newsletter', 'Subscription');
+    console.log('Newsletter subscription:', email);
   };
 
   return (
@@ -45,22 +50,19 @@ const NewsletterPage: React.FC = () => {
         </TabsList>
         
         <TabsContent value="latest">
-          <NewsletterLatestIssue issue={latestIssue} loading={loading} error={error} />
+          <NewsletterLatestIssue issue={latestIssue} loading={isLoading} error={error} />
         </TabsContent>
         
         <TabsContent value="archive">
           <NewsletterArchive
-            pastIssues={pastIssues}
-            page={page}
-            setPage={setPage}
-            limit={limit}
-            setBlogTag={setBlogTag}
-            setSearchQuery={setSearchQuery}
+            issues={archiveIssues}
+            isLoading={isLoading}
+            error={error}
           />
         </TabsContent>
         
         <TabsContent value="subscribe">
-          <NewsletterSignup />
+          <NewsletterSignup onSubscribe={handleSubscribe} />
         </TabsContent>
       </Tabs>
     </div>
