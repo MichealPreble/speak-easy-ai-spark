@@ -29,7 +29,7 @@ const NewsletterLatestIssue: React.FC<NewsletterLatestIssueProps> = ({ issue, is
     if (navigator.share) {
       navigator.share({
         title: issue.title,
-        text: issue.previewText,
+        text: issue.preview_text,
         url: `https://speakeasyai.beehiiv.com/${issue.slug}`,
       });
     } else {
@@ -87,10 +87,10 @@ const NewsletterLatestIssue: React.FC<NewsletterLatestIssueProps> = ({ issue, is
 
   return (
     <Card className="w-full overflow-hidden backdrop-blur-sm border border-primary/10 bg-background/80">
-      {issue.featuredImage && (
+      {issue.featured_image && (
         <div className="w-full h-64 overflow-hidden">
           <img 
-            src={issue.featuredImage} 
+            src={issue.featured_image} 
             alt={issue.title} 
             className="w-full h-full object-cover transition-transform hover:scale-105 duration-700"
           />
@@ -100,8 +100,8 @@ const NewsletterLatestIssue: React.FC<NewsletterLatestIssueProps> = ({ issue, is
       <CardHeader>
         <div className="flex items-center text-sm text-muted-foreground mb-2">
           <Calendar className="h-4 w-4 mr-1" />
-          <time dateTime={issue.publishDate}>
-            {new Date(issue.publishDate).toLocaleDateString('en-US', { 
+          <time dateTime={issue.published_at}>
+            {new Date(issue.published_at).toLocaleDateString('en-US', { 
               year: 'numeric', 
               month: 'long', 
               day: 'numeric' 
@@ -109,20 +109,19 @@ const NewsletterLatestIssue: React.FC<NewsletterLatestIssueProps> = ({ issue, is
           </time>
         </div>
         <CardTitle className="text-2xl md:text-3xl font-bold">{issue.title}</CardTitle>
-        <CardDescription className="text-lg mt-2">{issue.previewText}</CardDescription>
+        <CardDescription className="text-lg mt-2">{issue.preview_text}</CardDescription>
       </CardHeader>
       
       <CardContent>
-        <div className="flex flex-wrap gap-2 mb-4">
-          {issue.tags.map(tag => (
+        {issue.blogTag && (
+          <div className="flex flex-wrap gap-2 mb-4">
             <span 
-              key={tag} 
               className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary"
             >
-              {tag.replace(/-/g, ' ')}
+              {issue.blogTag.replace(/-/g, ' ')}
             </span>
-          ))}
-        </div>
+          </div>
+        )}
       </CardContent>
       
       <CardFooter className="flex justify-between">

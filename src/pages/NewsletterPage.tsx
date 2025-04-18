@@ -13,7 +13,12 @@ const NewsletterPage: React.FC = () => {
   const [blogTag, setBlogTag] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
   const limit = 10;
-  const { latestIssue, archiveIssues, isLoading, error } = useNewsletter();
+  const { latestIssue, archiveIssues, isLoading, error } = useNewsletter({ 
+    page, 
+    limit, 
+    blogTag, 
+    searchQuery 
+  });
   const { trackEvent } = useAnalytics();
 
   const handleTabChange = (value: string) => {
@@ -37,13 +42,13 @@ const NewsletterPage: React.FC = () => {
       <h1 className="text-3xl font-bold mb-6 text-gray-800">SpeakEasyAI Newsletter</h1>
       <Tabs defaultValue="latest" className="w-full" onValueChange={handleTabChange}>
         <TabsList className="grid w-full grid-cols-3 bg-white/80 backdrop-blur-md border-none">
-          <TabsTrigger value="latest" className="text-gray-600 hover:text-mint-500" aria-label="View Latest Issue">
+          <TabsTrigger value="latest" className="text-gray-600 hover:text-primary" aria-label="View Latest Issue">
             Latest Issue
           </TabsTrigger>
-          <TabsTrigger value="archive" className="text-gray-600 hover:text-mint-500" aria-label="View Archives">
+          <TabsTrigger value="archive" className="text-gray-600 hover:text-primary" aria-label="View Archives">
             Archives
           </TabsTrigger>
-          <TabsTrigger value="subscribe" className="text-gray-600 hover:text-mint-500" aria-label="Subscribe to Newsletter">
+          <TabsTrigger value="subscribe" className="text-gray-600 hover:text-primary" aria-label="Subscribe to Newsletter">
             Subscribe
           </TabsTrigger>
         </TabsList>

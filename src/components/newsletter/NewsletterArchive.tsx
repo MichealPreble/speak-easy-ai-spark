@@ -44,10 +44,10 @@ const NewsletterArchive: React.FC<NewsletterArchiveProps> = ({ issues, isLoading
     <div className="space-y-4">
       {issues.map(issue => (
         <Card key={issue.id} className="overflow-hidden backdrop-blur-sm border border-primary/10 bg-background/80 flex flex-col md:flex-row">
-          {issue.featuredImage && (
+          {issue.featured_image && (
             <div className="w-full md:w-1/4 h-40 overflow-hidden">
               <img 
-                src={issue.featuredImage} 
+                src={issue.featured_image} 
                 alt={issue.title} 
                 className="w-full h-full object-cover"
               />
@@ -58,8 +58,8 @@ const NewsletterArchive: React.FC<NewsletterArchiveProps> = ({ issues, isLoading
             <CardHeader className="flex-1">
               <div className="flex items-center text-sm text-muted-foreground mb-1">
                 <Calendar className="h-4 w-4 mr-1" />
-                <time dateTime={issue.publishDate}>
-                  {new Date(issue.publishDate).toLocaleDateString('en-US', { 
+                <time dateTime={issue.published_at}>
+                  {new Date(issue.published_at).toLocaleDateString('en-US', { 
                     year: 'numeric', 
                     month: 'long', 
                     day: 'numeric' 
@@ -67,7 +67,7 @@ const NewsletterArchive: React.FC<NewsletterArchiveProps> = ({ issues, isLoading
                 </time>
               </div>
               <CardTitle className="text-xl font-bold">{issue.title}</CardTitle>
-              <CardDescription className="line-clamp-2">{issue.previewText}</CardDescription>
+              <CardDescription className="line-clamp-2">{issue.preview_text}</CardDescription>
             </CardHeader>
             
             <CardFooter>
