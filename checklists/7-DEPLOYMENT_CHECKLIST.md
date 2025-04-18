@@ -1,4 +1,3 @@
-
 # SpeakEasyAI Deployment Checklist
 
 This checklist covers the deployment process for SpeakEasyAI.
@@ -61,7 +60,7 @@ This checklist covers the deployment process for SpeakEasyAI.
   - [ ] `VITE_BEEHIIV_API_KEY` (optional)
 - [ ] Configure CI/CD:
   - [ ] If using CI/CD (e.g., GitHub Actions), verify `CI=true` or `GITHUB_ACTIONS=true` in the environment
-  - [ ] Configure log storage for `deployment.log`
+  - [ ] Configure log storage for `deployment.log` (e.g., GitHub Actions artifact upload)
 
 ## Section 10: Deployment Process
 - [ ] Run pre-deployment checks:
@@ -93,7 +92,7 @@ This checklist covers the deployment process for SpeakEasyAI.
   - [ ] Track load times
 - [ ] Monitor errors:
   - [ ] Review error logs
-  - [ ] Review `deployment.log` for errors, verify completion timestamp, and check Git commit hash for traceability
+  - [ ] Review `deployment.log` for errors, verify completion timestamp, commit hash, and branch name for traceability
   - [ ] Track user feedback
 
 _Last updated: April 18, 2025_

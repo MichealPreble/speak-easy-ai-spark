@@ -1,4 +1,3 @@
-
 #!/bin/bash
 # deploy.sh - v1.0
 
@@ -15,11 +14,12 @@ ERRORS=()
 
 # Initialize log file with header
 COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 CI_ENV=""
 if [ "$CI" = "true" ] || [ "$GITHUB_ACTIONS" = "true" ]; then
   CI_ENV=" - CI: GitHub Actions"
 fi
-echo "SpeakEasyAI Deployment Log - Started $(date '+%Y-%m-%d %H:%M:%S') - Script v1.0 - Commit $COMMIT_HASH$CI_ENV" > deployment.log
+echo "SpeakEasyAI Deployment Log - Started $(date '+%Y-%m-%d %H:%M:%S') - Script v1.0 - Commit $COMMIT_HASH - Branch $BRANCH_NAME$CI_ENV" > deployment.log
 
 # Make script executable
 log_task "Ensuring deploy.sh is executable (Checklist: Section 1)"
@@ -28,13 +28,13 @@ chmod +x deploy.sh
 # Check Vercel CLI and version
 log_task "Verifying Vercel CLI installation (Checklist: Section 10)"
 if ! command -v vercel &> /dev/null; then
-  ERRORS+=("Vercel CLI not installed, run 'npm install -g vercel@latest' (Checklist: Section 10)")
+  ERRORS+=("[$(date '+%Y-%m-%d %H:%M:%S')] Vercel CLI not installed, run 'npm install -g vercel@latest' (Checklist: Section 10)")
   echo "${ERRORS[-1]}"
   exit 1
 fi
 VERCEL_VERSION=$(vercel --version 2>/dev/null | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "0.0.0")
 if ! echo "$VERCEL_VERSION 28.0.0" | sort -V | tail -n 1 | grep -q "28.0.0"; then
-  ERRORS+=("Vercel CLI version $VERCEL_VERSION is outdated, run 'npm install -g vercel@latest' (Checklist: Section 10)")
+  ERRORS+=("[$(date '+%Y-%m-%d %H:%M:%S')] Vercel CLI version $VERCEL_VERSION is outdated, run 'npm install -g vercel@latest' (Checklist: Section 10)")
   echo "${ERRORS[-1]}"
   exit 1
 fi
@@ -138,16 +138,23 @@ done
 
 # Post-deployment notification
 log_task "Sending deployment notification (Checklist: Section 12)"
-# REPLACE with your Slack webhook URL before use (e.g., https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX)
-# Set LOG_URL to your CI/CD log URL (e.g., GitHub Actions artifact URL or Vercel log URL)
-SLACK_WEBHOOK="https://hooks.slack.com/services/your/slack/webhook"
-LOG_URL="[CI/CD Log URL]"
-curl -X POST -H 'Content-type: application/json' \
-  --data "{\"text\":\"SpeakEasyAI deployed successfully at $(date '+%Y-%m-%d %H:%M:%S')! Check https://speakeasyai.com. Log: $LOG_URL\"}" \
-  "$SLACK_WEBHOOK" || {
-    echo "Warning: Slack notification failed, verify webhook URL (Checklist: Section 10)" >&2
-    echo "Warning: Slack notification failed, verify webhook URL (Checklist: Section 10)"
-  }
+if [ "$CI" = "true" ] || [ "$GITHUB_ACTIONS" = "true" ]; then
+  # REPLACE with your Slack webhook URL before use (e.g., https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX)
+  # Set LOG_URL to your CI/CD log URL (e.g., GitHub Actions artifact URL or Vercel log URL)
+  SLACK_WEBHOOK="https://hooks.slack.com/services/your/slack/webhook"
+  LOG_URL="[CI/CD Log URL]"
+  if [ ! -z "$SLACK_WEBHOOK" ] && [ "$SLACK_WEBHOOK" != "https://hooks.slack.com/services/your/slack/webhook" ]; then
+    curl -X POST -H 'Content-type: application/json' \
+      --data "{\"text\":\"SpeakEasyAI deployed successfully at $(date '+%Y-%m-%d %H:%M:%S')! Check https://speakeasyai.com. Log: $LOG_URL\"}" \
+      "$SLACK_WEBHOOK" || {
+        log_task "Warning: Slack notification failed, verify webhook URL (Checklist: Section 10)"
+      }
+  else
+    log_task "Skipping Slack notification in CI/CD environment (webhook not configured)"
+  fi
+else
+  log_task "Skipping Slack notification (not in CI/CD environment)"
+fi
 
 # Log error summary if any
 if [ ${#ERRORS[@]} -gt 0 ]; then
