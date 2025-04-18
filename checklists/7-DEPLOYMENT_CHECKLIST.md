@@ -1,3 +1,4 @@
+
 # SpeakEasyAI Deployment Checklist
 
 This checklist covers the deployment process for SpeakEasyAI.
