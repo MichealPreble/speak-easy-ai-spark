@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,7 +32,10 @@ const NewsletterUpload: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!user || !(user.role && user.role.includes('admin'))) {
+  // Check if user metadata includes admin role
+  const isAdmin = user?.user_metadata?.is_admin === true;
+
+  if (!user || !isAdmin) {
     return null;
   }
 
