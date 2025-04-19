@@ -1,5 +1,6 @@
 
 import { useEffect } from "react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import Hero from "@/components/landing/Hero";
 import Features from "@/components/landing/Features";
 import HowItWorks from "@/components/landing/HowItWorks";
@@ -12,6 +13,12 @@ import { ACCESSIBILITY_COLORS } from "@/types/chat";
 import { ConnectionStatusIndicator } from "@/components/ui/connection-status";
 
 const Index = () => {
+  const { trackPageView } = useAnalytics();
+
+  useEffect(() => {
+    trackPageView('/');
+  }, [trackPageView]);
+
   return (
     <>
       <SEO 
