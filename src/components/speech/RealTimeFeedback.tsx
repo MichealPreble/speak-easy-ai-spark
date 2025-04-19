@@ -5,6 +5,7 @@ import { useSpeechFeedback } from "@/hooks/speech-feedback";
 import FeedbackHeader from "./FeedbackHeader";
 import FeedbackContent from "./FeedbackContent";
 import { SpeechInsightsCard } from "./SpeechInsightsCard";
+import { CadenceInsightsCard } from "./CadenceInsightsCard";
 import { useSpeechInsights } from "@/hooks/speech/useSpeechInsights";
 
 interface RealTimeFeedbackProps {
