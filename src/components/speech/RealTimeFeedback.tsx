@@ -21,7 +21,7 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
   feedback
 }) => {
   const [expanded, setExpanded] = useState(true);
-  const { wpm } = useSpeechInsights(transcript, isActive);
+  const { wpm, cadence } = useSpeechInsights(transcript, isActive);
   
   const {
     tips,
@@ -46,8 +46,9 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
       
       {expanded && (
         <>
-          <div className="p-4">
+          <div className="p-4 space-y-4">
             <SpeechInsightsCard wpm={wpm} />
+            <CadenceInsightsCard cadence={cadence} />
           </div>
           <FeedbackContent 
             isActive={isActive}
