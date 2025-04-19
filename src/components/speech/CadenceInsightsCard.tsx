@@ -20,11 +20,11 @@ export function CadenceInsightsCard({ cadence }: CadenceInsightsCardProps) {
   const getTrendIcon = () => {
     if (averagePauseMs === null) return null;
     return averagePauseMs < 500 ? (
-      <ArrowUp className="w-4 h-4 text-destructive" title="Too rushed" />
+      <ArrowUp className="w-4 h-4 text-destructive" aria-label="Too rushed" />
     ) : averagePauseMs > 1500 ? (
-      <ArrowDown className="w-4 h-4 text-destructive" title="Too choppy" />
+      <ArrowDown className="w-4 h-4 text-destructive" aria-label="Too choppy" />
     ) : (
-      <ActivitySquare className="w-4 h-4 text-green-600" title="Well-paced" />
+      <ActivitySquare className="w-4 h-4 text-green-600" aria-label="Well-paced" />
     );
   };
 
