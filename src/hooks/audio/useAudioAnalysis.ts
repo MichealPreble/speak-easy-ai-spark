@@ -2,14 +2,17 @@
 import { useCallback } from 'react';
 import { useAudioMetrics } from './useAudioMetrics';
 import { useSpeakingPatterns } from './useSpeakingPatterns';
+import { useSpeechRate } from '../speech/useSpeechRate';
 
 export function useAudioAnalysis(
   isActive: boolean,
   analyser: AnalyserNode | null,
-  audioContext: AudioContext | null
+  audioContext: AudioContext | null,
+  transcript: string = ''
 ) {
   const { pitchValues, volumeValues } = useAudioMetrics(isActive, analyser, audioContext);
   const speakingPatterns = useSpeakingPatterns(isActive, volumeValues[volumeValues.length - 1] || 0);
+  const { wpm } = useSpeechRate(transcript, isActive);
 
   const getAnalysisResults = useCallback(() => {
     const avgPitch = pitchValues.length 
@@ -44,9 +47,10 @@ export function useAudioAnalysis(
       pauseDurations,
       speechBurstDurations,
       pitchValues: [...pitchValues],
-      volumeValues: [...volumeValues]
+      volumeValues: [...volumeValues],
+      wpm
     };
-  }, [pitchValues, volumeValues, speakingPatterns]);
-
+  }, [pitchValues, volumeValues, speakingPatterns, wpm]);
+  
   return { getAnalysisResults };
 }
