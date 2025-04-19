@@ -5,6 +5,7 @@ import { useSpeechFeedback } from "@/hooks/speech-feedback";
 import FeedbackHeader from "./FeedbackHeader";
 import FeedbackContent from "./FeedbackContent";
 import { SpeechInsightsCard } from "./SpeechInsightsCard";
+import { useSpeechInsights } from "@/hooks/speech/useSpeechInsights";
 
 interface RealTimeFeedbackProps {
   isActive: boolean;
@@ -20,6 +21,7 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
   feedback
 }) => {
   const [expanded, setExpanded] = useState(true);
+  const { wpm } = useSpeechInsights(transcript, isActive);
   
   const {
     tips,
@@ -45,7 +47,7 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
       {expanded && (
         <>
           <div className="p-4">
-            <SpeechInsightsCard wpm={feedback?.speed ?? null} />
+            <SpeechInsightsCard wpm={wpm} />
           </div>
           <FeedbackContent 
             isActive={isActive}

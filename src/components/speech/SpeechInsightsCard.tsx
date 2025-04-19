@@ -2,19 +2,11 @@
 import React from 'react';
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getWpmFeedback } from "@/hooks/speech/useSpeechInsights";
 
 interface SpeechInsightsCardProps {
   wpm: number | null;
 }
-
-const getWpmFeedback = (wpm: number | null) => {
-  if (wpm === null) return { text: "Not speaking", color: "text-muted-foreground" };
-  if (wpm < 70) return { text: "Too slow", color: "text-destructive" };
-  if (wpm <= 89) return { text: "Somewhat slow", color: "text-yellow-500" };
-  if (wpm <= 130) return { text: "Well-paced", color: "text-green-600" };
-  if (wpm <= 150) return { text: "Somewhat fast", color: "text-yellow-500" };
-  return { text: "Too fast", color: "text-destructive" };
-};
 
 export function SpeechInsightsCard({ wpm }: SpeechInsightsCardProps) {
   const feedback = getWpmFeedback(wpm);
