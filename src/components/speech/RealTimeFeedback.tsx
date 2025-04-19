@@ -4,6 +4,7 @@ import { SpeechFeedback } from "@/hooks/useVoiceRecognition";
 import { useSpeechFeedback } from "@/hooks/speech-feedback";
 import FeedbackHeader from "./FeedbackHeader";
 import FeedbackContent from "./FeedbackContent";
+import { SpeechInsightsCard } from "./SpeechInsightsCard";
 
 interface RealTimeFeedbackProps {
   isActive: boolean;
@@ -42,20 +43,25 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
       />
       
       {expanded && (
-        <FeedbackContent 
-          isActive={isActive}
-          duration={duration}
-          feedback={feedback}
-          tips={tips}
-          metrics={metrics}
-          clarityAnalysis={clarityAnalysis}
-          hesitationAnalysis={hesitationAnalysis}
-          metricsHistory={metricsHistory}
-          speechScore={speechScore}
-        />
+        <>
+          <div className="p-4">
+            <SpeechInsightsCard wpm={feedback?.speed ?? null} />
+          </div>
+          <FeedbackContent 
+            isActive={isActive}
+            duration={duration}
+            feedback={feedback}
+            tips={tips}
+            metrics={metrics}
+            clarityAnalysis={clarityAnalysis}
+            hesitationAnalysis={hesitationAnalysis}
+            metricsHistory={metricsHistory}
+            speechScore={speechScore}
+          />
+        </>
       )}
     </div>
   );
-};
+}
 
 export default RealTimeFeedback;
