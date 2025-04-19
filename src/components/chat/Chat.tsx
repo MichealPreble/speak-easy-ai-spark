@@ -1,19 +1,9 @@
 
-import React, { useEffect } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
+import React from "react";
 import { useChat } from "@/hooks/useChat";
 import ChatHeader from "./ChatHeader";
-import ChatMessage from "./ChatMessage";
-import ChatInput from "./ChatInput";
-import ChatSearch from "./ChatSearch";
-import NoMessages from "./NoMessages";
-import LoadingIndicator from "./LoadingIndicator";
-import { MobileFilter } from "./MobileFilter";
-import { DesktopFilter } from "./DesktopFilter";
-import { ActiveFilterBadges } from "./ActiveFilterBadges";
 import { ClearFiltersDialog } from "./ClearFiltersDialog";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import ChatContainer from "./ChatContainer";
 
 interface ChatProps {
   selectedScenario?: string | null;
@@ -29,21 +19,20 @@ const Chat: React.FC<ChatProps> = ({ selectedScenario }) => {
     searchQuery,
     setSearchQuery,
     isDarkMode,
-    toggleDarkMode,
     isVoiceActive,
     isBrowserSupported,
+    recordingDuration,
+    MAX_RECORDING_SECONDS,
     inputRef,
     scrollAreaRef,
     handleSend,
     handleClearChat,
     toggleVoice,
+    toggleDarkMode,
     summarize,
-    showTypingIndicator,
-    recordingDuration,
-    MAX_RECORDING_SECONDS
+    showTypingIndicator
   } = useChat({ selectedScenario });
   
-  const isMobile = useMediaQuery("(max-width: 768px)");
   const [isFilterOpen, setIsFilterOpen] = React.useState(false);
   const [filterOptions, setFilterOptions] = React.useState({
     showUserMessages: true,
@@ -122,96 +111,33 @@ const Chat: React.FC<ChatProps> = ({ selectedScenario }) => {
         onSummarize={summarize}
       />
       
-      <div className="flex flex-1 overflow-hidden">
-        {/* Desktop sidebar filter */}
-        {!isMobile && (
-          <DesktopFilter
-            filterOptions={filterOptions}
-            handleFilterChange={handleFilterChange}
-          />
-        )}
-        
-        {/* Chat content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Search and filter badges area */}
-          <div className="p-3 border-b bg-gray-50 dark:bg-zinc-900 dark:border-zinc-800">
-            <ChatSearch
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              disabled={messages.length === 0}
-            />
-            
-            {isFiltersActive && (
-              <ActiveFilterBadges
-                filterOptions={filterOptions}
-                searchQuery={searchQuery}
-                onClearAll={() => setShowClearFilters(true)}
-              />
-            )}
-          </div>
-          
-          {/* Message list */}
-          <ScrollArea 
-            ref={scrollAreaRef} 
-            className="flex-1 p-4"
-          >
-            {messages.length === 0 ? (
-              <NoMessages isSearching={false} />
-            ) : visibleMessages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                <p>No messages match your filters</p>
-                <Button 
-                  variant="link" 
-                  onClick={clearFilters}
-                  className="mt-2"
-                >
-                  Clear all filters
-                </Button>
-              </div>
-            ) : (
-              visibleMessages.map((message) => (
-                <ChatMessage
-                  key={message.id}
-                  message={message}
-                  isDarkMode={isDarkMode}
-                />
-              ))
-            )}
-            
-            {showTypingIndicator && (
-              <LoadingIndicator isDarkMode={isDarkMode} />
-            )}
-          </ScrollArea>
-          
-          {/* Input area */}
-          <ChatInput
-            input={input}
-            setInputValue={setInput}
-            onSend={handleSend}
-            onKeyDown={handleKeyDown}
-            isLoading={isLoading}
-            isVoiceActive={isVoiceActive}
-            toggleVoice={toggleVoice}
-            isBrowserSupported={isBrowserSupported}
-            onSummarize={summarize}
-            ref={inputRef}
-            recordingDuration={recordingDuration}
-            maxRecordingDuration={MAX_RECORDING_SECONDS}
-          />
-        </div>
-      </div>
+      <ChatContainer 
+        messages={messages}
+        visibleMessages={visibleMessages}
+        filterOptions={filterOptions}
+        handleFilterChange={handleFilterChange}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        isFilterOpen={isFilterOpen}
+        setIsFilterOpen={setIsFilterOpen}
+        isFiltersActive={isFiltersActive}
+        clearFilters={clearFilters}
+        isDarkMode={isDarkMode}
+        showTypingIndicator={showTypingIndicator}
+        input={input}
+        setInput={setInput}
+        handleSend={handleSend}
+        handleKeyDown={handleKeyDown}
+        isLoading={isLoading}
+        isVoiceActive={isVoiceActive}
+        toggleVoice={toggleVoice}
+        isBrowserSupported={isBrowserSupported}
+        onSummarize={summarize}
+        inputRef={inputRef}
+        recordingDuration={recordingDuration}
+        maxRecordingDuration={MAX_RECORDING_SECONDS}
+      />
       
-      {/* Mobile filter dialog */}
-      {isMobile && (
-        <MobileFilter
-          isOpen={isFilterOpen}
-          onClose={() => setIsFilterOpen(false)}
-          filterOptions={filterOptions}
-          handleFilterChange={handleFilterChange}
-        />
-      )}
-      
-      {/* Clear filters confirmation */}
       <ClearFiltersDialog
         open={showClearFilters}
         onOpenChange={setShowClearFilters}
