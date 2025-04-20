@@ -15,7 +15,10 @@ export function MetricCard({ icon: Icon, title, value, description }: MetricCard
     <Card className="relative overflow-hidden">
       <CardContent className="p-6">
         <div className="flex items-center gap-4">
-          <div className="p-2 bg-primary/10 rounded-full">
+          <div 
+            data-testid="metric-card-icon"
+            className="p-2 bg-primary/10 rounded-full"
+          >
             <Icon className="w-4 h-4 text-primary" />
           </div>
           <div>
