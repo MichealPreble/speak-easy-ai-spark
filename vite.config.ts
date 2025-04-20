@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -27,7 +28,20 @@ export default defineConfig(({ mode }) => ({
       exclude: [
         'node_modules/',
         'src/setupTests.ts',
-      ]
+        '**/*.d.ts',
+        'src/vite-env.d.ts',
+        'src/types/**',
+        'src/**/__mocks__/**',
+      ],
+      include: [
+        'src/**/*.{ts,tsx}',
+      ],
+      all: true,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+      branches: 70,
     }
   }
 }));
+
