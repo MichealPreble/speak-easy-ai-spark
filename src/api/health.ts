@@ -1,23 +1,16 @@
 
-import { supabase, isSupabaseConfigured } from "../lib/supabase";
+import { supabase, isSupabaseConfigured, testSupabaseConnection } from "../lib/supabase";
 import { startTimestamp } from "../utils/uptime";
 
-// Simple function to check Supabase connection
+// Enhanced function to check Supabase connection with better error handling
 async function checkSupabaseConnection() {
   if (!isSupabaseConfigured()) {
     return "not_configured";
   }
 
   try {
-    const { data, error } = await supabase
-      .from('messages')
-      .select('id')
-      .limit(1);
-
-    if (error) {
-      return "error";
-    }
-    return "ok";
+    const connectionTest = await testSupabaseConnection();
+    return connectionTest.success ? "ok" : "error";
   } catch {
     return "error";
   }
