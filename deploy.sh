@@ -1,4 +1,3 @@
-
 #!/bin/bash
 # deploy.sh - Main deployment script (Refactored v2.0)
 
@@ -13,6 +12,7 @@ source "$SCRIPTS_DIR/repo-check.sh"
 source "$SCRIPTS_DIR/build.sh"
 source "$SCRIPTS_DIR/vercel.sh"
 source "$SCRIPTS_DIR/notifications.sh"
+source "$SCRIPTS_DIR/health-check.sh"
 
 # Initialize log file
 initialize_log
@@ -45,6 +45,9 @@ run_lighthouse
 check_vercel || exit 1
 deploy_production || exit 1
 verify_production || exit 1
+
+# Run health checks
+verify_health || exit 1
 
 # Post-deployment tasks
 send_notification
