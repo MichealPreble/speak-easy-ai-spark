@@ -1,6 +1,6 @@
 
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { startTimestamp } from "@/utils/uptime";
+import { supabase, isSupabaseConfigured } from "../lib/supabase";
+import { startTimestamp } from "../utils/uptime";
 
 // Simple function to check Supabase connection
 async function checkSupabaseConnection() {

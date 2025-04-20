@@ -5,6 +5,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import type { ViteDevServer } from "vite";
 import type { IncomingMessage, ServerResponse } from "http";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig(({ mode }) => ({
   server: {
@@ -26,6 +27,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
+    tsconfigPaths(), // Add tsconfig paths resolver
     mode === 'development' &&
     componentTagger(),
     // Custom plugin to handle health checks
@@ -34,6 +36,7 @@ export default defineConfig(({ mode }) => ({
       configureServer(server: ViteDevServer) {
         server.middlewares.use('/__health', async (req: IncomingMessage, res: ServerResponse) => {
           try {
+            // Use relative path instead of alias to avoid circular dependency in config
             const { healthCheck } = await import('./src/api/health');
             const health = await healthCheck();
             res.setHeader('Content-Type', 'application/json');
