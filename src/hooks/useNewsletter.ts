@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { NewsletterIssue } from '@/types/practiceTypes';
+import type { NewsletterIssue } from '@/types/practiceTypes';
 
 export function useNewsletter() {
   const [issues, setIssues] = useState<NewsletterIssue[]>([]);
@@ -23,26 +23,26 @@ export function useNewsletter() {
         .select('*')
         .order('published_at', { ascending: false });
 
-      if (error) {
-        throw new Error(error.message);
-      }
+      if (error) throw error;
 
-      if (data && data.length > 0) {
-        const typedIssues: NewsletterIssue[] = data.map((issue: any) => ({
+      if (data) {
+        const typedIssues: NewsletterIssue[] = data.map(issue => ({
           id: String(issue.id),
           title: String(issue.title || ''),
           slug: String(issue.slug || ''),
           preview_text: String(issue.preview_text || ''),
           published_at: String(issue.published_at || ''),
-          content: issue.content ? String(issue.content) : undefined
+          content: issue.content ? String(issue.content) : undefined,
+          featured_image: issue.featured_image ? String(issue.featured_image) : undefined,
+          blogTag: issue.blog_tag ? String(issue.blog_tag) : undefined
         }));
-        
+
         setIssues(typedIssues);
-        setLatestIssue(typedIssues[0]);
+        setLatestIssue(typedIssues[0] || null);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred while fetching newsletter issues');
       console.error('Error fetching newsletter issues:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch newsletter issues');
     } finally {
       setIsLoading(false);
     }
@@ -56,9 +56,7 @@ export function useNewsletter() {
         .eq('slug', slug)
         .single();
 
-      if (error) {
-        throw new Error(error.message);
-      }
+      if (error) throw error;
 
       if (data) {
         return {
@@ -67,10 +65,11 @@ export function useNewsletter() {
           slug: String(data.slug || ''),
           preview_text: String(data.preview_text || ''),
           published_at: String(data.published_at || ''),
-          content: data.content ? String(data.content) : undefined
+          content: data.content ? String(data.content) : undefined,
+          featured_image: data.featured_image ? String(data.featured_image) : undefined,
+          blogTag: data.blog_tag ? String(data.blog_tag) : undefined
         };
       }
-      
       return null;
     } catch (err) {
       console.error('Error fetching newsletter issue:', err);
@@ -80,30 +79,22 @@ export function useNewsletter() {
 
   const subscribeToNewsletter = async (email: string): Promise<{ success: boolean; message: string }> => {
     try {
-      // Validate email
-      if (!email || !/\S+@\S+\.\S+/.test(email)) {
-        return { success: false, message: 'Please enter a valid email address.' };
-      }
-
       const { error } = await supabase
         .from('newsletter_subscribers')
         .insert([{ email }]);
 
       if (error) {
-        if (error.code === '23505') { // PostgreSQL unique constraint violation
+        if (error.code === '23505') {
           return { success: true, message: 'You are already subscribed!' };
         }
-        throw new Error(error.message);
+        throw error;
       }
 
       return { success: true, message: 'Successfully subscribed to the newsletter!' };
     } catch (err) {
-      console.error('Error subscribing to newsletter:', err);
-      return { 
-        success: false, 
-        message: err instanceof Error 
-          ? `Error: ${err.message}` 
-          : 'An error occurred during subscription.'
+      return {
+        success: false,
+        message: err instanceof Error ? err.message : 'Failed to subscribe to newsletter'
       };
     }
   };

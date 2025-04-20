@@ -1,4 +1,3 @@
-
 export interface PracticeSession {
   id: string;
   occasion_name: string;
@@ -25,6 +24,8 @@ export interface NewsletterIssue {
   preview_text: string;
   published_at: string;
   content?: string;
+  featured_image?: string;
+  blogTag?: string;
 }
 
 export type SenderType = 'user' | 'bot';
@@ -70,4 +71,3 @@ export interface OccasionDetailsData {
   handleFeedbackSubmit: () => Promise<void>;
   handleToggleFavorite: () => Promise<void>;
 }
-
