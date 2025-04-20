@@ -1,12 +1,12 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Get environment variables with fallbacks to prevent runtime errors
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Get environment variables with proper fallbacks
+// Using dummy values for development to avoid runtime errors
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
 
-// Initialize the Supabase client with empty string fallbacks
-// This prevents runtime errors but still allows the app to load
+// Initialize the Supabase client
 export const supabase = createClient(
   supabaseUrl,
   supabaseKey,
@@ -20,7 +20,9 @@ export const supabase = createClient(
 
 // Helper function to check if Supabase is properly configured
 export const isSupabaseConfigured = (): boolean => {
-  const isConfigured = Boolean(supabaseUrl) && Boolean(supabaseKey);
+  const isRealUrl = supabaseUrl !== 'https://placeholder.supabase.co';
+  const isRealKey = supabaseKey !== 'placeholder-key';
+  const isConfigured = isRealUrl && isRealKey;
   
   // Only show warning in development environment
   if (!isConfigured && import.meta.env.DEV) {
