@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { BlogPostPreview, Template, OccasionDetailsData } from '@/types/practiceTypes';
@@ -32,7 +33,9 @@ export function useOccasionDetailsData(occasionId: string): OccasionDetailsData 
           const typedPosts: BlogPostPreview[] = postsData.map((post: any) => ({
             id: String(post.id),
             title: String(post.title || ''),
-            excerpt: String(post.excerpt || '')
+            summary: String(post.excerpt || ''), // Map excerpt to summary
+            publishedAt: new Date().toISOString(), // Default date if not provided
+            excerpt: String(post.excerpt || '') // Keep excerpt too
           }));
           setRelatedPosts(typedPosts);
         }
@@ -49,7 +52,8 @@ export function useOccasionDetailsData(occasionId: string): OccasionDetailsData 
           const typedTemplates: Template[] = templateData.map((template: any) => ({
             id: String(template.id),
             title: String(template.title || ''),
-            content: String(template.content || '')
+            body: String(template.content || ''), // Map content to body
+            content: String(template.content || '') // Keep content too
           }));
           setTemplates(typedTemplates);
         }
@@ -74,6 +78,10 @@ export function useOccasionDetailsData(occasionId: string): OccasionDetailsData 
   };
 
   return {
+    id: occasionId,
+    title: occasionId,
+    rating: parseInt(practiceFeedback) || 0,
+    feedback: '',
     relatedPosts,
     templates,
     isLoading,

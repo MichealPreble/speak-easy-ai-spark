@@ -1,5 +1,6 @@
 
 import { SpeechOccasion } from '@/types/speechOccasions';
+import { BlogPostPreview as PracticeTypeBlogPostPreview } from '@/types/practiceTypes';
 
 export interface Template {
   id: string;
@@ -11,12 +12,9 @@ export interface OccasionDetailsProps {
   occasion: SpeechOccasion;
   favorites: string[];
   setFavorites: React.Dispatch<React.SetStateAction<string[]>>;
-  blogPreviews: BlogPostPreview[];
-  setBlogPreviews: React.Dispatch<React.SetStateAction<BlogPostPreview[]>>;
+  blogPreviews: PracticeTypeBlogPostPreview[];
+  setBlogPreviews: React.Dispatch<React.SetStateAction<PracticeTypeBlogPostPreview[]>>;
 }
 
-export interface BlogPostPreview {
-  id: string;
-  title: string;
-  excerpt: string;
-}
+// Re-export BlogPostPreview from practiceTypes to ensure consistent usage
+export type BlogPostPreview = PracticeTypeBlogPostPreview;

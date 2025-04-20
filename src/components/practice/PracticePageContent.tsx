@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ProgressTracker from '@/components/progress/ProgressTracker';
 import PracticeGoals from '@/components/speech/PracticeGoals';
@@ -7,7 +8,7 @@ import RecentOccasions from '@/components/speech/RecentOccasions';
 import PracticeHistory from '@/components/speech/PracticeHistory';
 import OccasionDetails from '@/components/speech/OccasionDetails';
 import { usePracticePageData } from '@/hooks/usePracticePageData';
-import { SpeechOccasion } from '@/types/speechOccasions';
+import { SpeechOccasion as SpeechOccasionType } from '@/types/speechOccasions';
 import { Milestone } from '@/types/practiceTypes';
 
 const PracticePageContent: React.FC = () => {
@@ -28,19 +29,30 @@ const PracticePageContent: React.FC = () => {
     handleSelectSession
   } = usePracticePageData();
 
-  // Convert string[] to Milestone[] to satisfy type requirements
-  const typedMilestones: Milestone[] = milestones.map(
-    (milestone: string): Milestone => ({ 
-      id: milestone, 
-      label: milestone,
-      title: milestone,
-      description: `Milestone: ${milestone}`,
-      achieved: false,
-      progress: 0,
-      target: 1,
-      tip: `Tip for ${milestone}`
-    })
-  );
+  // Ensure milestones conform to the expected Milestone type
+  const typedMilestones: Milestone[] = Array.isArray(milestones) 
+    ? milestones.map((milestone): Milestone => {
+        if (typeof milestone === 'string') {
+          // Convert string to proper Milestone object
+          return { 
+            id: milestone, 
+            label: milestone,
+            title: milestone,
+            description: `Milestone: ${milestone}`,
+            achieved: false,
+            progress: 0,
+            target: 1,
+            tip: `Tip for ${milestone}`
+          };
+        }
+        // If it's already a Milestone object, ensure required fields are present
+        return {
+          ...milestone,
+          title: milestone.title || milestone.label || 'Untitled Milestone',
+          tip: milestone.tip || 'Keep practicing to improve'
+        };
+      })
+    : [];
 
   // Type conversion for string to SpeechOccasion for selectedOccasion
   const convertedOccasion = selectedOccasion ? {
@@ -55,7 +67,7 @@ const PracticePageContent: React.FC = () => {
   } : null;
 
   // Wrapper function to convert string parameter to SpeechOccasion
-  const handleOccasionSelect = (occasion: SpeechOccasion) => {
+  const handleOccasionSelect = (occasion: SpeechOccasionType) => {
     handleSelect(occasion.name);
   };
 
@@ -99,7 +111,7 @@ const PracticePageContent: React.FC = () => {
             occasion={convertedOccasion}
             favorites={favorites}
             setFavorites={setFavorites}
-            blogPreviews={blogPreviews}
+            blogPreviews={blogPreviews || []}
             setBlogPreviews={setBlogPreviews}
           />
         </div>

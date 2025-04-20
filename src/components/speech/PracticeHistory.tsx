@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
@@ -37,7 +38,11 @@ const PracticeHistory: React.FC<PracticeHistoryProps> = ({ userId, occasionName,
         if (data) {
           const typedSessions: PracticeSession[] = data.map((session: any) => ({
             id: String(session.id),
+            userId: String(userId), // Use from props
+            occasionName: String(occasionName), // Use from props
             occasion_name: String(session.occasion_name || ''),
+            transcript: String(session.transcript || ''),
+            createdAt: String(session.created_at || ''),
             session_date: String(session.session_date || ''),
             notes: String(session.notes || '')
           }));

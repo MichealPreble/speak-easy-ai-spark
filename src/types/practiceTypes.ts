@@ -2,13 +2,13 @@
 export type Milestone = {
   id: string;
   label: string;
-  title?: string;
+  title: string; // Required per PracticePageContent.tsx
   description?: string;
   completed?: boolean;
   achieved?: boolean;
   progress?: number;
   target?: number;
-  tip?: string;
+  tip: string; // Required per PracticePageContent.tsx
 }
 
 export type SpeechOccasion = 'interview' | 'presentation' | 'toast' | 'pitch';
@@ -16,7 +16,7 @@ export type SpeechOccasion = 'interview' | 'presentation' | 'toast' | 'pitch';
 export type NewsletterIssue = {
   id: string;
   title: string;
-  date: string;
+  date: string; // Required
   content: string;
   slug?: string;
   preview_text?: string;
@@ -29,15 +29,15 @@ export type BlogPostPreview = {
   id: string;
   title: string;
   summary: string;
-  excerpt?: string;
   publishedAt: string;
+  excerpt?: string; // Optional to match occasionDetailsTypes
 }
 
 export type Template = {
   id: string;
   title: string;
-  body: string;
-  content?: string;
+  body: string; // Required per Template component
+  content?: string; // Optional to support alternate pattern
 }
 
 export type OccasionDetailsData = {
@@ -53,17 +53,24 @@ export type OccasionDetailsData = {
   practiceFeedback?: string;
   showFeedback?: boolean;
   sessionId?: string | null;
+  // Required setters per OccasionDetails.tsx
+  setPracticeNote?: (note: string) => void;
+  setPracticeFeedback?: (feedback: string) => void;
+  setShowFeedback?: (show: boolean) => void;
+  setSessionId?: (id: string | null) => void;
+  handleFeedbackSubmit?: () => void;
+  handleToggleFavorite?: () => void;
 }
 
 export type PracticeSession = {
   id: string;
   userId: string;
   occasionName: string;
-  occasion_name?: string;
+  occasion_name?: string; // Alternative field name
   transcript: string;
   notes?: string;
   createdAt: string;
-  session_date?: string;
+  session_date?: string; // Alternative field name
 }
 
 export type PracticePageData = {
@@ -95,7 +102,9 @@ export type Message = {
   read: boolean;
 }
 
-export type CarouselInstance = ReturnType<typeof import('embla-carousel-react').useEmblaCarousel>[0];
+// Use proper import for embla-carousel-react
+import { useEmblaCarousel } from 'embla-carousel-react';
+export type CarouselInstance = ReturnType<typeof useEmblaCarousel>[0];
 
 export interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL: string;

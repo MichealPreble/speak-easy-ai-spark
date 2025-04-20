@@ -36,10 +36,11 @@ export function useNewsletter(options: NewsletterOptions = {}) {
         const typedIssues: NewsletterIssue[] = data.map(issue => ({
           id: String(issue.id),
           title: String(issue.title || ''),
+          date: String(issue.published_at || ''),
           slug: String(issue.slug || ''),
           preview_text: String(issue.preview_text || ''),
           published_at: String(issue.published_at || ''),
-          content: issue.content ? String(issue.content) : undefined,
+          content: issue.content ? String(issue.content) : '',
           featured_image: issue.featured_image ? String(issue.featured_image) : undefined,
           blogTag: issue.blog_tag ? String(issue.blog_tag) : undefined
         }));
@@ -70,10 +71,11 @@ export function useNewsletter(options: NewsletterOptions = {}) {
         return {
           id: String(data.id),
           title: String(data.title || ''),
+          date: String(data.published_at || ''),
           slug: String(data.slug || ''),
           preview_text: String(data.preview_text || ''),
           published_at: String(data.published_at || ''),
-          content: data.content ? String(data.content) : undefined,
+          content: data.content ? String(data.content) : '',
           featured_image: data.featured_image ? String(data.featured_image) : undefined,
           blogTag: data.blog_tag ? String(data.blog_tag) : undefined
         };
