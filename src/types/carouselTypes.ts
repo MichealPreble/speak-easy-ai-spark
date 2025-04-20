@@ -8,7 +8,7 @@ export type CarouselPlugin = UseCarouselParameters[1]
 
 export type CarouselProps = {
   opts?: CarouselOptions
-  plugins?: CarouselPlugin
+  plugins?: CarouselPlugin[]  // Changed from singular to array type
   orientation?: "horizontal" | "vertical"
   setApi?: (api: CarouselApi) => void
 }
@@ -20,4 +20,6 @@ export type CarouselContextProps = {
   scrollNext: () => void
   canScrollPrev: boolean
   canScrollNext: boolean
-} & CarouselProps
+  opts?: CarouselOptions
+  orientation?: "horizontal" | "vertical"
+}

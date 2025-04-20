@@ -1,6 +1,6 @@
 
 import * as React from "react"
-import { CarouselContextProps } from "@/types/carouselTypes"
+import type { CarouselContextProps } from "@/types/carouselTypes"
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
 
