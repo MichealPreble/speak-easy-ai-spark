@@ -1,5 +1,6 @@
 
 import * as React from "react"
+import { ChartConfig } from "./chart-context"
 
 const THEMES = { light: "", dark: ".dark" } as const
 
@@ -31,6 +32,7 @@ ${colorConfig
       itemConfig.color
     return color ? `  --color-${key}: ${color};` : null
   })
+  .filter(Boolean)
   .join("\n")}
 }
 `

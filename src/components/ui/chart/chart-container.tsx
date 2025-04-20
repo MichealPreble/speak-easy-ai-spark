@@ -2,7 +2,7 @@
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 import { cn } from "@/lib/utils"
-import { ChartContext } from "./chart-context"
+import { ChartContext, ChartConfig } from "./chart-context"
 import { ChartStyle } from "./chart-style"
 
 const ChartContainer = React.forwardRef<
@@ -39,4 +39,3 @@ const ChartContainer = React.forwardRef<
 ChartContainer.displayName = "Chart"
 
 export { ChartContainer }
-export type { ChartConfig }

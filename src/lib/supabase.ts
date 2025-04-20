@@ -34,4 +34,3 @@ export const isSupabaseConfigured = (): boolean => {
 
 // Call isSupabaseConfigured once to check configuration on initialization
 isSupabaseConfigured();
-
