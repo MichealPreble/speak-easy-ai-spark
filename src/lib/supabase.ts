@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import type { ImportMetaEnv } from '@/types/practiceTypes';
 

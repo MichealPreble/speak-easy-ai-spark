@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useOccasionDetailsData } from '@/hooks/useOccasionDetailsData';
@@ -8,6 +7,7 @@ import PracticeFeedback from './occasion-details/PracticeFeedback';
 import TemplateSection from './occasion-details/TemplateSection';
 import RelatedBlogPosts from './RelatedBlogPosts';
 import { OccasionDetailsProps } from '@/types/occasionDetailsTypes';
+import { Template, BlogPostPreview } from '@/types/practiceTypes';
 
 const OccasionDetails: React.FC<OccasionDetailsProps> = ({
   occasion,
@@ -30,12 +30,25 @@ const OccasionDetails: React.FC<OccasionDetailsProps> = ({
     handleToggleFavorite
   } = useOccasionDetailsData(occasion.name);
 
-  // Fixed function to match expected signature
+  const typedTemplates: Template[] = templates.map(t => ({
+    id: t.id,
+    title: t.title,
+    body: t.body || '',
+    content: t.content || ''
+  }));
+
+  const typedBlogPreviews: BlogPostPreview[] = blogPreviews.map(bp => ({
+    id: bp.id,
+    title: bp.title,
+    summary: bp.summary,
+    publishedAt: bp.publishedAt,
+    excerpt: bp.excerpt || ''
+  }));
+
   const onFavoriteToggle = () => {
     handleToggleFavorite();
   };
 
-  // Convert string to number for speech quality score if needed
   const feedbackScore = parseInt(practiceFeedback, 10) || 0;
 
   return (
@@ -57,18 +70,17 @@ const OccasionDetails: React.FC<OccasionDetailsProps> = ({
           <PracticeFeedback
             practiceFeedback={feedbackScore}
             onFeedbackChange={(rating: number) => {
-              // Convert number to string to match expected state setter
               setPracticeFeedback(rating.toString());
             }}
             onSubmit={handleFeedbackSubmit}
           />
         )}
         <TemplateSection
-          templates={templates}
+          templates={typedTemplates}
           occasionName={occasion.name}
         />
         <RelatedBlogPosts
-          blogPreviews={blogPreviews}
+          blogPreviews={typedBlogPreviews}
           blogTag={occasion.blogTag || ''}
         />
       </CardContent>
