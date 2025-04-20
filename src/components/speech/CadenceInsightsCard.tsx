@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,11 +19,17 @@ export function CadenceInsightsCard({ cadence }: CadenceInsightsCardProps) {
   const getTrendIcon = () => {
     if (averagePauseMs === null) return null;
     return averagePauseMs < 500 ? (
-      <ArrowUp className="w-4 h-4 text-destructive" aria-label="Too rushed" />
+      <span title="Too rushed" aria-label="Too rushed">
+        <ArrowUp className="w-4 h-4 text-destructive" />
+      </span>
     ) : averagePauseMs > 1500 ? (
-      <ArrowDown className="w-4 h-4 text-destructive" aria-label="Too choppy" />
+      <span title="Too choppy" aria-label="Too choppy">
+        <ArrowDown className="w-4 h-4 text-destructive" />
+      </span>
     ) : (
-      <ActivitySquare className="w-4 h-4 text-green-600" aria-label="Well-paced" />
+      <span title="Well-paced" aria-label="Well-paced">
+        <ActivitySquare className="w-4 h-4 text-green-600" />
+      </span>
     );
   };
 
