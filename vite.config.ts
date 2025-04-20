@@ -8,11 +8,47 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      // Proxy /api/health requests to our handler
+      '/api/health': {
+        target: 'http://localhost:8080',
+        bypass: (req) => {
+          // Handle health checks during development
+          if (req.url === '/api/health') {
+            req.url = '/__health';
+            return req.url;
+          }
+        }
+      }
+    },
   },
   plugins: [
     react(),
     mode === 'development' &&
     componentTagger(),
+    // Custom plugin to handle health checks
+    {
+      name: 'vite-plugin-health-check',
+      configureServer(server) {
+        server.middlewares.use('/__health', async (req, res) => {
+          try {
+            const { healthCheck } = await import('./src/api/health');
+            const health = await healthCheck();
+            res.setHeader('Content-Type', 'application/json');
+            res.statusCode = health.status === 'ok' ? 200 : 500;
+            res.end(JSON.stringify(health));
+          } catch (error) {
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({
+              status: 'error',
+              message: 'Health check failed',
+              timestamp: new Date().toISOString()
+            }));
+          }
+        });
+      }
+    }
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -44,4 +80,3 @@ export default defineConfig(({ mode }) => ({
     }
   }
 }));
-

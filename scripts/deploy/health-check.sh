@@ -19,7 +19,7 @@ calculate_wait_time() {
 # Check Supabase connection
 check_supabase_connection() {
   log_task "Verifying Supabase connectivity (Checklist: Section 11)"
-  local response=$(curl -s -o /dev/null -w "%{http_code}" https://speakeasyai.com/api/health/supabase)
+  local response=$(curl -s -o /dev/null -w "%{http_code}" https://speakeasyai.com/api/health)
   if [ "$response" = "200" ]; then
     return 0
   fi
