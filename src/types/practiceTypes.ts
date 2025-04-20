@@ -1,3 +1,4 @@
+import type { UseEmblaCarouselType } from 'embla-carousel-react';
 
 export type Milestone = {
   id: string;
