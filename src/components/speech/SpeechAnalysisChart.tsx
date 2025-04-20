@@ -25,7 +25,6 @@ const SpeechAnalysisChart: React.FC<SpeechAnalysisChartProps> = ({
   const [chartType, setChartType] = useState<'line' | 'bar' | 'composed'>('line');
   const { processedData, insights } = useSpeechChartData(data);
 
-  // If no data, show empty state
   if (data.length === 0) {
     return (
       <Card className="w-full">
@@ -41,25 +40,27 @@ const SpeechAnalysisChart: React.FC<SpeechAnalysisChartProps> = ({
   return (
     <Card className="w-full">
       <CardHeader>
-        <div className="flex justify-between items-start">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
           <div>
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
+            <CardTitle className="text-lg sm:text-xl">{title}</CardTitle>
+            <CardDescription className="text-sm">{description}</CardDescription>
           </div>
           
           {showControls && (
-            <ChartControls 
-              chartType={chartType} 
-              setChartType={setChartType}
-            />
+            <div className="w-full sm:w-auto">
+              <ChartControls 
+                chartType={chartType} 
+                setChartType={setChartType}
+              />
+            </div>
           )}
         </div>
         
         <ChartInsights insights={insights} />
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="all" className="h-[300px]">
-          <TabsList className="mb-4">
+      <CardContent className="px-2 sm:px-6">
+        <Tabs defaultValue="all" className="h-[300px] sm:h-[400px]">
+          <TabsList className="mb-4 w-full overflow-x-auto flex-nowrap whitespace-nowrap">
             <TabsTrigger value="all">All Metrics</TabsTrigger>
             <TabsTrigger value="clarity">Clarity</TabsTrigger>
             <TabsTrigger value="pace">Pace & Rhythm</TabsTrigger>

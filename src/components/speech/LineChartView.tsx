@@ -1,7 +1,7 @@
-
 import React from "react";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LineChartViewProps {
   data: any[];
@@ -23,7 +23,7 @@ const LineChartView: React.FC<LineChartViewProps> = ({
   dataKeys,
   className = "h-full" 
 }) => {
-  // Create a config object for ChartContainer
+  const isMobile = useIsMobile();
   const chartConfig = dataKeys.lines.reduce((config, line) => {
     config[line.key] = { color: line.color };
     return config;
@@ -31,12 +31,28 @@ const LineChartView: React.FC<LineChartViewProps> = ({
 
   return (
     <ChartContainer className={className} config={chartConfig}>
-      <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
+      <LineChart data={data} margin={{ 
+        top: 10, 
+        right: isMobile ? 10 : 30, 
+        left: isMobile ? -20 : 0, 
+        bottom: 5 
+      }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
-        <XAxis dataKey={dataKeys.x} />
-        <YAxis />
+        <XAxis 
+          dataKey={dataKeys.x} 
+          tick={{ fontSize: isMobile ? 10 : 12 }}
+          interval={isMobile ? 2 : 0}
+        />
+        <YAxis 
+          tick={{ fontSize: isMobile ? 10 : 12 }}
+          width={isMobile ? 30 : 40}
+        />
         <Tooltip content={<ChartTooltipContent />} />
-        <Legend verticalAlign="bottom" />
+        <Legend 
+          verticalAlign="bottom" 
+          height={isMobile ? 50 : 36}
+          wrapperStyle={{ fontSize: isMobile ? '10px' : '12px' }}
+        />
         {dataKeys.lines.map((line, index) => (
           <Line 
             key={index}
@@ -45,7 +61,8 @@ const LineChartView: React.FC<LineChartViewProps> = ({
             name={line.name} 
             stroke={`var(--color-${line.key})`}
             activeDot={line.activeDot} 
-            strokeWidth={line.strokeWidth}
+            strokeWidth={isMobile ? 1 : line.strokeWidth}
+            dot={!isMobile}
           />
         ))}
       </LineChart>
