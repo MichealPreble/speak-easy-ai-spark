@@ -3,7 +3,7 @@ import * as React from "react"
 import useEmblaCarousel from "embla-carousel-react"
 import { cn } from "@/lib/utils"
 import { CarouselContext } from "./carousel-context"
-import { CarouselProps } from "@/types/carouselTypes"
+import type { CarouselApi, CarouselProps } from "@/types/carouselTypes"
 
 const Carousel = React.forwardRef<
   HTMLDivElement,
