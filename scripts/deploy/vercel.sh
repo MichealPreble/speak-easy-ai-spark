@@ -1,8 +1,20 @@
 
 #!/bin/bash
-# vercel.sh - Vercel deployment script
+# vercel.sh - Vercel deployment script with retry logic
 
 source "$(dirname "$0")/utils.sh"
+
+# Retry configuration
+MAX_ATTEMPTS=3
+INITIAL_WAIT=5
+MAX_WAIT=30
+
+# Exponential backoff wait calculator
+calculate_wait_time() {
+  local attempt=$1
+  local wait_time=$((INITIAL_WAIT * 2 ** (attempt - 1)))
+  echo $((wait_time > MAX_WAIT ? MAX_WAIT : wait_time))
+}
 
 # Check Vercel CLI and version with retry
 check_vercel() {
@@ -13,19 +25,20 @@ check_vercel() {
   fi
   
   VERCEL_VERSION=""
-  for attempt in 1 2; do
+  for attempt in $(seq 1 $MAX_ATTEMPTS); do
     VERCEL_VERSION=$(vercel --version 2>/dev/null | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "0.0.0")
     if [ "$VERCEL_VERSION" != "0.0.0" ]; then
       break
     fi
-    if [ $attempt -eq 1 ]; then
-      log_task "Retrying Vercel CLI version check after 5 seconds (Checklist: Section 10)"
-      sleep 5
+    if [ $attempt -lt $MAX_ATTEMPTS ]; then
+      local wait_time=$(calculate_wait_time $attempt)
+      log_task "Attempt $attempt failed. Retrying Vercel CLI version check after ${wait_time}s (Checklist: Section 10)"
+      sleep $wait_time
     fi
   done
   
   if [ "$VERCEL_VERSION" = "0.0.0" ]; then
-    add_error "Failed to retrieve Vercel CLI version, check network and retry (Checklist: Section 10)"
+    add_error "Failed to retrieve Vercel CLI version after $MAX_ATTEMPTS attempts (Checklist: Section 10)"
     return 1
   fi
   
@@ -37,23 +50,50 @@ check_vercel() {
   return 0
 }
 
-# Deploy to production
+# Deploy to production with retries
 deploy_production() {
   log_task "Deploying to production (Checklist: Section 10)"
-  vercel --prod || {
-    add_error "Deployment failed, check Vercel dashboard (Checklist: Section 10)"
-    return 1
-  }
-  return 0
+  
+  for attempt in $(seq 1 $MAX_ATTEMPTS); do
+    if vercel --prod; then
+      log_task "Deployment successful on attempt $attempt"
+      return 0
+    fi
+    
+    if [ $attempt -lt $MAX_ATTEMPTS ]; then
+      local wait_time=$(calculate_wait_time $attempt)
+      log_task "Attempt $attempt failed. Retrying deployment after ${wait_time}s (Checklist: Section 10)"
+      sleep $wait_time
+    else
+      add_error "Deployment failed after $MAX_ATTEMPTS attempts, check Vercel dashboard (Checklist: Section 10)"
+      return 1
+    fi
+  done
 }
 
-# Verify production with retries
+# Verify production with retries and exponential backoff
 verify_production() {
   log_task "Verifying production (Checklist: Section 10)"
-  sleep 5 # Wait for deployment propagation
-  curl --retry 3 --retry-delay 5 -s -o /dev/null -w "%{http_code}" https://speakeasyai.com | grep 200 || {
-    add_error "Production verification failed, check https://speakeasyai.com and Vercel dashboard (Checklist: Section 11)"
-    return 1
-  }
-  return 0
+  
+  # Initial wait for deployment propagation
+  sleep $INITIAL_WAIT
+  
+  for attempt in $(seq 1 $MAX_ATTEMPTS); do
+    if curl -s -o /dev/null -w "%{http_code}" https://speakeasyai.com | grep -q "200"; then
+      log_task "Production verification successful on attempt $attempt"
+      return 0
+    fi
+    
+    if [ $attempt -lt $MAX_ATTEMPTS ]; then
+      local wait_time=$(calculate_wait_time $attempt)
+      log_task "Attempt $attempt failed. Retrying verification after ${wait_time}s (Checklist: Section 11)"
+      sleep $wait_time
+    else
+      add_error "Production verification failed after $MAX_ATTEMPTS attempts, check https://speakeasyai.com and Vercel dashboard (Checklist: Section 11)"
+      return 1
+    fi
+  done
+  
+  return 1
 }
+
