@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ProgressTracker from '@/components/progress/ProgressTracker';
 import PracticeGoals from '@/components/speech/PracticeGoals';
@@ -31,7 +30,15 @@ const PracticePageContent: React.FC = () => {
 
   // Convert string[] to Milestone[] to satisfy type requirements
   const typedMilestones: Milestone[] = milestones.map(
-    (milestone: string): Milestone => ({ id: milestone, label: milestone })
+    (milestone: string): Milestone => ({ 
+      id: milestone, 
+      label: milestone,
+      title: milestone,
+      description: `Milestone: ${milestone}`,
+      achieved: false,
+      progress: 0,
+      target: 1
+    })
   );
 
   // Type conversion for string to SpeechOccasion for selectedOccasion
