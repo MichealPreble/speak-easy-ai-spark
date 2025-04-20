@@ -3,6 +3,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import type { ViteDevServer } from "vite";
+import type { IncomingMessage, ServerResponse } from "http";
 
 export default defineConfig(({ mode }) => ({
   server: {
@@ -29,8 +31,8 @@ export default defineConfig(({ mode }) => ({
     // Custom plugin to handle health checks
     {
       name: 'vite-plugin-health-check',
-      configureServer(server) {
-        server.middlewares.use('/__health', async (req, res) => {
+      configureServer(server: ViteDevServer) {
+        server.middlewares.use('/__health', async (req: IncomingMessage, res: ServerResponse) => {
           try {
             const { healthCheck } = await import('./src/api/health');
             const health = await healthCheck();
