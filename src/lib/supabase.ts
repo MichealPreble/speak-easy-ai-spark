@@ -2,8 +2,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Explicitly type environment variables with a safe fallback
-const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || 'https://example.supabase.co';
-const supabaseKey = import.meta.env?.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://example.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
 
 // Initialize the Supabase client
 export const supabase = createClient(supabaseUrl, supabaseKey);
@@ -14,7 +14,7 @@ export const isSupabaseConfigured = (): boolean => {
                       supabaseKey !== 'your-anon-key';
   
   // Only show warning in development environment
-  if (!isConfigured && import.meta.env?.DEV) {
+  if (!isConfigured && import.meta.env.DEV) {
     console.warn(
       'Supabase not properly configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.'
     );
@@ -25,4 +25,3 @@ export const isSupabaseConfigured = (): boolean => {
 
 // Call isSupabaseConfigured once to check configuration on initialization
 isSupabaseConfigured();
-
