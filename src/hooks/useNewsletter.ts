@@ -1,13 +1,16 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { NewsletterIssue } from '@/types/practiceTypes';
 
-export function useNewsletter(options?: { 
-  page?: number; 
-  limit?: number; 
-  blogTag?: string; 
-  searchQuery?: string 
-} = {}) {
+interface NewsletterOptions {
+  page?: number;
+  limit?: number;
+  blogTag?: string;
+  searchQuery?: string;
+}
+
+export function useNewsletter(options: NewsletterOptions = {}) {
   const [issues, setIssues] = useState<NewsletterIssue[]>([]);
   const [latestIssue, setLatestIssue] = useState<NewsletterIssue | null>(null);
   const [archiveIssues, setArchiveIssues] = useState<NewsletterIssue[]>([]);
