@@ -28,9 +28,15 @@ const OccasionDetails: React.FC<OccasionDetailsProps> = ({
     setSessionId,
     handleFeedbackSubmit,
     handleToggleFavorite
-  } = useOccasionDetailsData(occasion, setBlogPreviews);
+  } = useOccasionDetailsData(occasion.name);
 
-  const onFavoriteToggle = () => handleToggleFavorite(favorites, setFavorites);
+  // Fixed function to match expected signature
+  const onFavoriteToggle = () => {
+    handleToggleFavorite();
+  };
+
+  // Convert string to number for speech quality score if needed
+  const feedbackScore = parseInt(practiceFeedback, 10) || 0;
 
   return (
     <Card>
@@ -49,8 +55,11 @@ const OccasionDetails: React.FC<OccasionDetailsProps> = ({
         />
         {showFeedback && (
           <PracticeFeedback
-            practiceFeedback={practiceFeedback}
-            onFeedbackChange={setPracticeFeedback}
+            practiceFeedback={feedbackScore}
+            onFeedbackChange={(rating: number) => {
+              // Convert number to string to match expected state setter
+              setPracticeFeedback(rating.toString());
+            }}
             onSubmit={handleFeedbackSubmit}
           />
         )}

@@ -1,10 +1,10 @@
 
-import type { EmblaCarouselType } from 'embla-carousel-react';
+import type { UseEmblaCarouselType } from 'embla-carousel-react';
 import useEmblaCarousel from 'embla-carousel-react';
 
-export type CarouselApi = EmblaCarouselType;
+export type CarouselApi = UseEmblaCarouselType[1];
 export type CarouselOptions = Parameters<typeof useEmblaCarousel>[0];
-export type CarouselPlugin = any; // Consider refining this type
+export type CarouselPlugin = NonNullable<Parameters<typeof useEmblaCarousel>[1]>[number];
 
 export type CarouselProps = {
   opts?: CarouselOptions;

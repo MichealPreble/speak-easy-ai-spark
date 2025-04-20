@@ -8,6 +8,8 @@ import RecentOccasions from '@/components/speech/RecentOccasions';
 import PracticeHistory from '@/components/speech/PracticeHistory';
 import OccasionDetails from '@/components/speech/OccasionDetails';
 import { usePracticePageData } from '@/hooks/usePracticePageData';
+import { SpeechOccasion } from '@/types/speechOccasions';
+import { Milestone } from '@/types/practiceTypes';
 
 const PracticePageContent: React.FC = () => {
   const {
@@ -27,6 +29,28 @@ const PracticePageContent: React.FC = () => {
     handleSelectSession
   } = usePracticePageData();
 
+  // Convert string[] to Milestone[] to satisfy type requirements
+  const typedMilestones: Milestone[] = milestones.map(
+    (milestone: string): Milestone => ({ id: milestone, label: milestone })
+  );
+
+  // Type conversion for string to SpeechOccasion for selectedOccasion
+  const convertedOccasion = selectedOccasion ? {
+    name: selectedOccasion,
+    occasion: selectedOccasion,
+    examples: '',
+    audienceSize: '',
+    audienceSizeCategory: 'Small' as const,
+    frequency: 'Rare' as const,
+    task: '',
+    blogTag: ''
+  } : null;
+
+  // Wrapper function to convert string parameter to SpeechOccasion
+  const handleOccasionSelect = (occasion: SpeechOccasion) => {
+    handleSelect(occasion.name);
+  };
+
   return (
     <>
       <ProgressTracker
@@ -34,7 +58,7 @@ const PracticePageContent: React.FC = () => {
         uniqueOccasions={uniqueOccasions}
         totalDuration={totalMinutes}
         notesAdded={notesAdded}
-        milestones={milestones}
+        milestones={typedMilestones}
         shareUrl={shareUrl}
       />
       <PracticeGoals
@@ -47,17 +71,24 @@ const PracticePageContent: React.FC = () => {
         }}
         shareUrl={shareUrl}
       />
-      <SpeechOccasionSelector onSelectOccasion={handleSelect} />
+      <SpeechOccasionSelector onSelectOccasion={handleOccasionSelect} />
       <FavoriteOccasions
         favorites={favorites}
-        onSelectFavorite={handleSelect}
+        onSelectFavorite={handleOccasionSelect}
       />
-      <RecentOccasions onSelectRecent={handleSelect} />
-      <PracticeHistory onSelectSession={handleSelectSession} />
-      {selectedOccasion && (
+      <RecentOccasions 
+        userId={userId}
+        onSelectRecent={handleSelect} 
+      />
+      <PracticeHistory 
+        userId={userId}
+        occasionName={selectedOccasion || ''}
+        onSelectSession={handleSelectSession} 
+      />
+      {selectedOccasion && convertedOccasion && (
         <div className="mt-6">
           <OccasionDetails
-            occasion={selectedOccasion}
+            occasion={convertedOccasion}
             favorites={favorites}
             setFavorites={setFavorites}
             blogPreviews={blogPreviews}

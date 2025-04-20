@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Message } from "@/types/chat";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -41,7 +42,7 @@ export function useMessageStore() {
           const typedMessages: Message[] = messagesData.map((msg: any) => ({
             id: Number(msg.id),
             text: String(msg.text || ''),
-            sender: String(msg.sender || 'bot'),
+            sender: (String(msg.sender || 'bot') === 'user' ? 'user' : 'bot') as 'user' | 'bot',
             timestamp: new Date(msg.timestamp),
             isVoiceMessage: Boolean(msg.isVoiceMessage),
             isFeedback: Boolean(msg.isFeedback),
