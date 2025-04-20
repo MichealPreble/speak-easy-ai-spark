@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -7,9 +6,10 @@ import { Link } from 'react-router-dom';
 
 interface RecentOccasionsProps {
   userId: string | null;
+  onSelectRecent?: (occasion: string) => void;
 }
 
-const RecentOccasions: React.FC<RecentOccasionsProps> = ({ userId }) => {
+const RecentOccasions: React.FC<RecentOccasionsProps> = ({ userId, onSelectRecent }) => {
   const [occasions, setOccasions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -88,6 +88,7 @@ const RecentOccasions: React.FC<RecentOccasionsProps> = ({ userId }) => {
               <Link
                 to={`/practice/${encodeURIComponent(occasion)}`}
                 className="text-primary hover:underline text-sm"
+                onClick={() => onSelectRecent && onSelectRecent(occasion)}
               >
                 Practice
               </Link>

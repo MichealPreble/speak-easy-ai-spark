@@ -1,15 +1,33 @@
-
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { PracticePageData } from '@/types/practiceTypes';
+import { supabase } from '@/lib/supabase';
 
-export function usePracticePageData() {
+export function usePracticePageData(): PracticePageData {
   const { user } = useAuth();
   const [favoriteOccasions, setFavoriteOccasions] = useState<string[]>([]);
   const [recentOccasions, setRecentOccasions] = useState<string[]>([]);
+  const [selectedOccasion, setSelectedOccasion] = useState<string | null>(null);
+  const [blogPreviews, setBlogPreviews] = useState<BlogPostPreview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
+  // Statistics state
+  const [totalSessions, setTotalSessions] = useState(0);
+  const [uniqueOccasions, setUniqueOccasions] = useState(0);
+  const [totalMinutes, setTotalMinutes] = useState(0);
+  const [notesAdded, setNotesAdded] = useState(0);
+  const [milestones, setMilestones] = useState<string[]>([]);
+
+  const handleSelect = (occasion: string) => {
+    setSelectedOccasion(occasion);
+  };
+
+  const handleSelectSession = (sessionId: string) => {
+    // Session selection logic
+  };
+
   useEffect(() => {
     if (!user) {
       setIsLoading(false);
@@ -71,9 +89,19 @@ export function usePracticePageData() {
   }, [user]);
   
   return {
-    favoriteOccasions,
-    recentOccasions,
-    isLoading,
-    error
+    selectedOccasion,
+    favorites: favoriteOccasions,
+    setFavorites: setFavoriteOccasions,
+    blogPreviews,
+    setBlogPreviews,
+    totalSessions,
+    uniqueOccasions,
+    totalMinutes,
+    notesAdded,
+    milestones,
+    userId: user?.id || null,
+    shareUrl: `/share/${user?.id || 'preview'}`,
+    handleSelect,
+    handleSelectSession,
   };
 }

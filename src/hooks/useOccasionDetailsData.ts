@@ -1,13 +1,16 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { BlogPostPreview, Template } from '@/types/practiceTypes';
+import { BlogPostPreview, Template, OccasionDetailsData } from '@/types/practiceTypes';
 
-export function useOccasionDetailsData(occasionId: string) {
+export function useOccasionDetailsData(occasionId: string): OccasionDetailsData {
   const [relatedPosts, setRelatedPosts] = useState<BlogPostPreview[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [practiceNote, setPracticeNote] = useState('');
+  const [practiceFeedback, setPracticeFeedback] = useState('');
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!occasionId) return;
@@ -62,10 +65,28 @@ export function useOccasionDetailsData(occasionId: string) {
     fetchData();
   }, [occasionId]);
   
+  const handleFeedbackSubmit = async () => {
+    // Feedback submission logic
+  };
+
+  const handleToggleFavorite = async () => {
+    // Favorite toggle logic
+  };
+
   return {
     relatedPosts,
     templates,
     isLoading,
-    error
+    error,
+    practiceNote,
+    setPracticeNote,
+    practiceFeedback,
+    setPracticeFeedback,
+    showFeedback,
+    setShowFeedback,
+    sessionId,
+    setSessionId,
+    handleFeedbackSubmit,
+    handleToggleFavorite
   };
 }

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
@@ -8,9 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 interface PracticeHistoryProps {
   userId: string | null;
   occasionName: string;
+  onSelectSession?: (sessionId: string) => void;
 }
 
-const PracticeHistory: React.FC<PracticeHistoryProps> = ({ userId, occasionName }) => {
+const PracticeHistory: React.FC<PracticeHistoryProps> = ({ userId, occasionName, onSelectSession }) => {
   const [sessions, setSessions] = useState<PracticeSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -35,7 +35,6 @@ const PracticeHistory: React.FC<PracticeHistoryProps> = ({ userId, occasionName 
         }
 
         if (data) {
-          // Properly type the session data
           const typedSessions: PracticeSession[] = data.map((session: any) => ({
             id: String(session.id),
             occasion_name: String(session.occasion_name || ''),
