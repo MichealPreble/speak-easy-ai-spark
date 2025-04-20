@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { PracticePageData } from '@/types/practiceTypes';
 import { supabase } from '@/lib/supabase';
+import { BlogPostPreview } from '@/types/practiceTypes';  // Added import
 
 export function usePracticePageData(): PracticePageData {
   const { user } = useAuth();
