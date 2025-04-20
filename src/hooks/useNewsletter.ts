@@ -1,13 +1,18 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { NewsletterIssue } from '@/types/practiceTypes';
+import { NewsletterIssue } from '@/types/practiceTypes';
 
-export function useNewsletter() {
+export function useNewsletter(options?: { 
+  page?: number; 
+  limit?: number; 
+  blogTag?: string; 
+  searchQuery?: string 
+} = {}) {
   const [issues, setIssues] = useState<NewsletterIssue[]>([]);
   const [latestIssue, setLatestIssue] = useState<NewsletterIssue | null>(null);
+  const [archiveIssues, setArchiveIssues] = useState<NewsletterIssue[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
     fetchNewsletterIssues();
@@ -15,7 +20,7 @@ export function useNewsletter() {
 
   const fetchNewsletterIssues = async () => {
     setIsLoading(true);
-    setError(null);
+    setError('');
 
     try {
       const { data, error } = await supabase
@@ -39,6 +44,7 @@ export function useNewsletter() {
 
         setIssues(typedIssues);
         setLatestIssue(typedIssues[0] || null);
+        setArchiveIssues(typedIssues.slice(1));
       }
     } catch (err) {
       console.error('Error fetching newsletter issues:', err);
@@ -102,6 +108,7 @@ export function useNewsletter() {
   return {
     issues,
     latestIssue,
+    archiveIssues,
     isLoading,
     error,
     fetchNewsletterIssues,

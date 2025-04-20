@@ -1,3 +1,25 @@
+export interface NewsletterIssue {
+  id: string;
+  title: string;
+  slug: string;
+  preview_text: string;
+  published_at: string;
+  content?: string;
+  featured_image?: string;
+  blogTag?: string;
+}
+
+export interface Milestone {
+  id: string;
+  label: string;
+}
+
+export interface BlogPostPreview {
+  id: string;
+  title: string;
+  excerpt: string;
+}
+
 export interface PracticeSession {
   id: string;
   occasion_name: string;
@@ -9,23 +31,6 @@ export interface Template {
   id: string;
   title: string;
   content: string;
-}
-
-export interface BlogPostPreview {
-  id: string;
-  title: string;
-  excerpt: string;
-}
-
-export interface NewsletterIssue {
-  id: string;
-  title: string;
-  slug: string;
-  preview_text: string;
-  published_at: string;
-  content?: string;
-  featured_image?: string;
-  blogTag?: string;
 }
 
 export type SenderType = 'user' | 'bot';

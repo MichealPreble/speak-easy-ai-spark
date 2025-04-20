@@ -1,10 +1,8 @@
+import type { EmblaCarouselType } from 'embla-carousel-react';
 
-import type { UseEmblaCarouselType } from "embla-carousel-react";
-
-export type CarouselApi = UseEmblaCarouselType[1];
-export type UseCarouselParameters = UseEmblaCarouselType;
-export type CarouselOptions = UseCarouselParameters[0];
-export type CarouselPlugin = UseCarouselParameters[1];
+export type CarouselApi = EmblaCarouselType;
+export type CarouselOptions = Parameters<typeof import('embla-carousel-react')>[0];
+export type CarouselPlugin = any; // Consider refining this type
 
 export type CarouselProps = {
   opts?: CarouselOptions;
@@ -23,3 +21,4 @@ export type CarouselContextProps = {
   opts?: CarouselOptions;
   orientation?: "horizontal" | "vertical";
 };
+

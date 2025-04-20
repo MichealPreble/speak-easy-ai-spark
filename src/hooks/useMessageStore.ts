@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Message } from "@/types/chat";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
