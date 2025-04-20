@@ -37,7 +37,8 @@ const PracticePageContent: React.FC = () => {
       description: `Milestone: ${milestone}`,
       achieved: false,
       progress: 0,
-      target: 1
+      target: 1,
+      tip: `Tip for ${milestone}`
     })
   );
 
