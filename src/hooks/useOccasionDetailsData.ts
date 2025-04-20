@@ -1,142 +1,71 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
-import { useAnalytics } from '@/hooks/useAnalytics';
-import { SpeechOccasion } from '@/types/speechOccasions';
-import { Template, OccasionDetailsProps } from '@/types/occasionDetailsTypes';
+import { BlogPostPreview, Template } from '@/types/practiceTypes';
 
-export const useOccasionDetailsData = (
-  occasion: SpeechOccasion, 
-  setBlogPreviews: OccasionDetailsProps['setBlogPreviews']
-) => {
+export function useOccasionDetailsData(occasionId: string) {
+  const [relatedPosts, setRelatedPosts] = useState<BlogPostPreview[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
-  const [practiceNote, setPracticeNote] = useState('');
-  const [practiceFeedback, setPracticeFeedback] = useState<number | null>(null);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  
-  const { trackEvent } = useAnalytics();
-  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!occasionId) return;
+    
     const fetchData = async () => {
-      if (occasion.blogTag) {
-        const { data } = await supabase
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        // Fetch related blog posts
+        const { data: postsData, error: postsError } = await supabase
           .from('blog_posts')
           .select('id, title, excerpt')
-          .eq('tag', occasion.blogTag)
-          .limit(2);
-        setBlogPreviews(data || []);
-      }
-      
-      const { data } = await supabase
-        .from('templates')
-        .select('id, title, content')
-        .eq('occasion_name', occasion.name);
-      
-      setTemplates(data || []);
-      
-      if (data && data.length > 0) {
-        trackEvent('view_template', 'SpeechPractice', occasion.name);
+          .eq('occasion_id', occasionId);
+          
+        if (postsError) throw new Error(postsError.message);
+        
+        if (postsData) {
+          const typedPosts: BlogPostPreview[] = postsData.map((post: any) => ({
+            id: String(post.id),
+            title: String(post.title || ''),
+            excerpt: String(post.excerpt || '')
+          }));
+          setRelatedPosts(typedPosts);
+        }
+        
+        // Fetch speech templates
+        const { data: templateData, error: templateError } = await supabase
+          .from('speech_templates')
+          .select('id, title, content')
+          .eq('occasion_id', occasionId);
+          
+        if (templateError) throw new Error(templateError.message);
+        
+        if (templateData) {
+          const typedTemplates: Template[] = templateData.map((template: any) => ({
+            id: String(template.id),
+            title: String(template.title || ''),
+            content: String(template.content || '')
+          }));
+          setTemplates(typedTemplates);
+        }
+        
+      } catch (err) {
+        console.error('Error fetching occasion details:', err);
+        setError(err instanceof Error ? err.message : 'Error fetching data');
+      } finally {
+        setIsLoading(false);
       }
     };
     
     fetchData();
-  }, [occasion, setBlogPreviews, trackEvent]);
-
-  const handleFeedbackSubmit = async () => {
-    if (!sessionId || practiceFeedback === null) return;
-
-    const { error } = await supabase
-      .from('practice_sessions')
-      .update({ practice_feedback: practiceFeedback })
-      .eq('id', sessionId);
-    if (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to save feedback.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    toast({
-      title: 'Feedback Saved',
-      description: `You rated this session ${practiceFeedback} star${practiceFeedback > 1 ? 's' : ''}.`,
-    });
-    trackEvent('submit_practice_feedback', 'SpeechPractice', `${occasion.name}:${practiceFeedback}`);
-    setShowFeedback(false);
-    setPracticeFeedback(null);
-    setSessionId(null);
-  };
-
-  const handleToggleFavorite = async (
-    favorites: string[], 
-    setFavorites: React.Dispatch<React.SetStateAction<string[]>>
-  ) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: 'Authentication Required',
-        description: 'Please log in to save favorites.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const isFavorite = favorites.includes(occasion.name);
-    trackEvent(isFavorite ? 'remove_favorite' : 'save_favorite', 'SpeechPractice', occasion.name);
-
-    if (isFavorite) {
-      const { error } = await supabase
-        .from('favorites')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('occasion_name', occasion.name);
-      if (error) {
-        toast({
-          title: 'Error',
-          description: 'Failed to remove favorite.',
-          variant: 'destructive',
-        });
-        return;
-      }
-      setFavorites(favorites.filter((name) => name !== occasion.name));
-      toast({
-        title: 'Removed from Favorites',
-        description: `${occasion.name} removed from your favorites.`,
-      });
-    } else {
-      const { error } = await supabase
-        .from('favorites')
-        .insert({ user_id: user.id, occasion_name: occasion.name });
-      if (error) {
-        toast({
-          title: 'Error',
-          description: 'Failed to save favorite.',
-          variant: 'destructive',
-        });
-        return;
-      }
-      setFavorites([...favorites, occasion.name]);
-      toast({
-        title: 'Added to Favorites',
-        description: `${occasion.name} added to your favorites.`,
-      });
-    }
-  };
-
+  }, [occasionId]);
+  
   return {
+    relatedPosts,
     templates,
-    practiceNote,
-    setPracticeNote,
-    practiceFeedback,
-    setPracticeFeedback,
-    showFeedback,
-    setShowFeedback,
-    sessionId,
-    setSessionId,
-    handleFeedbackSubmit,
-    handleToggleFavorite
+    isLoading,
+    error
   };
-};
+}

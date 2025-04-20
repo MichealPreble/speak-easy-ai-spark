@@ -1,122 +1,120 @@
 
 import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-import { useAnalytics } from '@/hooks/useAnalytics';
+import { NewsletterIssue } from '@/types/practiceTypes';
 
-export interface NewsletterIssue {
-  id: string;
-  title: string;
-  slug: string;
-  preview_text: string;
-  published_at: string;
-  featured_image?: string;
-  content?: string;
-  blogTag?: string;
-}
-
-interface UseNewsletterProps {
-  publicationId?: string;
-  slug?: string;
-  page?: number;
-  limit?: number;
-  blogTag?: string;
-  searchQuery?: string;
-}
-
-export function useNewsletter({
-  publicationId = 'pub_459544e2-b4ac-473d-b735-38470ab16e0c',
-  slug,
-  page = 1,
-  limit = 10,
-  blogTag,
-  searchQuery,
-}: UseNewsletterProps = {}) {
+export function useNewsletter() {
+  const [issues, setIssues] = useState<NewsletterIssue[]>([]);
   const [latestIssue, setLatestIssue] = useState<NewsletterIssue | null>(null);
-  const [archiveIssues, setArchiveIssues] = useState<NewsletterIssue[]>([]);
-  const [singleIssue, setSingleIssue] = useState<NewsletterIssue | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
-  const { trackEvent } = useAnalytics();
 
   useEffect(() => {
-    if (slug) return;
-    const fetchIssues = async () => {
-      setIsLoading(true);
-      try {
-        let query = supabase
-          .from('newsletter_issues')
-          .select('id, title, slug, preview_text, published_at, featured_image, blogTag')
-          .order('published_at', { ascending: false })
-          .range((page - 1) * limit, page * limit - 1);
+    fetchNewsletterIssues();
+  }, []);
 
-        if (blogTag) {
-          query = query.eq('blogTag', blogTag);
-          trackEvent('filter_archive', 'Newsletter', `Filter by ${blogTag}`);
-        }
-        if (searchQuery) {
-          query = query.ilike('title', `%${searchQuery}%`);
-          trackEvent('search_archive', 'Newsletter', `Search: ${searchQuery}`);
-        }
+  const fetchNewsletterIssues = async () => {
+    setIsLoading(true);
+    setError(null);
 
-        const { data, error: dbError } = await query;
-        if (dbError) throw dbError;
+    try {
+      const { data, error } = await supabase
+        .from('newsletter_issues')
+        .select('*')
+        .order('published_at', { ascending: false });
 
-        const posts = data as NewsletterIssue[] || [];
-        if (posts.length > 0) {
-          setLatestIssue(posts[0]);
-          setArchiveIssues(posts.slice(1));
-          trackEvent('view_newsletter', 'Newsletter', 'Latest Issue Loaded');
-        }
-      } catch (err) {
-        console.error('Failed to fetch newsletter data:', err);
-        setError('Failed to load newsletter data. Please try again later.');
-        toast({
-          title: "Error Loading Newsletter",
-          description: "There was a problem loading the newsletter content.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
+      if (error) {
+        throw new Error(error.message);
       }
-    };
-    
-    fetchIssues();
-  }, [page, limit, blogTag, searchQuery, trackEvent, slug, toast]);
 
-  // Fetch single issue when slug is provided
-  useEffect(() => {
-    if (!slug) return;
-    const fetchSingleIssue = async () => {
-      setIsLoading(true);
-      try {
-        const { data, error: dbError } = await supabase
-          .from('newsletter_issues')
-          .select('*')
-          .eq('slug', slug)
-          .single();
-
-        if (dbError) throw dbError;
+      if (data && data.length > 0) {
+        const typedIssues: NewsletterIssue[] = data.map((issue: any) => ({
+          id: String(issue.id),
+          title: String(issue.title || ''),
+          slug: String(issue.slug || ''),
+          preview_text: String(issue.preview_text || ''),
+          published_at: String(issue.published_at || ''),
+          content: issue.content ? String(issue.content) : undefined
+        }));
         
-        if (data) {
-          setSingleIssue(data as NewsletterIssue);
-          trackEvent('view_newsletter_issue', 'Newsletter', data.title);
-        }
-      } catch (err) {
-        console.error('Failed to fetch single issue:', err);
-        setError('Failed to load the newsletter issue. Please try again later.');
-        toast({
-          title: "Error Loading Issue",
-          description: "There was a problem loading this newsletter issue.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
+        setIssues(typedIssues);
+        setLatestIssue(typedIssues[0]);
       }
-    };
-    fetchSingleIssue();
-  }, [slug, trackEvent, toast]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred while fetching newsletter issues');
+      console.error('Error fetching newsletter issues:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  return { latestIssue, archiveIssues, singleIssue, isLoading, error };
+  const getIssueBySlug = async (slug: string): Promise<NewsletterIssue | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('newsletter_issues')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data) {
+        return {
+          id: String(data.id),
+          title: String(data.title || ''),
+          slug: String(data.slug || ''),
+          preview_text: String(data.preview_text || ''),
+          published_at: String(data.published_at || ''),
+          content: data.content ? String(data.content) : undefined
+        };
+      }
+      
+      return null;
+    } catch (err) {
+      console.error('Error fetching newsletter issue:', err);
+      return null;
+    }
+  };
+
+  const subscribeToNewsletter = async (email: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      // Validate email
+      if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        return { success: false, message: 'Please enter a valid email address.' };
+      }
+
+      const { error } = await supabase
+        .from('newsletter_subscribers')
+        .insert([{ email }]);
+
+      if (error) {
+        if (error.code === '23505') { // PostgreSQL unique constraint violation
+          return { success: true, message: 'You are already subscribed!' };
+        }
+        throw new Error(error.message);
+      }
+
+      return { success: true, message: 'Successfully subscribed to the newsletter!' };
+    } catch (err) {
+      console.error('Error subscribing to newsletter:', err);
+      return { 
+        success: false, 
+        message: err instanceof Error 
+          ? `Error: ${err.message}` 
+          : 'An error occurred during subscription.'
+      };
+    }
+  };
+
+  return {
+    issues,
+    latestIssue,
+    isLoading,
+    error,
+    fetchNewsletterIssues,
+    getIssueBySlug,
+    subscribeToNewsletter
+  };
 }

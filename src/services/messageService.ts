@@ -1,111 +1,108 @@
-
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Message } from "@/types/chat";
-import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
+import { RealtimeChannel } from "@supabase/supabase-js";
 
 // Fetch messages from Supabase
 export async function fetchMessagesFromSupabase(userId: string) {
-  try {
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .eq('user_id', userId)
-      .order('timestamp', { ascending: true });
+  const { data, error } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('user_id', userId)
+    .order('timestamp', { ascending: true });
 
-    if (error) {
-      throw error;
-    }
-
-    if (data && data.length > 0) {
-      // Transform Supabase data format to match our Message type
-      return data.map(msg => ({
-        id: msg.id,
-        text: msg.text,
-        sender: msg.sender,
-        timestamp: new Date(msg.timestamp),
-        isVoiceMessage: msg.is_voice_message,
-        isFeedback: msg.is_feedback,
-        read: msg.read
-      }));
-    }
-    
-    return null;
-  } catch (error) {
-    console.error("Error fetching messages:", error);
+  if (error) {
+    console.error('Error fetching messages:', error);
     throw error;
   }
+
+  // Ensure proper type conversion
+  return data?.map((message: any) => ({
+    id: Number(message.id),
+    text: String(message.text || ''),
+    sender: String(message.sender || 'bot'),
+    timestamp: new Date(message.timestamp || Date.now()),
+    isVoiceMessage: Boolean(message.isVoiceMessage),
+    isFeedback: Boolean(message.isFeedback),
+    read: Boolean(message.read)
+  })) || [];
 }
 
-// Save welcome message to Supabase
-export async function saveWelcomeMessageToSupabase(userId: string, welcomeMessage: Message) {
-  try {
-    await supabase.from('messages').insert({
-      user_id: userId,
-      text: welcomeMessage.text,
-      sender: welcomeMessage.sender,
-      timestamp: welcomeMessage.timestamp,
-      read: welcomeMessage.read
-    });
-  } catch (error) {
-    console.error("Error saving welcome message:", error);
-    throw error;
-  }
-}
-
-// Save message to Supabase
+// Save a message to Supabase
 export async function saveMessageToSupabase(userId: string, message: Omit<Message, 'id' | 'timestamp'>) {
-  try {
-    await supabase.from('messages').insert({
+  const { error } = await supabase
+    .from('messages')
+    .insert({
       user_id: userId,
       text: message.text,
       sender: message.sender,
-      is_voice_message: message.isVoiceMessage || false,
-      is_feedback: message.isFeedback || false,
+      isVoiceMessage: message.isVoiceMessage || false,
+      isFeedback: message.isFeedback || false,
       read: message.read || false,
     });
-  } catch (error) {
-    console.error("Error saving message to Supabase:", error);
+
+  if (error) {
+    console.error('Error saving message:', error);
     throw error;
   }
 }
 
-// Clear messages from Supabase
+// Save the initial welcome message to Supabase
+export async function saveWelcomeMessageToSupabase(userId: string, message: Message) {
+  const { error } = await supabase
+    .from('messages')
+    .insert({
+      id: message.id,
+      user_id: userId,
+      text: message.text,
+      sender: message.sender,
+      timestamp: message.timestamp.toISOString(),
+      read: true,
+    });
+
+  if (error) {
+    console.error('Error saving welcome message:', error);
+    throw error;
+  }
+}
+
+// Clear all messages from Supabase for a specific user
 export async function clearMessagesFromSupabase(userId: string) {
-  try {
-    await supabase
-      .from('messages')
-      .delete()
-      .eq('user_id', userId);
-  } catch (error) {
-    console.error("Error clearing messages in Supabase:", error);
+  const { error } = await supabase
+    .from('messages')
+    .delete()
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('Error clearing messages:', error);
     throw error;
   }
 }
 
-// Mark message as read in Supabase
+// Mark a message as read in Supabase
 export async function markMessageAsReadInSupabase(messageId: number) {
-  try {
-    await supabase
-      .from('messages')
-      .update({ read: true })
-      .eq('id', messageId);
-  } catch (error) {
-    console.error("Error marking message as read:", error);
+  const { error } = await supabase
+    .from('messages')
+    .update({ read: true })
+    .eq('id', messageId);
+
+  if (error) {
+    console.error('Error marking message as read:', error);
     throw error;
   }
 }
 
-// Create Supabase real-time subscription
-export function subscribeToMessages(userId: string, callback: () => void) {
+// Create a subscription to messages table changes
+export function subscribeToMessages(userId: string, callback: () => void): RealtimeChannel {
   return supabase
-    .channel('messages_changes')
-    .on('postgres_changes', 
-      { 
-        event: '*', 
-        schema: 'public', 
-        table: 'messages', 
-        filter: `user_id=eq.${userId}` 
-      }, 
+    .channel('messages_channel')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'messages',
+        filter: `user_id=eq.${userId}`
+      },
       () => {
         callback();
       }

@@ -54,9 +54,12 @@ const PracticeGoals: React.FC<PracticeGoalsProps> = ({ userId, stats, shareUrl }
       }
 
       if (data) {
-        const updatedGoals = data.map((goal) => ({
-          ...goal,
-          progress: getGoalProgress(goal.goal_type, stats),
+        const updatedGoals = data.map((goal: any) => ({
+          id: goal.id,
+          goal_type: goal.goal_type as 'sessions' | 'occasions' | 'hours' | 'notes',
+          target: goal.target,
+          deadline: goal.deadline,
+          progress: getGoalProgress(goal.goal_type as 'sessions' | 'occasions' | 'hours' | 'notes', stats),
         }));
         setGoals(updatedGoals);
         trackEvent('view_practice_goals', 'Practice', 'Goals Loaded');
@@ -124,7 +127,10 @@ const PracticeGoals: React.FC<PracticeGoalsProps> = ({ userId, stats, shareUrl }
 
     if (data) {
       const newGoal: PracticeGoal = {
-        ...data,
+        id: data.id,
+        goal_type: data.goal_type,
+        target: data.target,
+        deadline: data.deadline,
         progress: getGoalProgress(newGoalType, stats),
       };
       

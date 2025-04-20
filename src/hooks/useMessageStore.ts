@@ -38,7 +38,18 @@ export function useMessageStore() {
         const messagesData = await fetchMessagesFromSupabase(user.id);
         
         if (messagesData && messagesData.length > 0) {
-          setMessages(messagesData);
+          // Properly type-cast the data
+          const typedMessages: Message[] = messagesData.map((msg: any) => ({
+            id: Number(msg.id),
+            text: String(msg.text || ''),
+            sender: String(msg.sender || 'bot'),
+            timestamp: new Date(msg.timestamp),
+            isVoiceMessage: Boolean(msg.isVoiceMessage),
+            isFeedback: Boolean(msg.isFeedback),
+            read: Boolean(msg.read)
+          }));
+          
+          setMessages(typedMessages);
         } else {
           // Set initial welcome message if no messages exist
           const welcomeMessage: Message = {
