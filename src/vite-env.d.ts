@@ -1,13 +1,14 @@
 
 /// <reference types="vite/client" />
 
-interface ImportMetaEnv {
+// Explicitly define the ImportMetaEnv interface for TypeScript
+declare interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL: string;
   readonly VITE_SUPABASE_ANON_KEY: string;
-  // Add other environment variables here as needed
   readonly DEV: boolean;
 }
 
-interface ImportMeta {
+// Extend the ImportMeta interface
+declare interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
