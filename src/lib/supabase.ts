@@ -2,9 +2,9 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Create supabase client with environment variables
-// Using proper type-safe approach with import.meta.env
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Using type assertion as a workaround for TypeScript not recognizing import.meta.env
+const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL;
+const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY;
 
 // Return true only if both env vars exist
 export const isSupabaseConfigured = () => {
