@@ -1,8 +1,6 @@
-
 import { createClient } from '@supabase/supabase-js';
 
-// Create supabase client with environment variables
-// Using type assertion as a workaround for TypeScript not recognizing import.meta.env
+// TODO: Remove `as any` once TS picks up vite-env.d.ts properly
 const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL;
 const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY;
 
