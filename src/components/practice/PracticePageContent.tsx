@@ -29,7 +29,7 @@ const PracticePageContent: React.FC = () => {
     handleSelectSession
   } = usePracticePageData();
 
-  // Ensure milestones conform to the expected Milestone type, including required 'target' field
+  // Ensure milestones conform to the expected Milestone type
   const typedMilestones: Milestone[] = Array.isArray(milestones) 
     ? milestones.map((milestone): Milestone => {
         if (typeof milestone === 'string') {
@@ -75,52 +75,57 @@ const PracticePageContent: React.FC = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:gap-8 max-w-4xl mx-auto py-6">
-      <div className="glass-card shadow-lg transition-shadow duration-200 hover:shadow-2xl">
-        <ProgressTracker
-          totalSessions={totalSessions}
-          uniqueOccasions={uniqueOccasions}
-          totalDuration={totalMinutes}
-          notesAdded={notesAdded}
-          milestones={typedMilestones}
-          shareUrl={shareUrl}
-        />
+    <div className="max-w-4xl mx-auto py-8 px-2 sm:px-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+
+        <div className="glass-card shadow-adaptive rounded-2xl p-6 mb-6 hover:scale-[1.02] transition-transform duration-200">
+          <ProgressTracker
+            totalSessions={totalSessions}
+            uniqueOccasions={uniqueOccasions}
+            totalDuration={totalMinutes}
+            notesAdded={notesAdded}
+            milestones={typedMilestones}
+            shareUrl={shareUrl}
+          />
+        </div>
+
+        <div className="glass-card shadow-adaptive rounded-2xl p-6 mb-6 hover:scale-[1.02] transition-transform duration-200">
+          <PracticeGoals
+            userId={userId}
+            stats={{ 
+              totalSessions, 
+              uniqueOccasions, 
+              totalHours: totalMinutes / 60, 
+              notesAdded 
+            }}
+            shareUrl={shareUrl}
+          />
+        </div>
       </div>
 
-      <div className="glass-card shadow-lg transition-shadow duration-200 hover:shadow-2xl">
-        <PracticeGoals
-          userId={userId}
-          stats={{ 
-            totalSessions, 
-            uniqueOccasions, 
-            totalHours: totalMinutes / 60, 
-            notesAdded 
-          }}
-          shareUrl={shareUrl}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mt-2">
+        <div className="glass-card shadow-adaptive rounded-2xl p-4 mb-6 hover:scale-[1.02] transition-transform duration-200">
+          <SpeechOccasionSelector 
+            onSelectOccasion={handleOccasionSelect}
+          />
+        </div>
+        <div className="glass-card shadow-adaptive rounded-2xl p-4 mb-6 hover:scale-[1.02] transition-transform duration-200">
+          <FavoriteOccasions
+            favorites={favorites}
+            onSelectFavorite={handleOccasionSelect}
+          />
+        </div>
       </div>
 
-      <div className="glass-card shadow-lg transition-shadow duration-200 hover:shadow-2xl p-0">
-        <SpeechOccasionSelector 
-          onSelectOccasion={handleOccasionSelect}
-        />
-      </div>
-
-      <div className="glass-card shadow-lg transition-shadow duration-200 hover:shadow-2xl">
-        <FavoriteOccasions
-          favorites={favorites}
-          onSelectFavorite={handleOccasionSelect}
-        />
-      </div>
-
-      <div className="glass-card shadow-lg transition-shadow duration-200 hover:shadow-2xl">
+      <div className="glass-card shadow-adaptive rounded-2xl p-4 mb-6 hover:scale-[1.02] transition-transform duration-200">
         <RecentOccasions 
           userId={userId}
           onSelectRecent={handleSelect} 
         />
       </div>
+
       {selectedOccasion && (
-        <div className="glass-card shadow-lg transition-shadow duration-200 hover:shadow-2xl mt-4">
+        <div className="glass-card shadow-adaptive rounded-2xl p-4 mb-6 hover:scale-[1.02] transition-transform duration-200 mt-4">
           <PracticeHistory 
             userId={userId}
             occasionName={selectedOccasion}
@@ -128,8 +133,9 @@ const PracticePageContent: React.FC = () => {
           />
         </div>
       )}
+
       {selectedOccasion && convertedOccasion && (
-        <div className="glass-card shadow-lg transition-shadow duration-200 hover:shadow-2xl mt-6">
+        <div className="glass-card shadow-adaptive rounded-2xl p-4 mb-6 hover:scale-[1.02] transition-transform duration-200 mt-6">
           <OccasionDetails
             occasion={convertedOccasion}
             favorites={favorites}
