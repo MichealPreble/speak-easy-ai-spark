@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -5,16 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Activity, Clock, BookOpen, FileText, Trophy, Target, Star, Medal } from 'lucide-react';
 import { useAnalytics } from '@/hooks/useAnalytics';
-
-interface Milestone {
-  id: string;
-  title: string;
-  description: string;
-  achieved: boolean;
-  progress: number;
-  target: number;
-  tip: string;
-}
+import type { Milestone } from '@/types/practiceTypes';
 
 interface ProgressTrackerProps {
   totalSessions: number;
