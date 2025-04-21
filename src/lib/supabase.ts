@@ -1,9 +1,8 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Do NOT import ImportMetaEnv here, rely on global declaration from vite-env.d.ts
+// We rely on vite-env.d.ts global types for import.meta.env here
 
-// Explicitly type the environment variables (no need to cast import.meta.env if global types are present)
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 

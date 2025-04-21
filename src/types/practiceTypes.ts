@@ -8,7 +8,7 @@ export type Milestone = {
   description: string; // Now required, not optional
   completed?: boolean;
   achieved: boolean; // Changed to required to fix TS2322 in PracticePageContent.tsx
-  progress?: number;
+  progress: number; // <-- Added required progress field to fix TS2322
   target?: number;
   tip: string; // Required per PracticePageContent.tsx
 }
