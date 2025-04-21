@@ -4,14 +4,14 @@ import type { UseEmblaCarouselType } from 'embla-carousel-react';
 export type Milestone = {
   id: string;
   label: string;
-  title: string; // Required per PracticePageContent.tsx
-  description: string; // Now required, not optional
+  title: string; // Required
+  description: string; // Required
   completed?: boolean;
-  achieved: boolean; // Changed to required to fix TS2322 in PracticePageContent.tsx
-  progress: number; // <-- Added required progress field to fix TS2322
-  target?: number;
-  tip: string; // Required per PracticePageContent.tsx
-}
+  achieved: boolean; // Required
+  progress: number; // Required
+  target: number; // Made required to fix TS2322
+  tip: string; // Required
+};
 
 export type SpeechOccasion = 'interview' | 'presentation' | 'toast' | 'pitch';
 
@@ -25,22 +25,22 @@ export type NewsletterIssue = {
   published_at?: string;
   featured_image?: string;
   blogTag?: string;
-}
+};
 
 export type BlogPostPreview = {
   id: string;
   title: string;
   summary: string;
   publishedAt: string;
-  excerpt: string; // Now required, not optional
-}
+  excerpt: string; // Now required
+};
 
 export type Template = {
   id: string;
   title: string;
-  body: string; // Required per Template component
-  content: string; // Now required, not optional
-}
+  body: string;
+  content: string; // Now required
+};
 
 export type OccasionDetailsData = {
   id: string;
@@ -55,25 +55,24 @@ export type OccasionDetailsData = {
   practiceFeedback?: string;
   showFeedback?: boolean;
   sessionId?: string | null;
-  // Required setters per OccasionDetails.tsx
   setPracticeNote?: (note: string) => void;
   setPracticeFeedback?: (feedback: string) => void;
   setShowFeedback?: (show: boolean) => void;
   setSessionId?: (id: string | null) => void;
   handleFeedbackSubmit?: () => void;
   handleToggleFavorite?: () => void;
-}
+};
 
 export type PracticeSession = {
   id: string;
   userId: string;
   occasionName: string;
-  occasion_name?: string; // Alternative field name
+  occasion_name?: string;
   transcript: string;
   notes?: string;
   createdAt: string;
-  session_date?: string; // Alternative field name
-}
+  session_date?: string;
+};
 
 export type PracticePageData = {
   selectedOccasion?: string | null;
@@ -92,7 +91,7 @@ export type PracticePageData = {
   shareUrl?: string;
   handleSelect?: (occasion: string) => void;
   handleSelectSession?: (sessionId: string) => void;
-}
+};
 
 export type Message = {
   id: number;
@@ -102,7 +101,6 @@ export type Message = {
   isVoiceMessage: boolean;
   isFeedback: boolean;
   read: boolean;
-}
+};
 
-// Use proper import for embla-carousel-react
 export type CarouselInstance = UseEmblaCarouselType[0];
