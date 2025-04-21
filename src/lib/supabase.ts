@@ -1,13 +1,15 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Explicitly type the environment variables
+// Do NOT import ImportMetaEnv here, rely on global declaration from vite-env.d.ts
+
+// Explicitly type the environment variables (no need to cast import.meta.env if global types are present)
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 export const isSupabaseConfigured = () => !!supabaseUrl && !!supabaseKey;
 
-export const supabase = isSupabaseConfigured() 
+export const supabase = isSupabaseConfigured()
   ? createClient(supabaseUrl, supabaseKey)
   : null;
 
@@ -18,7 +20,7 @@ export const testSupabaseConnection = async () => {
       .from('newsletter_issues')
       .select('id')
       .limit(1);
-    
+
     return {
       success: !error,
       message: error ? error.message : 'Connection successful'

@@ -7,7 +7,7 @@ export type Milestone = {
   title: string; // Required per PracticePageContent.tsx
   description: string; // Now required, not optional
   completed?: boolean;
-  achieved?: boolean;
+  achieved: boolean; // Changed to required to fix TS2322 in PracticePageContent.tsx
   progress?: number;
   target?: number;
   tip: string; // Required per PracticePageContent.tsx
@@ -106,12 +106,3 @@ export type Message = {
 
 // Use proper import for embla-carousel-react
 export type CarouselInstance = UseEmblaCarouselType[0];
-
-export interface ImportMetaEnv {
-  readonly VITE_SUPABASE_URL: string;
-  readonly VITE_SUPABASE_ANON_KEY: string;
-}
-
-export interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
