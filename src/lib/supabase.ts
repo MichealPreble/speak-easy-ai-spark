@@ -1,13 +1,14 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// We rely on vite-env.d.ts global types for import.meta.env here
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Create supabase client with environment variables
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Return true only if both env vars exist
-export const isSupabaseConfigured = () => !!supabaseUrl && !!supabaseKey;
+export const isSupabaseConfigured = () => {
+  return !!supabaseUrl && !!supabaseKey;
+};
 
 // Create supabase client or null if config missing
 export const supabase = isSupabaseConfigured()
