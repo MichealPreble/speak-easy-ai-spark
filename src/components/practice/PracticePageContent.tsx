@@ -29,11 +29,11 @@ const PracticePageContent: React.FC = () => {
     handleSelectSession
   } = usePracticePageData();
 
-  // Ensure milestones conform to the expected Milestone type
+  // Ensure milestones conform to the expected Milestone type, including required 'target' field
   const typedMilestones: Milestone[] = Array.isArray(milestones) 
     ? milestones.map((milestone): Milestone => {
         if (typeof milestone === 'string') {
-          // Convert string to proper Milestone object
+          // Convert string to proper Milestone object with required fields
           return { 
             id: milestone, 
             label: milestone,
@@ -41,15 +41,22 @@ const PracticePageContent: React.FC = () => {
             description: `Milestone: ${milestone}`,
             achieved: false,
             progress: 0,
-            target: 1,
-            tip: `Tip for ${milestone}`
+            target: 1, // Provide default target since it's required
+            tip: `Tip for ${milestone}`,
+            completed: false
           };
         }
-        // If it's already a Milestone object, ensure required fields are present
+        // If it's already a Milestone object, ensure required fields are present and provide defaults for missing values
         return {
-          ...milestone,
+          id: milestone.id,
+          label: milestone.label,
           title: milestone.title || milestone.label || 'Untitled Milestone',
-          tip: milestone.tip || 'Keep practicing to improve'
+          description: milestone.description || 'Keep practicing to improve',
+          achieved: milestone.achieved,
+          progress: milestone.progress,
+          target: milestone.target !== undefined ? milestone.target : 1, // default to 1 if missing
+          tip: milestone.tip || 'Keep practicing to improve',
+          completed: milestone.completed ?? false,
         };
       })
     : [];
