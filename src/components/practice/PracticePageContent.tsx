@@ -33,7 +33,6 @@ const PracticePageContent: React.FC = () => {
   const typedMilestones: Milestone[] = Array.isArray(milestones) 
     ? milestones.map((milestone): Milestone => {
         if (typeof milestone === 'string') {
-          // Convert string to proper Milestone object with required fields
           return { 
             id: milestone, 
             label: milestone,
@@ -41,12 +40,11 @@ const PracticePageContent: React.FC = () => {
             description: `Milestone: ${milestone}`,
             achieved: false,
             progress: 0,
-            target: 1, // Provide default target since it's required
+            target: 1,
             tip: `Tip for ${milestone}`,
             completed: false
           };
         }
-        // If it's already a Milestone object, ensure required fields are present and provide defaults for missing values
         return {
           id: milestone.id,
           label: milestone.label,
@@ -54,14 +52,13 @@ const PracticePageContent: React.FC = () => {
           description: milestone.description || 'Keep practicing to improve',
           achieved: milestone.achieved,
           progress: milestone.progress,
-          target: milestone.target !== undefined ? milestone.target : 1, // default to 1 if missing
+          target: milestone.target !== undefined ? milestone.target : 1,
           tip: milestone.tip || 'Keep practicing to improve',
           completed: milestone.completed ?? false,
         };
       })
     : [];
 
-  // Type conversion for string to SpeechOccasion for selectedOccasion
   const convertedOccasion = selectedOccasion ? {
     name: selectedOccasion,
     occasion: selectedOccasion,
@@ -73,47 +70,66 @@ const PracticePageContent: React.FC = () => {
     blogTag: ''
   } : null;
 
-  // Wrapper function to convert string parameter to SpeechOccasion
   const handleOccasionSelect = (occasion: SpeechOccasionType) => {
     handleSelect(occasion.name);
   };
 
   return (
-    <>
-      <ProgressTracker
-        totalSessions={totalSessions}
-        uniqueOccasions={uniqueOccasions}
-        totalDuration={totalMinutes}
-        notesAdded={notesAdded}
-        milestones={typedMilestones}
-        shareUrl={shareUrl}
-      />
-      <PracticeGoals
-        userId={userId}
-        stats={{ 
-          totalSessions, 
-          uniqueOccasions, 
-          totalHours: totalMinutes / 60, 
-          notesAdded 
-        }}
-        shareUrl={shareUrl}
-      />
-      <SpeechOccasionSelector onSelectOccasion={handleOccasionSelect} />
-      <FavoriteOccasions
-        favorites={favorites}
-        onSelectFavorite={handleOccasionSelect}
-      />
-      <RecentOccasions 
-        userId={userId}
-        onSelectRecent={handleSelect} 
-      />
-      <PracticeHistory 
-        userId={userId}
-        occasionName={selectedOccasion || ''}
-        onSelectSession={handleSelectSession} 
-      />
+    <div className="grid grid-cols-1 gap-6 md:gap-8 max-w-4xl mx-auto py-6">
+      <div className="glass-card shadow-lg transition-shadow duration-200 hover:shadow-2xl">
+        <ProgressTracker
+          totalSessions={totalSessions}
+          uniqueOccasions={uniqueOccasions}
+          totalDuration={totalMinutes}
+          notesAdded={notesAdded}
+          milestones={typedMilestones}
+          shareUrl={shareUrl}
+        />
+      </div>
+
+      <div className="glass-card shadow-lg transition-shadow duration-200 hover:shadow-2xl">
+        <PracticeGoals
+          userId={userId}
+          stats={{ 
+            totalSessions, 
+            uniqueOccasions, 
+            totalHours: totalMinutes / 60, 
+            notesAdded 
+          }}
+          shareUrl={shareUrl}
+        />
+      </div>
+
+      <div className="glass-card shadow-lg transition-shadow duration-200 hover:shadow-2xl p-0">
+        <SpeechOccasionSelector 
+          onSelectOccasion={handleOccasionSelect}
+        />
+      </div>
+
+      <div className="glass-card shadow-lg transition-shadow duration-200 hover:shadow-2xl">
+        <FavoriteOccasions
+          favorites={favorites}
+          onSelectFavorite={handleOccasionSelect}
+        />
+      </div>
+
+      <div className="glass-card shadow-lg transition-shadow duration-200 hover:shadow-2xl">
+        <RecentOccasions 
+          userId={userId}
+          onSelectRecent={handleSelect} 
+        />
+      </div>
+      {selectedOccasion && (
+        <div className="glass-card shadow-lg transition-shadow duration-200 hover:shadow-2xl mt-4">
+          <PracticeHistory 
+            userId={userId}
+            occasionName={selectedOccasion}
+            onSelectSession={handleSelectSession} 
+          />
+        </div>
+      )}
       {selectedOccasion && convertedOccasion && (
-        <div className="mt-6">
+        <div className="glass-card shadow-lg transition-shadow duration-200 hover:shadow-2xl mt-6">
           <OccasionDetails
             occasion={convertedOccasion}
             favorites={favorites}
@@ -123,7 +139,7 @@ const PracticePageContent: React.FC = () => {
           />
         </div>
       )}
-    </>
+    </div>
   );
 };
 
