@@ -2,8 +2,9 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Create supabase client with environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Using type assertion as TypeScript environment types may not be properly recognized
+const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL;
+const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY;
 
 // Return true only if both env vars exist
 export const isSupabaseConfigured = () => {
@@ -15,6 +16,7 @@ export const supabase = isSupabaseConfigured()
   ? createClient(supabaseUrl, supabaseKey)
   : null;
 
+// Test connection to Supabase (used in health checks)
 export const testSupabaseConnection = async () => {
   try {
     if (!supabase) throw new Error('Supabase not configured');
