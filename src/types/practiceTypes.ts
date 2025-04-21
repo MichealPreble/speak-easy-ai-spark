@@ -1,10 +1,11 @@
+
 import type { UseEmblaCarouselType } from 'embla-carousel-react';
 
 export type Milestone = {
   id: string;
   label: string;
   title: string; // Required per PracticePageContent.tsx
-  description?: string;
+  description: string; // Now required, not optional
   completed?: boolean;
   achieved?: boolean;
   progress?: number;
@@ -31,14 +32,14 @@ export type BlogPostPreview = {
   title: string;
   summary: string;
   publishedAt: string;
-  excerpt?: string; // Optional to match occasionDetailsTypes
+  excerpt: string; // Now required, not optional
 }
 
 export type Template = {
   id: string;
   title: string;
   body: string; // Required per Template component
-  content?: string; // Optional to support alternate pattern
+  content: string; // Now required, not optional
 }
 
 export type OccasionDetailsData = {
@@ -104,8 +105,7 @@ export type Message = {
 }
 
 // Use proper import for embla-carousel-react
-import { useEmblaCarousel } from 'embla-carousel-react';
-export type CarouselInstance = ReturnType<typeof useEmblaCarousel>[0];
+export type CarouselInstance = UseEmblaCarouselType[0];
 
 export interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL: string;

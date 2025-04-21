@@ -1,10 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
-import type { ImportMetaEnv } from '@/types/practiceTypes';
 
 // Explicitly type the environment variables
-const supabaseUrl = (import.meta.env as ImportMetaEnv).VITE_SUPABASE_URL || '';
-const supabaseKey = (import.meta.env as ImportMetaEnv).VITE_SUPABASE_ANON_KEY || '';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 export const isSupabaseConfigured = () => !!supabaseUrl && !!supabaseKey;
 
