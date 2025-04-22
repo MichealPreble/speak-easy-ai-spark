@@ -27,14 +27,21 @@ jobs:
     - name: Run Linting
       run: npm run lint
       
-    - name: Run Tests
-      run: npm run test
+    - name: Run Tests with Coverage
+      run: npm run test -- --coverage
       env:
         CI: true
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
-    - name: Upload Coverage
+    - name: Upload Coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage/lcov.info
+        fail_ci_if_error: true
+
+    - name: Upload Coverage Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: coverage
