@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, forwardRef } from "react";
 import DOMPurify from "dompurify";
 
 interface RichTextContentProps {
@@ -9,20 +9,21 @@ interface RichTextContentProps {
   autoFocus?: boolean;
 }
 
-export const RichTextContent: React.FC<RichTextContentProps> = ({
+export const RichTextContent = forwardRef<HTMLDivElement, RichTextContentProps>(({
   content,
   onChange,
   className,
   autoFocus = false,
-}) => {
-  const divRef = useRef<HTMLDivElement | null>(null);
+}, ref) => {
+  const internalRef = useRef<HTMLDivElement | null>(null);
+  const divRef = ref as React.RefObject<HTMLDivElement> || internalRef;
 
   useEffect(() => {
     if (divRef.current && divRef.current.innerHTML !== content) {
       divRef.current.innerHTML = content;
       if (autoFocus) divRef.current.focus();
     }
-  }, [content, autoFocus]);
+  }, [content, autoFocus, divRef]);
 
   const handleInput = () => {
     onChange(divRef.current?.innerHTML || "");
@@ -61,7 +62,7 @@ export const RichTextContent: React.FC<RichTextContentProps> = ({
 
   return (
     <div
-      ref={divRef}
+      ref={divRef as React.RefObject<HTMLDivElement>}
       className={className}
       contentEditable
       aria-label="Newsletter content editor"
@@ -78,4 +79,6 @@ export const RichTextContent: React.FC<RichTextContentProps> = ({
       }}
     />
   );
-};
+});
+
+RichTextContent.displayName = "RichTextContent";
