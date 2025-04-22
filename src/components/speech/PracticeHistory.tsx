@@ -29,7 +29,7 @@ const PracticeHistory: React.FC<PracticeHistoryProps> = ({ userId, occasionName,
           .select('*')
           .eq('user_id', userId)
           .eq('occasion_name', occasionName)
-          .order('session_date', { ascending: false });
+          .order('created_at', { ascending: false });
 
         if (error) {
           throw error;
@@ -38,13 +38,14 @@ const PracticeHistory: React.FC<PracticeHistoryProps> = ({ userId, occasionName,
         if (data) {
           const typedSessions: PracticeSession[] = data.map((session: any) => ({
             id: String(session.id),
-            userId: String(userId), // Use from props
-            occasionName: String(occasionName), // Use from props
-            occasion_name: String(session.occasion_name || ''),
-            transcript: String(session.transcript || ''),
-            createdAt: String(session.created_at || ''),
-            session_date: String(session.session_date || ''),
-            notes: String(session.notes || '')
+            occasionName: String(session.occasion_name || occasionName),
+            date: String(session.session_date || session.created_at || new Date().toISOString()),
+            duration: Number(session.duration || 0),
+            score: session.score ? Number(session.score) : undefined,
+            notes: session.notes ? String(session.notes) : undefined,
+            transcript: session.transcript ? String(session.transcript) : undefined,
+            userId: String(userId),
+            createdAt: String(session.created_at || new Date().toISOString())
           }));
           
           setSessions(typedSessions);
@@ -91,7 +92,7 @@ const PracticeHistory: React.FC<PracticeHistoryProps> = ({ userId, occasionName,
           {sessions.map((session) => (
             <div key={session.id} className="border rounded-md p-4">
               <div className="flex justify-between items-start mb-2">
-                <h4 className="font-medium">{new Date(session.session_date).toLocaleDateString()}</h4>
+                <h4 className="font-medium">{new Date(session.date).toLocaleDateString()}</h4>
               </div>
               {session.notes && (
                 <p className="text-sm text-muted-foreground">{session.notes}</p>

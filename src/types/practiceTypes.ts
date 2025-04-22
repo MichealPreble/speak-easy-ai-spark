@@ -1,4 +1,3 @@
-
 import { SpeechOccasion } from '@/types/speechOccasions';
 
 export interface Milestone {
@@ -35,6 +34,9 @@ export interface PracticeSession {
   duration: number;
   score?: number;
   notes?: string;
+  transcript?: string;
+  userId?: string;
+  createdAt?: string;
 }
 
 export interface PracticeStats {
@@ -61,4 +63,37 @@ export interface PracticePageData {
   shareUrl: string;
   handleSelect: (occasion: SpeechOccasion) => void;
   handleSelectSession: (sessionId: string) => void;
+}
+
+export interface NewsletterIssue {
+  id: string;
+  title: string;
+  date: string;
+  slug: string;
+  preview_text: string;
+  published_at: string;
+  content: string;
+  featured_image?: string;
+  blogTag?: string;
+}
+
+export interface OccasionDetailsData {
+  id: string;
+  title: string;
+  rating: number;
+  feedback: string;
+  relatedPosts: BlogPostPreview[];
+  templates: Template[];
+  isLoading: boolean;
+  error: string | null;
+  practiceNote: string;
+  setPracticeNote: (note: string) => void;
+  practiceFeedback: string;
+  setPracticeFeedback: (feedback: string) => void;
+  showFeedback: boolean;
+  setShowFeedback: (show: boolean) => void;
+  sessionId: string | null;
+  setSessionId: (id: string | null) => void;
+  handleFeedbackSubmit: () => Promise<void>;
+  handleToggleFavorite: () => Promise<void>;
 }

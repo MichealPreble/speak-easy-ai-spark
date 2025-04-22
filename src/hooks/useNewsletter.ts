@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { NewsletterIssue } from '@/types/practiceTypes';
@@ -120,5 +121,3 @@ export function useNewsletter(options: NewsletterOptions = {}) {
     subscribeToNewsletter
   };
 }
-
-export type { NewsletterIssue };
