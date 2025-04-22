@@ -10,6 +10,7 @@ import OccasionDetails from '@/components/speech/OccasionDetails';
 import { usePracticePageData } from '@/hooks/usePracticePageData';
 import { SpeechOccasion, LegacySpeechOccasion } from '@/types/speechOccasions';
 import { Milestone } from '@/types/practiceTypes';
+import { SPEECH_OCCASIONS } from '@/data/speechOccasions';
 
 const PracticePageContent: React.FC = () => {
   const {
@@ -72,7 +73,9 @@ const PracticePageContent: React.FC = () => {
   } : null;
 
   const handleOccasionSelect = (occasion: SpeechOccasion) => {
-    handleSelect(occasion);
+    if (handleSelect) {
+      handleSelect(occasion);
+    }
   };
 
   return (
@@ -124,9 +127,15 @@ const PracticePageContent: React.FC = () => {
           userId={userId}
           onSelectRecent={(title) => {
             // Find speech occasion by title and select it
-            const allOccasions: SpeechOccasion[] = Object.values(SPEECH_OCCASIONS).flat();
+            const allOccasions: SpeechOccasion[] = [];
+            Object.values(SPEECH_OCCASIONS).forEach(categoryOccasions => {
+              allOccasions.push(...categoryOccasions);
+            });
+            
             const occasion = allOccasions.find(o => o.title === title);
-            if (occasion) handleSelect(occasion);
+            if (occasion && handleSelect) {
+              handleSelect(occasion);
+            }
           }} 
         />
       </div>
