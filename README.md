@@ -1,10 +1,10 @@
 # SpeakEasyAI
 
 [![MVP Testing Status](https://img.shields.io/badge/MVP%20Testing-In%20Progress-yellow?style=flat-square&logo=checkmarx&logoColor=white)](./docs/mvp-testing-codex.md)
-[![Build Status](https://github.com/yourusername/speakeasyai/actions/workflows/test.yml/badge.svg?style=flat-square)](https://github.com/yourusername/speakeasyai/actions/workflows/test.yml)
-[![Coverage Status](https://img.shields.io/codecov/c/github/yourusername/speakeasyai/main?style=flat-square&logo=codecov&logoColor=white)](https://codecov.io/gh/yourusername/speakeasyai)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue?style=flat-square)](https://github.com/yourusername/speakeasyai/releases)
-[![Deployment Status](https://vercelbadge.vercel.app/api/yourusername/speakeasyai?style=flat-square)](https://speakeasyai.vercel.app)
+[![Build Status](https://github.com/GITHUB_USERNAME/REPO_NAME/actions/workflows/test.yml/badge.svg?style=flat-square)](https://github.com/GITHUB_USERNAME/REPO_NAME/actions/workflows/test.yml)
+[![Coverage Status](https://img.shields.io/codecov/c/github/GITHUB_USERNAME/REPO_NAME/main?style=flat-square&logo=codecov&logoColor=white)](https://codecov.io/gh/GITHUB_USERNAME/REPO_NAME)
+[![Version](https://img.shields.io/github/v/release/GITHUB_USERNAME/REPO_NAME?style=flat-square)](https://github.com/GITHUB_USERNAME/REPO_NAME/releases)
+[![Deployment Status](https://vercelbadge.vercel.app/api/VERCEL_USERNAME/VERCEL_PROJECT_NAME?style=flat-square)](https://VERCEL_DEPLOYMENT_URL)
 
 SpeakEasyAI is an AI-powered conversation assistant with voice recognition, message summarization, and markdown formatting capabilities.
 
