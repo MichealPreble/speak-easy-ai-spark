@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { NewsletterIssue } from '@/types/practiceTypes';
+import { NewsletterIssue } from '@/types/newsletter';
 
 interface NewsletterOptions {
   page?: number;
