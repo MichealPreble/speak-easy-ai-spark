@@ -17,14 +17,14 @@ export const useOccasionHandlers = (
 
   const handleSelect = useCallback((occasion: SpeechOccasion) => {
     setSelectedOccasion(occasion);
-    sessionStorage.setItem('selectedOccasion', occasion.name);
-    trackEvent('select_occasion', 'SpeechPractice', occasion.name);
+    sessionStorage.setItem('selectedOccasion', occasion.title);
+    trackEvent('select_occasion', 'SpeechPractice', occasion.title);
   }, [setSelectedOccasion, trackEvent]);
 
   const handleSelectSession = useCallback((occasion: SpeechOccasion, session: PracticeSession) => {
     setSelectedOccasion(occasion);
-    sessionStorage.setItem('selectedOccasion', occasion.name);
-    trackEvent('select_practice_session', 'SpeechPractice', occasion.name);
+    sessionStorage.setItem('selectedOccasion', occasion.title);
+    trackEvent('select_practice_session', 'SpeechPractice', occasion.title);
   }, [setSelectedOccasion, trackEvent]);
 
   return {
@@ -32,4 +32,3 @@ export const useOccasionHandlers = (
     handleSelectSession
   };
 };
-

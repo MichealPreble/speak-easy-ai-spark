@@ -8,7 +8,7 @@ import RecentOccasions from '@/components/speech/RecentOccasions';
 import PracticeHistory from '@/components/speech/PracticeHistory';
 import OccasionDetails from '@/components/speech/OccasionDetails';
 import { usePracticePageData } from '@/hooks/usePracticePageData';
-import { SpeechOccasion as SpeechOccasionType } from '@/types/speechOccasions';
+import { SpeechOccasion, LegacySpeechOccasion } from '@/types/speechOccasions';
 import { Milestone } from '@/types/practiceTypes';
 
 const PracticePageContent: React.FC = () => {
@@ -59,19 +59,20 @@ const PracticePageContent: React.FC = () => {
       })
     : [];
 
-  const convertedOccasion = selectedOccasion ? {
-    name: selectedOccasion,
-    occasion: selectedOccasion,
+  // Convert to legacy format for compatibility with existing components
+  const convertedOccasion: LegacySpeechOccasion | null = selectedOccasion ? {
+    name: selectedOccasion.title,
+    occasion: selectedOccasion.description,
     examples: '',
-    audienceSize: '',
-    audienceSizeCategory: 'Small' as const,
-    frequency: 'Rare' as const,
-    task: '',
+    audienceSize: selectedOccasion.duration,
+    audienceSizeCategory: 'Small',
+    frequency: 'Rare',
+    task: selectedOccasion.difficulty,
     blogTag: ''
   } : null;
 
-  const handleOccasionSelect = (occasion: SpeechOccasionType) => {
-    handleSelect(occasion.name);
+  const handleOccasionSelect = (occasion: SpeechOccasion) => {
+    handleSelect(occasion);
   };
 
   return (
@@ -106,7 +107,8 @@ const PracticePageContent: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mt-2">
         <div className="glass-card shadow-adaptive rounded-2xl p-4 mb-6 hover:scale-[1.02] transition-transform duration-200">
           <SpeechOccasionSelector 
-            onSelectOccasion={handleOccasionSelect}
+            value={selectedOccasion}
+            onChange={handleOccasionSelect}
           />
         </div>
         <div className="glass-card shadow-adaptive rounded-2xl p-4 mb-6 hover:scale-[1.02] transition-transform duration-200">
@@ -120,7 +122,12 @@ const PracticePageContent: React.FC = () => {
       <div className="glass-card shadow-adaptive rounded-2xl p-4 mb-6 hover:scale-[1.02] transition-transform duration-200">
         <RecentOccasions 
           userId={userId}
-          onSelectRecent={handleSelect} 
+          onSelectRecent={(title) => {
+            // Find speech occasion by title and select it
+            const allOccasions: SpeechOccasion[] = Object.values(SPEECH_OCCASIONS).flat();
+            const occasion = allOccasions.find(o => o.title === title);
+            if (occasion) handleSelect(occasion);
+          }} 
         />
       </div>
 
@@ -128,7 +135,7 @@ const PracticePageContent: React.FC = () => {
         <div className="glass-card shadow-adaptive rounded-2xl p-4 mb-6 hover:scale-[1.02] transition-transform duration-200 mt-4">
           <PracticeHistory 
             userId={userId}
-            occasionName={selectedOccasion}
+            occasionName={selectedOccasion.title}
             onSelectSession={handleSelectSession} 
           />
         </div>

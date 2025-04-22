@@ -12,10 +12,10 @@ interface FavoriteOccasionsProps {
 const FavoriteOccasions = ({ favorites, onSelectFavorite }: FavoriteOccasionsProps) => {
   if (!favorites.length) return null;
 
-  const handleSelect = (name: string) => {
+  const handleSelect = (title: string) => {
     // Convert the object to an array and then find the occasion
     const allOccasions: SpeechOccasion[] = Object.values(SPEECH_OCCASIONS).flat();
-    const occasion = allOccasions.find(occ => occ.title === name);
+    const occasion = allOccasions.find(occ => occ.title === title);
       
     if (occasion) {
       onSelectFavorite(occasion);
@@ -26,14 +26,14 @@ const FavoriteOccasions = ({ favorites, onSelectFavorite }: FavoriteOccasionsPro
     <div className="mt-6">
       <h2 className="text-xl font-semibold mb-2">Your Favorite Occasions</h2>
       <div className="flex flex-wrap gap-2">
-        {favorites.map((name) => (
+        {favorites.map((title) => (
           <Button
-            key={name}
+            key={title}
             variant="outline"
-            onClick={() => handleSelect(name)}
-            aria-label={`Select favorite occasion ${name}`}
+            onClick={() => handleSelect(title)}
+            aria-label={`Select favorite occasion ${title}`}
           >
-            {name}
+            {title}
           </Button>
         ))}
       </div>

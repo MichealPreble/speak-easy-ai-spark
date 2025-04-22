@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { CardContent } from '@/components/ui/card';
-import { SpeechOccasion } from '@/types/speechOccasions';
+import { LegacySpeechOccasion } from '@/types/speechOccasions';
 
 interface OccasionInfoProps {
-  occasion: SpeechOccasion;
+  occasion: LegacySpeechOccasion;
 }
 
 const OccasionInfo: React.FC<OccasionInfoProps> = ({ occasion }) => {

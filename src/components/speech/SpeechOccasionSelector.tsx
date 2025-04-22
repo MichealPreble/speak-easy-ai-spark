@@ -1,8 +1,6 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SPEECH_OCCASIONS } from '@/data/speechOccasions';
 import { SpeechOccasion } from '@/types/speechOccasions';
@@ -23,11 +21,6 @@ const SpeechOccasionSelector = ({ value, onChange }: SpeechOccasionSelectorProps
     category: key,
     occasions: value
   }));
-
-  // Find the category index
-  const getActiveCategoryIndex = () => {
-    return occasionsArray.findIndex(category => category.category === activeTab);
-  };
 
   // Get occasion from id
   const getOccasionById = (id: string): SpeechOccasion | undefined => {

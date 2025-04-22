@@ -9,8 +9,17 @@ import TemplateSection from './occasion-details/TemplateSection';
 import RelatedBlogPosts from './RelatedBlogPosts';
 import { OccasionDetailsProps } from '@/types/occasionDetailsTypes';
 import { Template, BlogPostPreview } from '@/types/practiceTypes';
+import { LegacySpeechOccasion } from '@/types/speechOccasions';
 
-const OccasionDetails: React.FC<OccasionDetailsProps> = ({
+interface UpdatedOccasionDetailsProps {
+  occasion: LegacySpeechOccasion;
+  favorites: string[];
+  setFavorites: (favorites: string[]) => void;
+  blogPreviews: any[];
+  setBlogPreviews: (previews: any[]) => void;
+}
+
+const OccasionDetails: React.FC<UpdatedOccasionDetailsProps> = ({
   occasion,
   favorites,
   setFavorites,
