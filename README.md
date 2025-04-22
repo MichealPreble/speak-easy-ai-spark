@@ -1,6 +1,8 @@
 
 # SpeakEasyAI
 
+[![MVP Testing Status](https://img.shields.io/badge/MVP%20Testing-In%20Progress-yellow?style=flat-square&logo=checkmarx)](docs/mvp-testing-codex.md)
+
 SpeakEasyAI is an AI-powered conversation assistant with voice recognition, message summarization, and markdown formatting capabilities.
 
 ## Features
