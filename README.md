@@ -1,3 +1,4 @@
+
 # SpeakEasyAI
 
 [![MVP Testing Status](https://img.shields.io/badge/MVP%20Testing-In%20Progress-yellow?style=flat-square&logo=checkmarx&logoColor=white)](./docs/mvp-testing-codex.md)
@@ -29,8 +30,8 @@ SpeakEasyAI is an AI-powered conversation assistant with voice recognition, mess
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/speakeasyai.git
-   cd speakeasyai
+   git clone https://github.com/AI-Collaborator/Awesome-Project.git
+   cd Awesome-Project
    ```
 
 2. Install dependencies:
@@ -67,6 +68,15 @@ SpeakEasyAI is an AI-powered conversation assistant with voice recognition, mess
 - **Theme**: Toggle between light and dark mode using the sun/moon icon
 - **Summarize**: Click the book icon or press Ctrl+S to get a summary of your conversation
 - **Clear Chat**: Click the trash icon to clear all messages
+
+## Documentation
+
+For more detailed information, check out our documentation:
+
+- [Getting Started Guide](./docs/getting-started.md)
+- [API Reference](./docs/api-reference.md)
+- [Examples](./docs/examples.md)
+- [Architecture Overview](./docs/architecture.md)
 
 ## Tech Stack
 
