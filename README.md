@@ -1,4 +1,3 @@
-
 # SpeakEasyAI
 
 [![MVP Testing Status](https://img.shields.io/badge/MVP%20Testing-In%20Progress-yellow?style=flat-square&logo=checkmarx&logoColor=white)](./docs/mvp-testing-codex.md)
