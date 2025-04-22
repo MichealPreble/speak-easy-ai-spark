@@ -1,106 +1,64 @@
 
-import type { UseEmblaCarouselType } from 'embla-carousel-react';
+import { SpeechOccasion } from '@/types/speechOccasions';
 
-export type Milestone = {
+export interface Milestone {
   id: string;
   label: string;
-  title: string; // Required
-  description: string; // Required
-  completed?: boolean;
-  achieved: boolean; // Required
-  progress: number; // Required
-  target: number; // Made required to fix TS2322
-  tip: string; // Required
-};
+  title: string;
+  description: string;
+  achieved: boolean;
+  progress: number;
+  target: number;
+  tip: string;
+  completed: boolean;
+}
 
-export type SpeechOccasion = 'interview' | 'presentation' | 'toast' | 'pitch';
-
-export type NewsletterIssue = {
+export interface Template {
   id: string;
   title: string;
-  date: string; // Required
+  body?: string;
   content: string;
-  slug?: string;
-  preview_text?: string;
-  published_at?: string;
-  featured_image?: string;
-  blogTag?: string;
-};
+}
 
-export type BlogPostPreview = {
+export interface BlogPostPreview {
   id: string;
   title: string;
   summary: string;
   publishedAt: string;
-  excerpt: string; // Now required
-};
+  excerpt: string;
+}
 
-export type Template = {
+export interface PracticeSession {
   id: string;
-  title: string;
-  body: string;
-  content: string; // Now required
-};
-
-export type OccasionDetailsData = {
-  id: string;
-  title: string;
-  rating: number;
-  feedback: string;
-  relatedPosts?: BlogPostPreview[];
-  templates?: Template[];
-  isLoading?: boolean;
-  error?: string | null;
-  practiceNote?: string;
-  practiceFeedback?: string;
-  showFeedback?: boolean;
-  sessionId?: string | null;
-  setPracticeNote?: (note: string) => void;
-  setPracticeFeedback?: (feedback: string) => void;
-  setShowFeedback?: (show: boolean) => void;
-  setSessionId?: (id: string | null) => void;
-  handleFeedbackSubmit?: () => void;
-  handleToggleFavorite?: () => void;
-};
-
-export type PracticeSession = {
-  id: string;
-  userId: string;
   occasionName: string;
-  occasion_name?: string;
-  transcript: string;
+  date: string;
+  duration: number;
+  score?: number;
   notes?: string;
-  createdAt: string;
-  session_date?: string;
-};
+}
 
-export type PracticePageData = {
-  selectedOccasion?: string | null;
-  favorites?: string[];
-  setFavorites?: React.Dispatch<React.SetStateAction<string[]>>;
-  blogPreviews?: BlogPostPreview[];
-  setBlogPreviews?: React.Dispatch<React.SetStateAction<BlogPostPreview[]>>;
-  totalSessions?: number;
-  uniqueOccasions?: number;
-  totalMinutes?: number;
-  notesAdded?: number;
+export interface PracticeStats {
+  totalSessions: number;
+  uniqueOccasions: number;
+  totalHours: number;
+  notesAdded: number;
+}
+
+export interface PracticePageData {
+  selectedOccasion: SpeechOccasion | null;
+  favorites: string[];
+  setFavorites: (favorites: string[]) => void;
+  blogPreviews: BlogPostPreview[];
+  setBlogPreviews: (previews: BlogPostPreview[]) => void;
+  totalSessions: number;
+  uniqueOccasions: number;
+  totalMinutes: number;
+  notesAdded: number;
   milestones: Milestone[];
   recentOccasions: SpeechOccasion[];
   practiceSessions: PracticeSession[];
-  userId?: string | null;
-  shareUrl?: string;
-  handleSelect?: (occasion: string) => void;
-  handleSelectSession?: (sessionId: string) => void;
-};
-
-export type Message = {
-  id: number;
-  text: string;
-  sender: 'user' | 'bot';
-  timestamp: Date;
-  isVoiceMessage: boolean;
-  isFeedback: boolean;
-  read: boolean;
-};
-
-export type CarouselInstance = UseEmblaCarouselType[0];
+  userId: string | null;
+  shareUrl: string;
+  handleSelect: (occasion: SpeechOccasion) => void;
+  handleSelectSession: (sessionId: string) => void;
+}

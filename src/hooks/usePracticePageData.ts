@@ -2,14 +2,15 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { PracticePageData, Milestone, SpeechOccasion, BlogPostPreview } from '@/types/practiceTypes';
+import { PracticePageData, Milestone, BlogPostPreview } from '@/types/practiceTypes';
+import { SpeechOccasion } from '@/types/speechOccasions';
 import { supabase } from '@/lib/supabase';
+import { SPEECH_OCCASIONS } from '@/data/speechOccasions';
 
 export function usePracticePageData(): PracticePageData {
   const { user } = useAuth();
   const [favoriteOccasions, setFavoriteOccasions] = useState<string[]>([]);
-  const [recentOccasions, setRecentOccasions] = useState<SpeechOccasion[]>([]);
-  const [selectedOccasion, setSelectedOccasion] = useState<string | null>(null);
+  const [selectedOccasion, setSelectedOccasion] = useState<SpeechOccasion | null>(null);
   const [blogPreviews, setBlogPreviews] = useState<BlogPostPreview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +22,7 @@ export function usePracticePageData(): PracticePageData {
   const [notesAdded, setNotesAdded] = useState(0);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
 
-  const handleSelect = (occasion: string) => {
+  const handleSelect = (occasion: SpeechOccasion) => {
     setSelectedOccasion(occasion);
   };
 
@@ -58,29 +59,6 @@ export function usePracticePageData(): PracticePageData {
           setFavoriteOccasions(typedFavorites);
         }
         
-        // Fetch recent occasions
-        const { data: recentData, error: recentError } = await supabase
-          .from('practice_sessions')
-          .select('occasion_name')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(5);
-          
-        if (recentError) throw new Error(recentError.message);
-        
-        if (recentData) {
-          // Get unique occasion names and ensure they are strings
-          const uniqueRecentNames = [...new Set(
-            recentData
-              .map((item: any) => (item.occasion_name ? String(item.occasion_name) : null))
-              .filter(Boolean) as string[]
-          )];
-          
-          // Convert string[] to SpeechOccasion[]
-          const typedRecentOccasions: SpeechOccasion[] = uniqueRecentNames as SpeechOccasion[];
-          setRecentOccasions(typedRecentOccasions);
-        }
-
         // Initialize some placeholder milestones
         const defaultMilestones: Milestone[] = [
           {
@@ -129,8 +107,8 @@ export function usePracticePageData(): PracticePageData {
     totalMinutes,
     notesAdded,
     milestones,
-    recentOccasions,
-    practiceSessions: [], // Placeholder
+    recentOccasions: [],
+    practiceSessions: [],
     userId: user?.id || null,
     shareUrl: `/share/${user?.id || 'preview'}`,
     handleSelect,

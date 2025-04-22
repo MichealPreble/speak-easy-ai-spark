@@ -72,12 +72,6 @@ const PracticePageContent: React.FC = () => {
     blogTag: ''
   } : null;
 
-  const handleOccasionSelect = (occasion: SpeechOccasion) => {
-    if (handleSelect) {
-      handleSelect(occasion);
-    }
-  };
-
   return (
     <div className="max-w-4xl mx-auto py-8 px-2 sm:px-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
@@ -111,13 +105,21 @@ const PracticePageContent: React.FC = () => {
         <div className="glass-card shadow-adaptive rounded-2xl p-4 mb-6 hover:scale-[1.02] transition-transform duration-200">
           <SpeechOccasionSelector 
             value={selectedOccasion}
-            onChange={handleOccasionSelect}
+            onChange={(occasion: SpeechOccasion) => {
+              if (handleSelect) {
+                handleSelect(occasion);
+              }
+            }}
           />
         </div>
         <div className="glass-card shadow-adaptive rounded-2xl p-4 mb-6 hover:scale-[1.02] transition-transform duration-200">
           <FavoriteOccasions
             favorites={favorites}
-            onSelectFavorite={handleOccasionSelect}
+            onSelectFavorite={(occasion: SpeechOccasion) => {
+              if (handleSelect) {
+                handleSelect(occasion);
+              }
+            }}
           />
         </div>
       </div>
@@ -125,7 +127,7 @@ const PracticePageContent: React.FC = () => {
       <div className="glass-card shadow-adaptive rounded-2xl p-4 mb-6 hover:scale-[1.02] transition-transform duration-200">
         <RecentOccasions 
           userId={userId}
-          onSelectRecent={(title) => {
+          onSelectRecent={(title: string) => {
             // Find speech occasion by title and select it
             const allOccasions: SpeechOccasion[] = [];
             Object.values(SPEECH_OCCASIONS).forEach(categoryOccasions => {
