@@ -1,7 +1,8 @@
 
 import React, { useRef, useEffect } from 'react';
 import { NewsletterEditorToolbar } from './editor/NewsletterEditorToolbar';
-import { NewsletterRichTextContent } from './editor/NewsletterRichTextContent';
+// Remove import of NewsletterRichTextContent, use new RichTextContent instead
+import { RichTextContent } from './editor/RichTextContent';
 import { useToast } from '@/hooks/use-toast';
 
 interface NewsletterRichTextEditorProps {
@@ -37,11 +38,10 @@ export function NewsletterRichTextEditor({ content, onChange, className }: Newsl
         onCommand={handleCommand}
         onImageInserted={handleImageInsert}
       />
-      <NewsletterRichTextContent
-        ref={editorRef as any}
+      <RichTextContent
         content={content}
         onChange={onChange}
-        className={`min-h-[200px] rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+        className={`min-h-[200px] rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className || ''}`}
         autoFocus
       />
     </div>
