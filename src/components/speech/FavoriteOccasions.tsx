@@ -13,9 +13,9 @@ const FavoriteOccasions = ({ favorites, onSelectFavorite }: FavoriteOccasionsPro
   if (!favorites.length) return null;
 
   const handleSelect = (name: string) => {
-    const occasion = SPEECH_OCCASIONS
-      .flatMap(cat => cat.occasions)
-      .find(occ => occ.name === name);
+    // Convert the object to an array and then find the occasion
+    const allOccasions: SpeechOccasion[] = Object.values(SPEECH_OCCASIONS).flat();
+    const occasion = allOccasions.find(occ => occ.title === name);
       
     if (occasion) {
       onSelectFavorite(occasion);

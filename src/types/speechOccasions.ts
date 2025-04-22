@@ -1,19 +1,18 @@
 
 export interface SpeechOccasion {
-  name: string;
-  occasion: string;
-  examples: string;
-  audienceSize: string;
-  audienceSizeCategory: 'Small' | 'Medium' | 'Large';
-  frequency: 'Rare' | 'Regular';
-  task: string;
-  blogTag?: string;
-  templateId?: string;
+  id: string;
+  title: string;
+  description: string;
+  difficulty: "easy" | "medium" | "hard";
+  duration: string;
+  tips: string[];
 }
 
-export interface SpeechCategory {
+export interface SpeechOccasionsData {
+  [category: string]: SpeechOccasion[];
+}
+
+export interface SpeechOccasionCategory {
   category: string;
   occasions: SpeechOccasion[];
 }
-
-export type SpeechOccasionsData = SpeechCategory[];
