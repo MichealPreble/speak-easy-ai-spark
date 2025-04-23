@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
  * Runtime validation for required environment variables.
  */
 function getEnvVar(name: string): string {
-  const value = import.meta.env[name];
+  const value = import.meta.env[name as keyof ImportMetaEnv];
   if (!value) {
     console.warn(`❌ Missing environment variable: ${name}`);
     return '';
