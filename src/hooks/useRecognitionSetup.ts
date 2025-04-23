@@ -1,3 +1,4 @@
+
 import { useRef, useState, useEffect, useCallback } from "react";
 import { isSpeechRecognitionSupported, getSpeechErrorMessage } from "@/utils/speechRecognitionTypes";
 import { useToast } from "@/hooks/use-toast";
@@ -13,28 +14,30 @@ export function useRecognitionSetup() {
     if (typeof window !== 'undefined') {
       const isSupported = isSpeechRecognitionSupported();
       setIsBrowserSupported(isSupported);
-      
-      if (isSupported) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = false;
-        recognitionRef.current.interimResults = false;
-        recognitionRef.current.lang = 'en-US';
 
-        // Check for permission status if possible
-        if (navigator.permissions && navigator.permissions.query) {
-          navigator.permissions.query({ name: 'microphone' as PermissionName })
-            .then(permissionStatus => {
-              setIsPermissionGranted(permissionStatus.state === 'granted');
-              
-              permissionStatus.onchange = () => {
+      if (isSupported) {
+        // Only instantiate SpeechRecognition if supported (handles both standard and webkit)
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+          recognitionRef.current = new SpeechRecognition();
+          recognitionRef.current.continuous = false;
+          recognitionRef.current.interimResults = false;
+          recognitionRef.current.lang = 'en-US';
+
+          // Check for permission status if possible
+          if (navigator.permissions && navigator.permissions.query) {
+            navigator.permissions.query({ name: 'microphone' as PermissionName })
+              .then(permissionStatus => {
                 setIsPermissionGranted(permissionStatus.state === 'granted');
-              };
-            })
-            .catch(() => {
-              // Some browsers don't support permission query for microphone
-              setIsPermissionGranted(null);
-            });
+                permissionStatus.onchange = () => {
+                  setIsPermissionGranted(permissionStatus.state === 'granted');
+                };
+              })
+              .catch(() => {
+                // Some browsers don't support permission query for microphone
+                setIsPermissionGranted(null);
+              });
+          }
         }
       } else {
         toast({
@@ -70,12 +73,12 @@ export function useRecognitionSetup() {
 
     recognitionRef.current.onerror = (event: any) => {
       const errorMessage = getSpeechErrorMessage(event.error);
-      
+
       // Special handling for permission errors
       if (event.error === 'not-allowed') {
         setIsPermissionGranted(false);
       }
-      
+
       toast({
         title: "Voice recognition error",
         description: errorMessage,
@@ -84,10 +87,9 @@ export function useRecognitionSetup() {
     };
 
     recognitionRef.current.onend = () => {
-      const noResultsTimeout = 500; // ms
+      const noResultsTimeout = 500;
       setTimeout(() => {
         const speechDuration = startTimeRef.current ? (Date.now() - startTimeRef.current) / 1000 : 0;
-        
         if (speechDuration < 1) {
           toast({
             title: "No speech detected",
@@ -101,14 +103,11 @@ export function useRecognitionSetup() {
 
   const checkPermission = useCallback(async (): Promise<boolean> => {
     if (!isBrowserSupported) return false;
-    
+
     try {
       // The most reliable way to check microphone permission is to actually request it
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
-      // Clean up the stream immediately - we just needed to check permission
       stream.getTracks().forEach(track => track.stop());
-      
       setIsPermissionGranted(true);
       return true;
     } catch (error) {
@@ -139,3 +138,4 @@ export function useRecognitionSetup() {
     checkPermission
   };
 }
+
