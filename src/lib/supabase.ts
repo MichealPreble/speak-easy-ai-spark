@@ -1,9 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Improved environment variable access with console logging
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Access environment variables with type assertions
+const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string) || '';
+const supabaseKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || '';
 
 // Log configuration status to console (for debugging)
 console.log(`Supabase configuration status:
