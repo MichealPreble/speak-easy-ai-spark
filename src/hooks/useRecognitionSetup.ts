@@ -84,13 +84,11 @@ export function useRecognitionSetup() {
     };
 
     recognitionRef.current.onend = () => {
-      // Check if ending without results and no error occurred
       const noResultsTimeout = 500; // ms
       setTimeout(() => {
         const speechDuration = startTimeRef.current ? (Date.now() - startTimeRef.current) / 1000 : 0;
         
         if (speechDuration < 1) {
-          // Very short recording could indicate no speech detected
           toast({
             title: "No speech detected",
             description: "Please try again and speak clearly into your microphone.",
