@@ -1,24 +1,35 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Access environment variables with type assertions and fallbacks
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+/**
+ * Runtime validation for required environment variables.
+ */
+function getEnvVar(name: string): string {
+  const value = import.meta.env[name as keyof ImportMetaEnv];
+  if (!value) {
+    console.warn(`❌ Missing environment variable: ${name}`);
+    return '';
+  }
+  return value;
+}
+
+const supabaseUrl = getEnvVar('VITE_SUPABASE_URL');
+const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY');
 
 // Log configuration status to console (for debugging)
 console.log(`Supabase configuration status:
 URL defined: ${!!supabaseUrl}
-Key defined: ${!!supabaseKey}`);
+Key defined: ${!!supabaseAnonKey}`);
 
 // Return true only if both env vars exist and are non-empty
 export const isSupabaseConfigured = () => {
-  const isConfigured = !!supabaseUrl && !!supabaseKey;
+  const isConfigured = !!supabaseUrl && !!supabaseAnonKey;
   return isConfigured;
 };
 
 // Create supabase client or null if config missing
 export const supabase = isSupabaseConfigured()
-  ? createClient(supabaseUrl, supabaseKey)
+  ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
 // Test connection to Supabase (used in health checks)
