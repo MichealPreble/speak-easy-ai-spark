@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { SpeechFeedback } from "@/hooks/useVoiceRecognition";
 import { useSpeechFeedback } from "@/hooks/speech-feedback";
@@ -42,7 +41,7 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
   if (!isActive && !isBrowserSupported) {
     return (
       <div className="fixed bottom-20 right-4 z-50 w-[95%] max-w-xs sm:max-w-sm md:max-w-md">
-        <Alert variant="warning" className="bg-background/95 backdrop-blur-md border">
+        <Alert variant="default" className="bg-background/95 backdrop-blur-md border">
           <AlertTriangle className="h-5 w-5" />
           <AlertTitle>Browser Compatibility Issue</AlertTitle>
           <AlertDescription>

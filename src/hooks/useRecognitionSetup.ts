@@ -1,4 +1,3 @@
-
 import { useRef, useState, useEffect, useCallback } from "react";
 import { isSpeechRecognitionSupported, getSpeechErrorMessage } from "@/utils/speechRecognitionTypes";
 import { useToast } from "@/hooks/use-toast";
@@ -38,11 +37,10 @@ export function useRecognitionSetup() {
             });
         }
       } else {
-        // Show one-time toast notification about browser compatibility
         toast({
           title: "Browser Compatibility Issue",
           description: "Your browser doesn't fully support voice recognition. For best results, use Chrome or Edge.",
-          variant: "warning",
+          variant: "default",
           duration: 6000
         });
       }
@@ -96,7 +94,7 @@ export function useRecognitionSetup() {
           toast({
             title: "No speech detected",
             description: "Please try again and speak clearly into your microphone.",
-            variant: "warning"
+            variant: "default"
           });
         }
       }, noResultsTimeout);
