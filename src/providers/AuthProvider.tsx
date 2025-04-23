@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, ReactNode } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import type { User, UpdateProfileData } from '../types/auth';
@@ -105,11 +104,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: {
-          // Set session duration based on rememberMe option
-          // Default: 1 hour, Remember me: 7 days
-          expiresIn: rememberMe ? 60 * 60 * 24 * 7 : 60 * 60
-        }
       });
 
       if (error) throw error;
