@@ -7,19 +7,25 @@ import FeedbackContent from "./FeedbackContent";
 import { SpeechInsightsCard } from "./SpeechInsightsCard";
 import { CadenceInsightsCard } from "./CadenceInsightsCard";
 import { useSpeechInsights } from "@/hooks/speech/useSpeechInsights";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Info, AlertTriangle } from "lucide-react";
 
 interface RealTimeFeedbackProps {
   isActive: boolean;
   transcript: string;
   duration: number;
   feedback?: SpeechFeedback;
+  isBrowserSupported?: boolean;
+  isPermissionGranted?: boolean | null;
 }
 
 const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
   isActive,
   transcript,
   duration,
-  feedback
+  feedback,
+  isBrowserSupported = true,
+  isPermissionGranted = null
 }) => {
   const [expanded, setExpanded] = useState(true);
   const { wpm, cadence } = useSpeechInsights(transcript, isActive);
@@ -32,6 +38,34 @@ const RealTimeFeedback: React.FC<RealTimeFeedbackProps> = ({
     hesitationAnalysis,
     calculateScore
   } = useSpeechFeedback(isActive, transcript, duration, feedback);
+
+  if (!isActive && !isBrowserSupported) {
+    return (
+      <div className="fixed bottom-20 right-4 z-50 w-[95%] max-w-xs sm:max-w-sm md:max-w-md">
+        <Alert variant="warning" className="bg-background/95 backdrop-blur-md border">
+          <AlertTriangle className="h-5 w-5" />
+          <AlertTitle>Browser Compatibility Issue</AlertTitle>
+          <AlertDescription>
+            Your browser doesn't fully support voice recognition. For the best experience, please use Chrome or Edge.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+  
+  if (!isActive && isPermissionGranted === false) {
+    return (
+      <div className="fixed bottom-20 right-4 z-50 w-[95%] max-w-xs sm:max-w-sm md:max-w-md">
+        <Alert variant="destructive" className="bg-background/95 backdrop-blur-md border">
+          <AlertTriangle className="h-5 w-5" />
+          <AlertTitle>Microphone Access Required</AlertTitle>
+          <AlertDescription>
+            Please allow microphone access in your browser settings to use voice recognition features.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   if (!isActive) return null;
 

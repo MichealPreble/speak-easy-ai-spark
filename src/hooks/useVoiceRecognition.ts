@@ -33,13 +33,16 @@ export function useVoiceRecognition(
     streamRef,
     setupAudio,
     teardownAudio,
+    isAudioSupported
   } = useAudioSetup();
 
   const {
     recognitionRef,
     startTimeRef,
     isBrowserSupported,
-    setupRecognitionHandlers
+    isPermissionGranted,
+    setupRecognitionHandlers,
+    checkPermission
   } = useRecognitionSetup();
 
   const { getAnalysisResults } = useAudioAnalysis(
@@ -66,16 +69,34 @@ export function useVoiceRecognition(
           return newDuration;
         });
       }, 1000);
+      
+      // Add silent timeout detector (no speech detected for 10 seconds)
+      const silenceTimeout = window.setTimeout(() => {
+        if (isVoiceActive && recordingDuration > 10) {
+          // We've been recording for over 10 seconds with potentially no speech
+          const analysis = getAnalysisResults();
+          // If very little audio activity detected, suggest to the user
+          if (analysis.volumeValues.length === 0 || 
+              (analysis.volumeValues.length > 0 && 
+               analysis.volumeValues.reduce((sum, val) => sum + val, 0) / analysis.volumeValues.length < 5)) {
+            showError("No speech detected. Please check your microphone and speak clearly.");
+            teardownAudio();
+            resetState();
+          }
+        }
+      }, 10000);
+      
+      return () => {
+        if (interval) {
+          clearInterval(interval);
+        }
+        clearTimeout(silenceTimeout);
+      };
     } else {
       setRecordingDuration(0);
+      return () => {};
     }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [isVoiceActive, isTimeLimited, recognitionRef, setRecordingDuration]);
+  }, [isVoiceActive, isTimeLimited, recognitionRef, recordingDuration, setRecordingDuration, getAnalysisResults, showError, teardownAudio, resetState]);
 
   // Set up recognition handlers
   useEffect(() => {
@@ -89,7 +110,7 @@ export function useVoiceRecognition(
 
   const toggleVoice = useCallback(async (timeLimit = false) => {
     if (!isBrowserSupported) {
-      showError("Your browser doesn't support voice recognition. Try Chrome or Edge.");
+      showError("Your browser doesn't support voice recognition. Try Chrome or Edge for the best experience.");
       return;
     }
 
@@ -104,6 +125,10 @@ export function useVoiceRecognition(
       }
     } else {
       try {
+        // Check permission first
+        const hasPermission = await checkPermission();
+        if (!hasPermission) return;
+        
         startTimeRef.current = Date.now();
         setIsTimeLimited(timeLimit);
         
@@ -126,13 +151,19 @@ export function useVoiceRecognition(
     resetState,
     setupAudio,
     setIsVoiceActive,
-    setIsTimeLimited
+    setIsTimeLimited,
+    checkPermission
   ]);
 
+  // Detect if this is a fully supported environment
+  const isFullySupported = isBrowserSupported && isAudioSupported();
+  
   return {
     isVoiceActive,
     toggleVoice,
     isBrowserSupported,
+    isPermissionGranted,
+    isFullySupported,
     recordingDuration,
     MAX_RECORDING_SECONDS: 60
   };

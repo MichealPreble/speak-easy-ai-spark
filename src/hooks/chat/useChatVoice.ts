@@ -14,6 +14,8 @@ export function useChatVoice({ generateResponse }: UseChatVoiceProps) {
     isVoiceActive,
     toggleVoice: _toggleVoice,
     isBrowserSupported,
+    isPermissionGranted,
+    isFullySupported,
     recordingDuration,
     MAX_RECORDING_SECONDS
   } = useVoiceRecognition((transcript, feedback) => {
@@ -30,6 +32,8 @@ export function useChatVoice({ generateResponse }: UseChatVoiceProps) {
     isVoiceActive,
     toggleVoice,
     isBrowserSupported,
+    isPermissionGranted,
+    isFullySupported,
     recordingDuration,
     MAX_RECORDING_SECONDS
   };

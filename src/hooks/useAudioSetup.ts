@@ -37,9 +37,22 @@ export function useAudioSetup() {
       
       return true;
     } catch (error) {
+      let errorMessage = "Could not start voice recognition. Please check your microphone access.";
+      
+      // More specific error messages based on error type
+      if (error instanceof DOMException) {
+        if (error.name === "NotAllowedError") {
+          errorMessage = "Microphone access was denied. Please allow microphone access in your browser settings.";
+        } else if (error.name === "NotFoundError") {
+          errorMessage = "No microphone detected. Please connect a microphone and try again.";
+        } else if (error.name === "NotReadableError") {
+          errorMessage = "Your microphone is busy or not working properly. Please check your device.";
+        }
+      }
+      
       toast({
         title: "Voice recognition error",
-        description: "Could not start voice recognition. Please check your microphone access.",
+        description: errorMessage,
         variant: "destructive"
       });
       return false;
