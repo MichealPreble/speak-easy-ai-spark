@@ -11,6 +11,8 @@ import Footer from "@/components/landing/Footer";
 import SEO from "@/components/SEO";
 import { ACCESSIBILITY_COLORS } from "@/types/chat";
 import { ConnectionStatusIndicator } from "@/components/ui/connection-status";
+import SupabaseDebugStatus from "@/components/shared/SupabaseDebugStatus";
+import { isSupabaseConfigured } from "@/lib/supabase";
 
 const Index = () => {
   const { trackPageView } = useAnalytics();
@@ -18,6 +20,8 @@ const Index = () => {
   useEffect(() => {
     trackPageView('/');
   }, [trackPageView]);
+
+  const showSupabaseDebug = !isSupabaseConfigured();
 
   return (
     <>
@@ -29,6 +33,13 @@ const Index = () => {
         <div className="absolute top-4 right-4 z-10">
           <ConnectionStatusIndicator />
         </div>
+        
+        {showSupabaseDebug && (
+          <div className="container mx-auto pt-16 px-4">
+            <SupabaseDebugStatus />
+          </div>
+        )}
+        
         <main>
           <Hero />
           <HowItWorks />
