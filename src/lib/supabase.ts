@@ -38,7 +38,7 @@ export const testSupabaseConnection = async () => {
     if (!isSupabaseConfigured()) {
       console.error('Supabase configuration missing:', {
         url: !!supabaseUrl ? 'defined' : 'missing',
-        key: !!supabaseKey ? 'defined' : 'missing'
+        key: !!supabaseAnonKey ? 'defined' : 'missing'
       });
       return {
         success: false,
@@ -81,7 +81,7 @@ export const getSupabaseConfigStatus = () => {
   return {
     isConfigured: isSupabaseConfigured(),
     hasUrl: !!supabaseUrl,
-    hasKey: !!supabaseKey,
+    hasKey: !!supabaseAnonKey,
     clientInitialized: !!supabase
   };
 };
