@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js';
  */
 function getEnvVar(name: string): string {
   // Access environment variables safely using the properly typed import.meta.env
-  const value = import.meta.env[name];
+  const value = import.meta.env[name as keyof ImportMetaEnv];
   if (!value) {
     console.warn(`❌ Missing environment variable: ${name}`);
     return '';
